@@ -1,12 +1,11 @@
 
+import Link from "next/link";
 import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator"
-
-import Link from "next/link";
 import { GithubSSO } from '@/components/github-sso'
 
 export default function Login({ searchParams }: { searchParams: Message }) {
