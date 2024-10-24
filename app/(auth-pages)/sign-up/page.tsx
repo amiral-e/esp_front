@@ -8,7 +8,8 @@ import { SmtpMessage } from "../smtp-message";
 import { Separator } from '@/components/ui/separator'
 import { GithubSSO } from '@/components/github-sso'
 
-export default function Signup({ searchParams }: { searchParams: Message }) {
+export default async function Signup(props: { searchParams: Promise<Message> }) {
+  const searchParams = await props.searchParams;
   if ("message" in searchParams) {
     return (
       <div className="w-full flex-1 flex items-center h-screen sm:max-w-md justify-center gap-2 p-4">
