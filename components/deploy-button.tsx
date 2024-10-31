@@ -10,7 +10,6 @@ export default function DeployButton() {
       >
         <Button className="flex items-center gap-2" size={"sm"}>
           <svg
-            className="h-3 h-3"
             viewBox="0 0 76 65"
             fill="hsl(var(--background)/1)"
             xmlns="http://www.w3.org/2000/svg"

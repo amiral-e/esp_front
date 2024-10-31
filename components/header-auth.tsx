@@ -29,7 +29,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-in">Sign in</Link>
+              <Link href="/sign-in">Se connecter</Link>
             </Button>
             <Button
               asChild
@@ -37,7 +37,7 @@ export default async function AuthButton() {
               disabled
               className="opacity-75 cursor-none pointer-events-none"
             >
-              <Link href="/sign-up">Sign up</Link>
+              <Link href="/sign-up">Découvrir</Link>
             </Button>
           </div>
         </div>
