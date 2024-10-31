@@ -9,6 +9,23 @@ export default async function AuthButton() {
   const {
     data: { user },
   } = await (await createClient()).auth.getUser();
+  
+  let isAdministrator = false;
+  
+  // Verification du rôle de l'utilisateur
+  if (user) {
+    const {
+      data: { admin },
+      error
+    } = await (await createClient()).rpc('verify_user_is_admin', { auth_user_id: user.id });
+  
+    if (error) {
+      console.error("Error verifying admin status:", error.message);
+    } else {
+      isAdministrator = admin;
+    }
+  }
+  
 
   if (!hasEnvVars) {
     return (
@@ -52,6 +69,9 @@ export default async function AuthButton() {
           Sign out
         </Button>
       </form>
+      <Button className="flex items-center gap-2" size={"sm"}>
+        <span>{isAdministrator ? "Admin" : "User"}</span>
+      </Button>
     </div>
   ) : (
     <div className="flex gap-2">
