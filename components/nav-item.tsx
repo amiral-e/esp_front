@@ -13,7 +13,6 @@ interface NavItemProps {
 
 const NavItem = ({ href, children }: NavItemProps) => {
   const pathname = usePathname();
-  console.log(pathname);
   const isActive = pathname === href;
 
   return (
