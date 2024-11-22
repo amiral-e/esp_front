@@ -54,8 +54,8 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
 
       <div className="hidden md:flex flex-1 justify-center items-center bg-[#f5f3ef] p-12 ml-12 rounded-lg max-w-24lg">
         <div className="text-sm">
-          <h2 className="font-medium">Finmate</h2>
-          <p className="text-gray-600 mt-2">Débloquer toute la puissance d'une IA comptable</p>
+          <h2 className="font-medium">ComptaCompanion</h2>
+          <p className="text-gray-600 mt-2">Unlock the full power of accounting AI</p>
           <div className="mt-6 border p-4 bg-white rounded-lg">
             <img
               src="https://framerusercontent.com/images/EDnGwSW85QvFiX5QkrMo3rIv8.png?scale-down-to=1024"
