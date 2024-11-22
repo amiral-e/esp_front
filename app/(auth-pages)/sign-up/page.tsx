@@ -47,7 +47,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
         <p className="text-sm text-center text-gray-600 mt-4">
           Already have an account?{" "}
           <Link className="text-orange-500 font-medium" href="/login">
-            S'inscrire
+            Sign up
           </Link>
         </p>
       </form>
