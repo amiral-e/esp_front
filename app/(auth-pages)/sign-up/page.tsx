@@ -12,8 +12,8 @@ export default async function Register(props: { searchParams: Promise<Message> }
   return (
     <div className="flex flex-col md:flex-row w-full max-w-12lg mx-auto p-8">
       <form className="flex-[0.7] flex flex-col space-y-4 p-4 ml-4">
-        <p className="text-2sm font-semibold text-orange-500">REGISTER</p>
-        <h1 className="text-3xl font-semibold text-black">Commencez maintenant !</h1>
+        <p className="text-2sm font-semibold text-orange-500">Sign up</p>
+        <h1 className="text-3xl font-semibold text-black">Start now!</h1>
         <br />
         <div className="space-y-2">
           <Input variant="outline" size="md" name="name" placeholder="Nom" className="w-full" required />
