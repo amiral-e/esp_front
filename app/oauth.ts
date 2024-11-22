@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/client";
 
 export const signInWithGithub = async () => {
-	const supabase = createClient();
+	const supabase = await createClient();
 
 	await supabase.auth.signInWithOAuth({
 		provider: "github",
