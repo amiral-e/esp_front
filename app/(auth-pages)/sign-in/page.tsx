@@ -3,7 +3,8 @@ import Link from "next/link";
 import { signInAction } from "@/app/actions";
 import { FormMessage, Message } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator"
 import { GithubSSO } from '@/components/github-sso'
 
 
