@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    container_name: esp_front
+    ports:
+      - '8080:8080'
+    environment:
+      NEXT_PUBLIC_SUPABASE_URL: 'https://cpwzokpibmeovspdkspu.supabase.co'
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNwd3pva3BpYm1lb3ZzcGRrc3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjYxMzA2MzUsImV4cCI6MjA0MTcwNjYzNX0.BAzzqbp0vY76DaOb8_jgYgIlE9sKggaSS-XAbwQldnA'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: npm run dev
