@@ -54,7 +54,7 @@ const ChatPage = () => {
   }, [messages]);
 
   return (
-    <div className="container flex flex-col h-full w-full mx-auto p-4">
+    <div className="container flex flex-col h-full w-full p-4">
       <Card className="flex-1 p-4 mb-4">
         <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
           {messages.map((message, i) => (
@@ -65,9 +65,9 @@ const ChatPage = () => {
               }`}
             >
               <div
-                className={`p-4 rounded-lg max-w-[80%] ${
+                className={`p-4 rounded-xl rounded-br-none max-w-[80%] ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "bg-orange-500 text-primary-foreground"
                     : "bg-muted"
                 }`}
               >
@@ -77,7 +77,7 @@ const ChatPage = () => {
           ))}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="p-4 rounded-lg bg-muted">
+              <div className="p-4 rounded-xl rounded-br-none bg-muted">
                 En train d'écrire...
               </div>
             </div>
