@@ -19,6 +19,13 @@ export interface Conversation {
 	createAt: string;
 }
 
+export interface Conversations {
+	id: string;
+	name: string;
+	convs: Message[];
+	createAt: string;
+}
+
 export const fetchConversations = async () => {
 	try {
 		const cookieStore = await cookies();
@@ -27,7 +34,7 @@ export const fetchConversations = async () => {
 		if (!access_token || !refresh_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.get<Conversation>(API_URL.concat('convs'), {
+		const { data } = await axios.get<Conversations>(API_URL.concat('convs'), {
 			headers: {
 				access_token,
 				refresh_token

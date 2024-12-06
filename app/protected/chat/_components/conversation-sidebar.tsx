@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import ConversationButton from "./conversation-button";
@@ -17,32 +17,35 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Conversation, fetchConversations } from "../conversation-action";
+import { Conversations, deleteConversation, fetchConversations } from "../conversation-action";
 
+interface ConversationSidebarProps {
+  activeConversation: string | null;
+  setActiveConversation: (id: string | null) => void;
+}
 
+const ConversationSidebar = ({ activeConversation, setActiveConversation }: ConversationSidebarProps) => {
+  const [conversations, setConversations] = useState<Conversations | null>(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-const ConversationSidebar = () => {
-  const [conversations, setConversations] = React.useState<Conversation[]>([]);
-  const [activeConversation, setActiveConversation] = React.useState<string | null>(null);
-  const [newTitle, setNewTitle] = React.useState("");
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const listeConvs = await fetchConversations();
-        if (listeConvs.error) {
-          console.log(listeConvs.error);
-        }
-        if (listeConvs.conversation) {
-          // setConversations(listeConvs.conversation);
-        } else {
-          console.log("No conversations found");
-        }
-      } catch (err) {
-        console.log("Failed to fetch conversationsss");
+  const fetchData = async () => {
+    try {
+      const listeConvs = await fetchConversations();
+      if (listeConvs.error) {
+        console.log(listeConvs.error);
       }
-    };
+      if (listeConvs.conversation?.convs) {
+        setConversations(listeConvs.conversation);
+      } else {
+        console.log("No conversations found");
+      }
+    } catch (err) {
+      console.log("Failed to fetch conversations");
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -52,23 +55,32 @@ const ConversationSidebar = () => {
 
   const handleCreateConversation = () => {
     if (newTitle.trim()) {
-      const newConversation: Conversation = {
+      const newConversation: Conversations = {
         id: Date.now().toString(),
         name: newTitle.trim(),
         createAt: new Date().toISOString(),
-        conv: []
+        convs: [],
       };
-      setConversations([newConversation, ...conversations]);
+      // setConversations([newConversation, ...conversations]);
       setActiveConversation(newConversation.id);
       setNewTitle("");
       setIsDialogOpen(false);
     }
   };
 
-  const handleDelete = (id: string) => {
-    setConversations(conversations.filter((conv: any) => conv.id !== id));
+  const handleDelete = async (id: string) => {
     if (activeConversation === id) {
       setActiveConversation(null);
+    }
+    try {
+      const fetchedConv = await deleteConversation(id);
+      if (fetchedConv.error) {
+        console.error(fetchedConv.error);
+      }
+      if (fetchedConv.conversation) {
+        fetchData();
+      }
+    } catch (error) {
     }
   };
 
@@ -106,16 +118,18 @@ const ConversationSidebar = () => {
 
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
-          {conversations.map((conversation: Conversation) => (
-            <ConversationButton
-              key={conversation.id}
-              title={conversation.name}
-              createdAt={conversation.createAt}
-              isActive={activeConversation === conversation.id}
-              onSelect={() => setActiveConversation(conversation.id)}
-              onDelete={() => handleDelete(conversation.id)}
-            />
-          ))}
+          {conversations?.convs
+            ?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // Sort by 'created_at'
+            .map((conversation: any) => (
+              <ConversationButton
+                key={conversation.id}
+                title={conversation.name}
+                createdAt={conversation.created_at}
+                isActive={activeConversation === conversation.id}
+                onSelect={() => setActiveConversation(conversation.id)}
+                onDelete={() => handleDelete(conversation.id)}
+              />
+            ))}
         </div>
       </ScrollArea>
     </div>
