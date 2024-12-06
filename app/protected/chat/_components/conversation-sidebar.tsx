@@ -17,20 +17,34 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
+import { Conversation, fetchConversations } from "../conversation-action";
 
-interface Conversation {
-  id: string;
-  title: string;
-  createdAt: string;
-}
+
 
 const ConversationSidebar = () => {
   const [conversations, setConversations] = React.useState<Conversation[]>([]);
-  const [activeConversation, setActiveConversation] = React.useState<
-    string | null
-  >(null);
+  const [activeConversation, setActiveConversation] = React.useState<string | null>(null);
   const [newTitle, setNewTitle] = React.useState("");
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const listeConvs = await fetchConversations();
+        if (listeConvs.error) {
+          console.log(listeConvs.error);
+        }
+        if (listeConvs.conversation) {
+          // setConversations(listeConvs.conversation);
+        } else {
+          console.log("No conversations found");
+        }
+      } catch (err) {
+        console.log("Failed to fetch conversationsss");
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleNewChat = () => {
     setIsDialogOpen(true);
@@ -40,8 +54,9 @@ const ConversationSidebar = () => {
     if (newTitle.trim()) {
       const newConversation: Conversation = {
         id: Date.now().toString(),
-        title: newTitle.trim(),
-        createdAt: new Date().toISOString(),
+        name: newTitle.trim(),
+        createAt: new Date().toISOString(),
+        conv: []
       };
       setConversations([newConversation, ...conversations]);
       setActiveConversation(newConversation.id);
@@ -51,7 +66,7 @@ const ConversationSidebar = () => {
   };
 
   const handleDelete = (id: string) => {
-    setConversations(conversations.filter((conv) => conv.id !== id));
+    setConversations(conversations.filter((conv: any) => conv.id !== id));
     if (activeConversation === id) {
       setActiveConversation(null);
     }
@@ -91,11 +106,11 @@ const ConversationSidebar = () => {
 
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
-          {conversations.map((conversation) => (
+          {conversations.map((conversation: Conversation) => (
             <ConversationButton
               key={conversation.id}
-              title={conversation.title}
-              createdAt={conversation.createdAt}
+              title={conversation.name}
+              createdAt={conversation.createAt}
               isActive={activeConversation === conversation.id}
               onSelect={() => setActiveConversation(conversation.id)}
               onDelete={() => handleDelete(conversation.id)}
