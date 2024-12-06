@@ -2,7 +2,7 @@
 
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
@@ -40,7 +40,7 @@ export const signInAction = async (formData: FormData) => {
 	const password = formData.get("password") as string;
 	const supabase = await createClient();
 
-	const { error } = await supabase.auth.signInWithPassword({
+	const { data, error } = await supabase.auth.signInWithPassword({
 		email,
 		password,
 	});
@@ -48,8 +48,15 @@ export const signInAction = async (formData: FormData) => {
 	if (error) {
 		return encodedRedirect("error", "/sign-in", error.message);
 	}
+	if (data?.session) {
+		const { access_token, refresh_token } = data.session;
+		(await
+			cookies()).set("access_token", access_token, { httpOnly: true, secure: true });
+		(await cookies()).set("refresh_token", refresh_token, { httpOnly: true, secure: true });
 
-	return redirect("/protected");
+		return redirect("/protected");
+	}
+	return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
@@ -126,5 +133,8 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
 	const supabase = await createClient();
 	await supabase.auth.signOut();
+	const cookieStore = cookies();
+	(await cookieStore).delete("access_token");
+	(await cookieStore).delete("refresh_token");
 	return redirect("/sign-in");
 };
