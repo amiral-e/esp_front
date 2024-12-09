@@ -7,11 +7,8 @@ import { fetchConversationsByConvId, Message } from "./conversation-action";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-interface ChatPageProps {
-  activeConversation: string | null;
-}
 
-const ChatPage = ({ activeConversation }: ChatPageProps) => {
+const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
