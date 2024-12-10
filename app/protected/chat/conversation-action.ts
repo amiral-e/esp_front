@@ -70,30 +70,84 @@ export const fetchConversationsByConvId = async (conv_id: string) => {
 };
 
 export const deleteConversation = async (convId: string) => {
-    try {
-        const cookieStore = await cookies();
-        const access_token = cookieStore.get('access_token')?.value ?? null;
-        const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+	try {
+		const cookieStore = await cookies();
+		const access_token = cookieStore.get('access_token')?.value ?? null;
+		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
 
-        if (!access_token || !refresh_token) {
-            throw new Error('Tokens are missing');
-        }
-        const { data } = await axios.request<Conversation>({
-            method: 'DELETE',
-            url: API_URL.concat('convs'),
-            headers: {
-                'content-Type': 'application/json',
-                'access_Token': access_token,
-                'refresh_Token': refresh_token,
-            },
-            data: {
-                'conv_id':String(convId),
-            },
-        });
-        return { conversation: data };
-    } catch (err: any) {
-        console.error('Error deleting conversation:', err);
-        return { error: err.message || 'An unexpected error occurred' };
-    }
+		if (!access_token || !refresh_token) {
+			throw new Error('Tokens are missing');
+		}
+		const { data } = await axios.request<Conversation>({
+			method: 'DELETE',
+			url: API_URL.concat('convs'),
+			headers: {
+				'content-Type': 'application/json',
+				'access_Token': access_token,
+				'refresh_Token': refresh_token,
+			},
+			data: {
+				'conv_id': String(convId),
+			},
+		});
+		return { conversation: data };
+	} catch (err: any) {
+		console.error('Error deleting conversation:', err);
+		return { error: err.message || 'An unexpected error occurred' };
+	}
 };
+
+export const createConversation = async (title: string) => {
+	try {
+		const cookieStore = await cookies();
+		const access_token = cookieStore.get('access_token')?.value ?? null;
+		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+		if (!access_token || !refresh_token) {
+			throw new Error('Tokens are missing');
+		}
+		const { data } = await axios.request<Conversation>({
+			method: 'POST',
+			url: API_URL.concat('convs'),
+			headers: {
+				'content-Type': 'application/json',
+				'access_Token': access_token,
+				'refresh_Token': refresh_token,
+			},
+			data: {
+				'conv_id': '0',
+				'message': String(title),
+			},
+		});
+		return { conv: data };
+	} catch (err: any) {
+		console.error('Error deleting conversation:', err);
+		return { error: err.message || 'An unexpected error occurred' };
+	}
+}
+
+export const updateConversation = async (convId: string, title: string) => {
+	try {
+		const cookieStore = await cookies();
+		const access_token = cookieStore.get('access_token')?.value ?? null;
+		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+		const data = await axios.request<Conversation>({
+			method: 'PATCH',
+			url: API_URL.concat('convs'),
+			headers: {
+				'content-Type': 'application/json',
+				'access_Token': access_token,
+				'refresh_Token': refresh_token,
+			},
+			data: {
+				'conv_id': String(convId),
+				'name': String(title),
+			},
+		});
+		console.log('Conversation updated:', data);
+	} catch (err: any) {
+		console.error('Error updating conversation:', err);
+		return { error: err.message || 'An unexpected error occurred' };
+	}
+}
+
 

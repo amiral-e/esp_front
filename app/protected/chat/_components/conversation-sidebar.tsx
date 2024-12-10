@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Conversations, deleteConversation, fetchConversations } from "../conversation-action";
+import { Conversations, createConversation, deleteConversation, fetchConversations, updateConversation } from "../conversation-action";
 
 interface ConversationSidebarProps {
   activeConversation: string | null;
@@ -30,6 +30,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const fetchData = async () => {
+    console.log("Fetching conversations");
     try {
       const listeConvs = await fetchConversations();
       if (listeConvs.error) {
@@ -53,18 +54,17 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
     setIsDialogOpen(true);
   };
 
-  const handleCreateConversation = () => {
+  const handleCreateConversation = async () => {
+    console.log("Creating conversation with title:");
     if (newTitle.trim()) {
-      const newConversation: Conversations = {
-        id: Date.now().toString(),
-        name: newTitle.trim(),
-        createAt: new Date().toISOString(),
-        convs: [],
-      };
-      // setConversations([newConversation, ...conversations]);
-      setActiveConversation(newConversation.id);
-      setNewTitle("");
-      setIsDialogOpen(false);
+      const newConv = await createConversation(newTitle.trim());
+      if (newConv?.conv) {
+        await updateConversation(newConv.conv.id, newTitle);
+        setActiveConversation(newConv.conv.id);
+        fetchData();
+        setNewTitle("");
+        setIsDialogOpen(false);
+      }
     }
   };
 
@@ -85,7 +85,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
   };
 
   return (
-    <div className="flex h-screen flex-col gap-4 border-r p-4 max-w-96">
+    <div className="flex flex-col gap-4 border-r p-4 max-w-96" style={{ height: "80vh" }}>
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogTrigger asChild>
           <Button onClick={handleNewChat} className="gap-2">

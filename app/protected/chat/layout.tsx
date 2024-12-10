@@ -13,7 +13,7 @@ const ChatLayout = ({ children }: { children: ReactNode }) => {
         activeConversation={activeConversation}
         setActiveConversation={setActiveConversation}
       />
-      <div className="w-full h-[95vh]">
+      <div className="w-full h-full">
         <ChatPage activeConversation={activeConversation} />
       </div>
     </div>

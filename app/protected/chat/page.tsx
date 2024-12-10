@@ -68,7 +68,7 @@ const ChatPage = ({ activeConversation }: any) => {
   }, [activeConversation]);
 
   return (
-    <div className="container flex flex-col h-full w-full p-4">
+    <div className="container flex flex-col w-full p-4" style={{ height: "80vh" }}>
       <Card className="flex-1 p-4 mb-4">
         <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
           {messages?.map((message, i) => (
