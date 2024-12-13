@@ -3,13 +3,11 @@
 import axios from "axios";
 import { cookies } from "next/headers";
 
-const API_URL = process.env.API_URL ?? 'http://esp_back:3000/';
+const API_URL = process.env.API_URL ?? "http://localhost:3000/";
 
 export interface Message {
-	message_id: number;
-	sender: string;
-	message: string;
-	timestamp: string;
+	role: string;
+	content: string;
 }
 
 export interface Conversation {

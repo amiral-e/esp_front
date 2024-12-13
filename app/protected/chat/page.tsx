@@ -17,6 +17,7 @@ const ChatPage = ({ activeConversation }: any) => {
     if (!convId) return;
     try {
       const fetchedConv = await fetchConversationsByConvId(convId);
+      console.log("fetchedConv", fetchedConv);
       if (fetchedConv.error) {
         console.error(fetchedConv.error);
       }
@@ -62,9 +63,11 @@ const ChatPage = ({ activeConversation }: any) => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
+    console.log("activeConversation", activeConversation);
     if (activeConversation) {
       showConversation(activeConversation);
     }
+    console.log('messages', messages);
   }, [activeConversation]);
 
   return (
@@ -74,16 +77,16 @@ const ChatPage = ({ activeConversation }: any) => {
           {messages?.map((message, i) => (
             <div
               key={i}
-              className={`mb-4 flex ${message.sender === "user" ? "justify-end" : "justify-start"
+              className={`mb-4 flex ${message.role === "user" ? "justify-end" : "justify-start"
                 }`}
             >
               <div
-                className={`p-4 rounded-xl rounded-br-none max-w-[80%] ${message.sender === "user"
+                className={`p-4 rounded-xl rounded-br-none max-w-[80%] ${message.role === "user"
                   ? "bg-orange-500 text-primary-foreground"
                   : "bg-muted"
                   }`}
               >
-                {message.message}
+                {message.content}
               </div>
             </div>
           ))}

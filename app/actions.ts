@@ -54,7 +54,7 @@ export const signInAction = async (formData: FormData) => {
 			cookies()).set("access_token", access_token, { httpOnly: true, secure: true });
 		(await cookies()).set("refresh_token", refresh_token, { httpOnly: true, secure: true });
 
-		return redirect("/protected");
+		return redirect("/protected/chat");
 	}
 	return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
