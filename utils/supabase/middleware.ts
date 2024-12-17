@@ -38,9 +38,13 @@ export const updateSession = async (request: NextRequest) => {
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
+    const cookieStore = await cookies();
+		const access_token = cookieStore.get('access_token')?.value ?? null;
+		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+    console.log("accesss",access_Token,refresh_Token);
 
     // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
+    if (request.nextUrl.pathname.startsWith("/protected/chat") && user.error && !access_Token && !refresh_Token) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 

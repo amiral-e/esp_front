@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
-import { Conversations, createConversation, deleteConversation, fetchConversations, updateConversation } from "../conversation-action";
+import { Conversation, createConversation, deleteConversation, fetchConversations, updateConversation } from "../conversation-action";
 
 interface ConversationSidebarProps {
   activeConversation: string | null;
@@ -25,7 +25,7 @@ interface ConversationSidebarProps {
 }
 
 const ConversationSidebar = ({ activeConversation, setActiveConversation }: ConversationSidebarProps) => {
-  const [conversations, setConversations] = useState<Conversations | null>(null);
+  const [conversations, setConversations] = useState<Conversation | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -38,6 +38,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       }
       if (listeConvs.conversation?.convs) {
         setConversations(listeConvs.conversation);
+        console.log('listeConvs',conversations);
       } else {
         console.log("No conversations found");
       }
@@ -59,7 +60,8 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
     if (newTitle.trim()) {
       const newConv = await createConversation(newTitle.trim());
       if (newConv?.conv) {
-        await updateConversation(newConv.conv.id, newTitle);
+        const res = await updateConversation(newConv.conv.id, newTitle);
+        console.log(res)
         setActiveConversation(newConv.conv.id);
         fetchData();
         setNewTitle("");
@@ -119,7 +121,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
           {conversations?.convs
-            ?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) // Sort by 'created_at'
+            ?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
             .map((conversation: any) => (
               <ConversationButton
                 key={conversation.id}

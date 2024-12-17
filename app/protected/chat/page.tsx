@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { fetchConversationsByConvId, Message } from "./conversation-action";
+import { fetchConversationsByConvId, Message, sendMessage } from "./conversation-action";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send } from "lucide-react";
+import { CarTaxiFront, Send } from "lucide-react";
 
 const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -17,12 +17,12 @@ const ChatPage = ({ activeConversation }: any) => {
     if (!convId) return;
     try {
       const fetchedConv = await fetchConversationsByConvId(convId);
-      console.log("fetchedConv", fetchedConv);
       if (fetchedConv.error) {
         console.error(fetchedConv.error);
       }
       if (fetchedConv.conversation) {
-        setMessages(fetchedConv.conversation.conv);
+        console.log("fetchedConv", fetchedConv.conversation);
+        setMessages(fetchedConv.conversation.history);
       }
     } catch (error) {
       console.error("Error fetching conversation:", error);
@@ -32,43 +32,39 @@ const ChatPage = ({ activeConversation }: any) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
-
-    const userMessage = { role: "user", content: input };
-    setMessages((prev: any) => [...prev, userMessage]);
+  
+    const newMessage: Message = { role: "user", content: input.trim() };
+  
+    setMessages((prev) => [...prev, newMessage]);
     setInput("");
     setIsLoading(true);
-
+  
     try {
-      // call API send message
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input }),
-      });
-
-      if (!response.ok) throw new Error("Failed to fetch response");
-
-      const aiMessage = await response.json();
-      setMessages((prev) => [...prev, aiMessage]);
+      const responseChat = await sendMessage(activeConversation, input);
+      console.log("Response from sendMessage:", responseChat);
+      if (responseChat) {
+        setMessages((prev) => [
+          ...prev,
+          { role: responseChat.role, content: responseChat.content },
+        ]);
+      }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error sending message:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  };  
 
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
-    console.log("activeConversation", activeConversation);
     if (activeConversation) {
+      console.log("Appel showConversation avec :", activeConversation);
       showConversation(activeConversation);
     }
-    console.log('messages', messages);
   }, [activeConversation]);
+
 
   return (
     <div className="container flex flex-col w-full p-4" style={{ height: "80vh" }}>
