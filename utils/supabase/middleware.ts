@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const updateSession = async (request: NextRequest) => {
@@ -41,10 +42,8 @@ export const updateSession = async (request: NextRequest) => {
     const cookieStore = await cookies();
 		const access_token = cookieStore.get('access_token')?.value ?? null;
 		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-    console.log("accesss",access_Token,refresh_Token);
-
     // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected/chat") && user.error && !access_Token && !refresh_Token) {
+    if (request.nextUrl.pathname.startsWith("/protected/chat") && user.error && !access_token && !refresh_token) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 

@@ -45,7 +45,7 @@ const ChatPage = ({ activeConversation }: any) => {
       if (responseChat) {
         setMessages((prev) => [
           ...prev,
-          { role: responseChat.role, content: responseChat.content },
+          { role: responseChat.role ?? "", content: responseChat.content ?? "" },
         ]);
       }
     } catch (error) {
