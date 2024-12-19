@@ -53,7 +53,7 @@ const ChatPage = ({ activeConversation }: any) => {
     setIsLoading(true);
 
     try {
-      const responseChat = await sendMessage(activeConversation, input, selectedCollection);
+      const responseChat = await sendMessage(activeConversation, input, selectedCollection ?? "");
       if (responseChat) {
         console.log(responseChat.sources)
         setMessages((prev) => [
@@ -64,7 +64,10 @@ const ChatPage = ({ activeConversation }: any) => {
               ? `${responseChat.content}${
                   responseChat.sources
                     ? `\n\nSources:\n${Object.entries(responseChat.sources)
-                        .map(([id, details]) => `- ${details.filename} (ID: ${id})`)
+                        .map(([id, details]) => {
+                          const detail = details as { filename: string };
+                          return `- ${detail.filename} (ID: ${id})`;
+                        })
                         .join("\n")}`
                     : ""
                 }`

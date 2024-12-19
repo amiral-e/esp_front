@@ -151,8 +151,8 @@ export const sendMessage = async (convId: string, message: string, collection: s
 		const cookieStore = await cookies();
 		const access_token = cookieStore.get('access_token')?.value ?? null;
 		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if(collection){
-			const data = await axios.request<Message>({
+		if(collection != ""){
+			const data = await axios.request<any>({
 				method: 'POST',
 				url: API_URL.concat('chat/').concat(convId).concat('/').concat(collection),
 				headers: {
