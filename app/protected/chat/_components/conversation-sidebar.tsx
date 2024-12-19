@@ -87,7 +87,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
   };
 
   return (
-    <div className="flex flex-col gap-4 border-r p-4 max-w-96" style={{ height: "80vh" }}>
+    <div className="flex flex-col gap-4 border-r p-4 max-w-96 h-screen">
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <AlertDialogTrigger asChild>
           <Button onClick={handleNewChat} className="gap-2">

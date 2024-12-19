@@ -1,9 +1,11 @@
+"use server";
+
 import axios from "axios";
 import { cookies } from "next/headers";
 
-const BACKEND_IA_URL = process.env.BACKEND_IA_URL ?? "";
+const API_URL = process.env.API_URL ?? "";
 
-export const fetchConversations = async () => {
+export const fetchCollections = async () => {
 	try {
 		const cookieStore = await cookies();
 		const access_token = cookieStore.get('access_token')?.value ?? null;
@@ -11,13 +13,8 @@ export const fetchConversations = async () => {
 		if (!access_token || !refresh_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.get<any>(BACKEND_IA_URL.concat('collections'), {
-			headers: {
-				access_token,
-				refresh_token
-			},
-		});
-		return { conversation: data };
+		const { data } = await axios.get<any>(API_URL.concat('collections'),{});
+		return { collection: data.data };
 	} catch (err: any) {
 		console.error('Error fetching conversations:', err);
 		return { error: err };
