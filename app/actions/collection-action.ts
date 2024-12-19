@@ -13,8 +13,19 @@ export const fetchCollections = async () => {
 		if (!access_token || !refresh_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.get<any>(API_URL.concat('collections'),{});
-		return { collection: data.data };
+		const data = [];
+		const response_global = await axios.get<any>(API_URL.concat('collections/global'),{});
+		data.push(response_global.data.response);
+		const response_user = await axios.get<any>(API_URL.concat('collections'),{
+			headers: {
+				access_token,
+				refresh_token
+			},
+		});
+		if(response_user.data.response.length > 0){
+			data.push(response_user.data.response);
+		}
+		return { collection: data };
 	} catch (err: any) {
 		console.error('Error fetching conversations:', err);
 		return { error: err };

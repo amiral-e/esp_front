@@ -6,12 +6,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { fetchConversationsByConvId, Message, sendMessage } from "./conversation-action";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, AlertCircle } from "lucide-react";
+import { Send, AlertCircle, Plus } from "lucide-react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import { fetchCollections } from "@/app/actions/collection-action";
+import { set } from "cypress/types/lodash";
 
 const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -19,6 +21,10 @@ const ChatPage = ({ activeConversation }: any) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const [collectionsGlobal, setCollectionsGlobal] = useState<any[]>([]);
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
 
   const showConversation = async (convId: string) => {
     if (!convId) return;
@@ -47,11 +53,23 @@ const ChatPage = ({ activeConversation }: any) => {
     setIsLoading(true);
 
     try {
-      const responseChat = await sendMessage(activeConversation, input);
+      const responseChat = await sendMessage(activeConversation, input, selectedCollection);
       if (responseChat) {
+        console.log(responseChat.sources)
         setMessages((prev) => [
           ...prev,
-          { role: responseChat.role ?? "", content: responseChat.content ?? "" },
+          {
+            role: responseChat.role ?? "",
+            content: responseChat.content
+              ? `${responseChat.content}${
+                  responseChat.sources
+                    ? `\n\nSources:\n${Object.entries(responseChat.sources)
+                        .map(([id, details]) => `- ${details.filename} (ID: ${id})`)
+                        .join("\n")}`
+                    : ""
+                }`
+              : "",
+          },
         ]);
       }
     } catch (error) {
@@ -60,6 +78,22 @@ const ChatPage = ({ activeConversation }: any) => {
       setIsLoading(false);
     }
   };
+  
+  const getCollections = async () => {
+      try {
+        const fetchedCollection = await fetchCollections();
+        console.log("fetchedCollection", fetchedCollection);
+        if (fetchedCollection.error) {
+          console.error(fetchedCollection.error);
+        }
+        if (fetchedCollection.collection) {
+          console.log("fetchedCollection", fetchedCollection.collection);
+          setCollectionsGlobal(fetchedCollection.collection);
+        }
+      } catch (error) {
+        console.error("Error fetching collection:", error);
+      }
+    };
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -102,7 +136,8 @@ const ChatPage = ({ activeConversation }: any) => {
           )}
         </ScrollArea>
       </Card>
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+        {/* Input de saisie */}
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -110,6 +145,49 @@ const ChatPage = ({ activeConversation }: any) => {
           className="flex-1"
           disabled={isLoading}
         />
+
+        {/* Bouton "+" avec menu déroulant */}
+        <div className="relative">
+          <Button
+            type="button"
+            onClick={() => {
+              toggleDropdown();
+              getCollections();
+            }}
+            className="p-2 h-12 w-12"
+          >
+            {selectedCollection ? (
+              <span className="truncate text-sm">{selectedCollection}</span>
+            ) : (
+              <Plus className="h-6 w-6" />
+            )}
+          </Button>
+          {isDropdownOpen && (
+            <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
+              <ul className="py-2">
+                {collectionsGlobal.map((option, index) => (
+                  <li key={option} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    <button
+                      onClick={() => {
+                      setSelectedCollection(option);
+                        setIsDropdownOpen(false);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          console.log(option);
+                          setIsDropdownOpen(false);
+                        }
+                      }}
+                      className="w-full text-left"
+                    >
+                      {option}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
         <Button
           type="submit"
           disabled={isLoading}

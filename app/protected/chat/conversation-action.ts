@@ -146,24 +146,40 @@ export const updateConversation = async (convId: string, title: string) => {
 	}
 }
 
-export const sendMessage = async (convId: string, message: string) => {
+export const sendMessage = async (convId: string, message: string, collection: string) => {
 	try {
 		const cookieStore = await cookies();
 		const access_token = cookieStore.get('access_token')?.value ?? null;
 		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		const data = await axios.request<Message>({
-			method: 'POST',
-			url: API_URL.concat('chat/').concat(convId),
-			headers: {
-				'content-Type': 'application/json',
-				'access_Token': access_token,
-				'refresh_Token': refresh_token,
-			},
-			data: {
-				'message': String(message),
-			},
-		});
-		return { role: data.data.role, content: data.data.content };
+		if(collection){
+			const data = await axios.request<Message>({
+				method: 'POST',
+				url: API_URL.concat('chat/').concat(convId).concat('/').concat(collection),
+				headers: {
+					'content-Type': 'application/json',
+					'access_Token': access_token,
+					'refresh_Token': refresh_token,
+				},
+				data: {
+					'message': String(message),
+				},
+			});
+			return { role: data.data.role, content: data.data.content, sources: data.data.sources }; 
+		} else {
+			const data = await axios.request<Message>({
+				method: 'POST',
+				url: API_URL.concat('chat/').concat(convId),
+				headers: {
+					'content-Type': 'application/json',
+					'access_Token': access_token,
+					'refresh_Token': refresh_token,
+				},
+				data: {
+					'message': String(message),
+				},
+			});
+			return { role: data.data.role, content: data.data.content }; 
+		}
 	} catch (err: any) {
 		console.error('Error sending message:', err);
 		return { error: err.message || 'An unexpected error occurred' };
