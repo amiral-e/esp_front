@@ -13,7 +13,6 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { fetchCollections } from "@/app/actions/collection-action";
-import { set } from "cypress/types/lodash";
 
 const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -55,22 +54,20 @@ const ChatPage = ({ activeConversation }: any) => {
     try {
       const responseChat = await sendMessage(activeConversation, input, selectedCollection ?? "");
       if (responseChat) {
-        console.log(responseChat.sources)
         setMessages((prev) => [
           ...prev,
           {
             role: responseChat.role ?? "",
             content: responseChat.content
-              ? `${responseChat.content}${
-                  responseChat.sources
-                    ? `\n\nSources:\n${Object.entries(responseChat.sources)
-                        .map(([id, details]) => {
-                          const detail = details as { filename: string };
-                          return `- ${detail.filename} (ID: ${id})`;
-                        })
-                        .join("\n")}`
-                    : ""
-                }`
+              ? `${responseChat.content}\n\n${responseChat.sources
+                ? `(Sources:\n${Object.entries(responseChat.sources)
+                  .map(([id, details]) => {
+                    const detail = details as { filename: string };
+                    return `- ${detail.filename} id: ${id}`;
+                  })
+                  .join("\n")})`
+                : ""
+              }`
               : "",
           },
         ]);
@@ -81,31 +78,30 @@ const ChatPage = ({ activeConversation }: any) => {
       setIsLoading(false);
     }
   };
-  
+
   const getCollections = async () => {
-      try {
-        const fetchedCollection = await fetchCollections();
-        console.log("fetchedCollection", fetchedCollection);
-        if (fetchedCollection.error) {
-          console.error(fetchedCollection.error);
-        }
-        if (fetchedCollection.collection) {
-          console.log("fetchedCollection", fetchedCollection.collection);
-          setCollectionsGlobal(fetchedCollection.collection);
-        }
-      } catch (error) {
-        console.error("Error fetching collection:", error);
+    try {
+      const fetchedCollection = await fetchCollections();
+      if (fetchedCollection.error) {
+        console.error(fetchedCollection.error);
       }
-    };
+      if (fetchedCollection.collection) {
+        setCollectionsGlobal(fetchedCollection.collection);
+      }
+    } catch (error) {
+      console.error("Error fetching collection:", error);
+    }
+  };
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
     if (activeConversation) {
       showConversation(activeConversation);
     }
   }, [activeConversation]);
+
+  useEffect(() => {
+    getCollections();
+  }, []);
 
   return (
     <div className="flex flex-col w-full h-screen p-4">
@@ -155,7 +151,6 @@ const ChatPage = ({ activeConversation }: any) => {
             type="button"
             onClick={() => {
               toggleDropdown();
-              getCollections();
             }}
             className="p-2 h-12 w-12"
           >
@@ -172,12 +167,11 @@ const ChatPage = ({ activeConversation }: any) => {
                   <li key={option} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <button
                       onClick={() => {
-                      setSelectedCollection(option);
+                        setSelectedCollection(option);
                         setIsDropdownOpen(false);
                       }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
-                          console.log(option);
                           setIsDropdownOpen(false);
                         }
                       }}

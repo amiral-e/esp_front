@@ -27,7 +27,9 @@ interface ConversationSidebarProps {
 const ConversationSidebar = ({ activeConversation, setActiveConversation }: ConversationSidebarProps) => {
   const [conversations, setConversations] = useState<Conversation | null>(null);
   const [newTitle, setNewTitle] = useState("");
+  const [oldTitle, setOldTitle] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
   const fetchData = async () => {
     console.log("Fetching conversations");
@@ -38,7 +40,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       }
       if (listeConvs.conversation?.convs) {
         setConversations(listeConvs.conversation);
-        console.log('listeConvs',conversations);
+        console.log('listeConvs', conversations);
       } else {
         console.log("No conversations found");
       }
@@ -56,19 +58,16 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
   };
 
   const handleCreateConversation = async () => {
-    console.log("Creating conversation with title:");
     if (newTitle.trim()) {
       const newConv = await createConversation(newTitle.trim());
-      if (newConv?.conv) {
-        const res = await updateConversation(newConv.conv.id, newTitle);
-        console.log(res)
-        setActiveConversation(newConv.conv.id);
-        fetchData();
-        setNewTitle("");
-        setIsDialogOpen(false);
-      }
+      const msg = newConv.conv?.message.split(' ');
+      const newId = msg[msg.length - 1];
+      setActiveConversation(newId);
+      fetchData();
+      setNewTitle("");
+      setIsDialogOpen(false);
     }
-  };
+  }
 
   const handleDelete = async (id: string) => {
     if (activeConversation === id) {
@@ -85,6 +84,24 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
     } catch (error) {
     }
   };
+
+  const handleUpdate = async (id: string, title: string) => {
+    setActiveConversation(id)
+    setIsUpdateOpen(true);
+    setOldTitle(title);
+  };
+
+  const handleUpdateConversation = async () => {
+    if (oldTitle.trim()) {
+      const convId = activeConversation ?? null
+      console.log('convId', convId)
+      if (convId) {
+        await updateConversation(convId, oldTitle);
+      }
+      fetchData();
+      setIsUpdateOpen(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 border-r p-4 max-w-96 h-screen">
@@ -118,6 +135,30 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Nommez votre conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              <Input
+                type="text"
+                value={oldTitle}
+                onChange={(e) => setOldTitle(e.target.value)}
+                placeholder="Entrez le nouveau titre de la conversation"
+              />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setNewTitle("")}>
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleUpdateConversation}>
+              Modifier
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
           {conversations?.convs
@@ -130,6 +171,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
                 isActive={activeConversation === conversation.id}
                 onSelect={() => setActiveConversation(conversation.id)}
                 onDelete={() => handleDelete(conversation.id)}
+                onUpdate={() => handleUpdate(conversation.id, conversation.name)}
               />
             ))}
         </div>

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, EllipsisIcon, TrashIcon } from "lucide-react";
+import { MessageCircleIcon, EllipsisIcon, TrashIcon, FilePenIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +16,7 @@ interface ConversationButtonProps {
   isActive?: boolean;
   onSelect?: () => void;
   onDelete?: () => void;
+  onUpdate?: () => void;
   createdAt?: string;
 }
 
@@ -24,6 +25,7 @@ const ConversationButton = ({
   isActive = false,
   onSelect,
   onDelete,
+  onUpdate,
   createdAt,
 }: ConversationButtonProps) => {
   return (
@@ -51,6 +53,12 @@ const ConversationButton = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={onUpdate}
+          >
+            <FilePenIcon className="mr-2 h-4 w-4" />
+            Update
+          </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={onDelete}

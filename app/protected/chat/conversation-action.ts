@@ -103,7 +103,7 @@ export const createConversation = async (title: string) => {
 		if (!access_token || !refresh_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.request<Conversations>({
+		const { data } = await axios.request<any>({
 			method: 'POST',
 			url: API_URL.concat('conversations/').concat(title),
 			headers: {
@@ -115,6 +115,7 @@ export const createConversation = async (title: string) => {
 				'message': String(title),
 			},
 		});
+		console.log('Conversation created:', data);
 		return { conv: data };
 	} catch (err: any) {
 		console.error('Error deleting conversation:', err);
@@ -129,7 +130,7 @@ export const updateConversation = async (convId: string, title: string) => {
 		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
 		const data = await axios.request<Conversations>({
 			method: 'PATCH',
-			url: API_URL.concat('conversations').concat(convId),
+			url: API_URL.concat('conversations/').concat(convId),
 			headers: {
 				'content-Type': 'application/json',
 				'access_Token': access_token,
