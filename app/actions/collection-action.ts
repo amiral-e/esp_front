@@ -2,58 +2,110 @@
 
 import axios from "axios";
 import { cookies } from "next/headers";
+import { isAdministrator } from "../actions";
+import { is } from "cypress/types/bluebird";
 
-const API_URL = process.env.API_URL ?? "";
+const API_URL = process.env.API_URL ?? "http://localhost:3000/";
+
+const getAuthToken = async (): Promise<string | null> => {
+	const cookieStore = await cookies();
+	return cookieStore.get('auth_token')?.value ?? null;
+};
+
+export interface Collection {
+	collections: Collections[];
+}
+
+export interface Collections {
+	table_name: string;
+	name: string;
+}
 
 export const fetchCollections = async () => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if (!access_token || !refresh_token) {
+		const isAdmin = await isAdministrator()
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
-		const data = [];
-		const response_user = await axios.get<any>(API_URL.concat('collections'),{
+		let globalCollections: Collections[] = [];
+		if (isAdmin) {
+			const globalResponse = await axios.get<Collection>(API_URL.concat('global/collections'), {
+				headers: {
+					Authorization: `Bearer ${auth_token}`,
+				},
+			});
+			globalCollections = globalResponse.data.collections;
+		}
+		const collectionsResponse = await axios.get<Collection>(API_URL.concat('collections'), {
 			headers: {
-				access_token,
-				refresh_token
+				Authorization: `Bearer ${auth_token}`,
 			},
 		});
-		if(response_user.data.response.length > 0){
-			data.push(response_user.data.response);
-		}
-		return { collection: data };
+		const normalCollections = collectionsResponse.data.collections;
+		const combinedCollections = [...globalCollections, ...normalCollections];
+		return { collections: combinedCollections };
 	} catch (err: any) {
 		console.error('Error fetching conversations:', err);
 		return { error: err };
 	}
 };
 
-export const createCollection = async (name: string, files: File|File[]) => {
+export const createCollection = async (name: string, files: File | File[]) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if (!access_token || !refresh_token) {
+		const isAdmin = await isAdministrator()
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
+		const url_api = !isAdmin
+			? API_URL.concat('collections/').concat(name)
+			: API_URL.concat('global/collections/').concat(name);
+		const formData = new FormData();
+		if (Array.isArray(files)) {
+			files.forEach((file) => formData.append("files", file));
+		} else {
+			formData.append("files", files);
+		}
+
 		const data = await axios.request<any>({
 			method: 'POST',
-			url: API_URL.concat('documents/').concat(name),
+			url: url_api,
 			headers: {
 				'content-Type': 'multipart/form-data',
-				'access_Token': access_token,
-				'refresh_Token': refresh_token,
+				Authorization: `Bearer ${auth_token}`,
 			},
-			data: {
-				'files': files,
-			},
+			data: formData,
 		});
-		console.log('data',data.data.response);
+		console.log('data', data);
 		return { response: data.data.response };
 	} catch (err: any) {
 		console.error('Error creating conversation:', err);
+		return { error: err };
+	}
+}
+
+
+export const deleteCollection = async (name: string) => {
+	try {
+		const isAdmin = await isAdministrator()
+		const url_api = !isAdmin
+			? API_URL.concat('collections/').concat(name).concat('/documents')
+			: API_URL.concat('global/collections/').concat(name);
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
+			throw new Error('Tokens are missing');
+		}
+		const data = await axios.request<any>({
+			method: 'DELETE',
+			url: url_api,
+			headers: {
+				Authorization: `Bearer ${auth_token}`,
+			},
+		});
+		return { response: data.data.response };
+	} catch (err: any) {
+		console.error('Error deleting conversation:', err);
 		return { error: err };
 	}
 }

@@ -13,7 +13,7 @@ export interface Message {
 export interface Conversation {
 	id: string;
 	name: string;
-	convs: Message[];
+	conversations: Message[];
 	createAt: string;
 }
 
@@ -24,20 +24,23 @@ export interface Conversations {
 	createAt: string;
 }
 
+const getAuthToken = async (): Promise<string | null> => {
+	const cookieStore = await cookies();
+	return cookieStore.get('auth_token')?.value ?? null;
+};
+
 export const fetchConversations = async () => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if (!access_token || !refresh_token) {
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
 		const { data } = await axios.get<Conversation>(API_URL.concat('conversations'), {
 			headers: {
-				access_token,
-				refresh_token
-			},
+				Authorization: `Bearer ${auth_token}`,
+			}
 		});
+		console.log('data', data);
 		return { conversation: data };
 	} catch (err: any) {
 		console.error('Error fetching conversations:', err);
@@ -48,16 +51,13 @@ export const fetchConversations = async () => {
 
 export const fetchConversationsByConvId = async (conv_id: string) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if (!access_token || !refresh_token) {
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
 		const { data } = await axios.get<Conversations>(API_URL.concat('conversations/').concat(conv_id), {
 			headers: {
-				access_token,
-				refresh_token
+				Authorization: `Bearer ${auth_token}`,
 			},
 		});
 		return { conversation: data };
@@ -69,11 +69,8 @@ export const fetchConversationsByConvId = async (conv_id: string) => {
 
 export const deleteConversation = async (convId: string) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-
-		if (!access_token || !refresh_token) {
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
 		const { data } = await axios.request<Conversations>({
@@ -81,8 +78,7 @@ export const deleteConversation = async (convId: string) => {
 			url: API_URL.concat('conversations/').concat(convId),
 			headers: {
 				'content-Type': 'application/json',
-				'access_Token': access_token,
-				'refresh_Token': refresh_token,
+				Authorization: `Bearer ${auth_token}`,
 			},
 			data: {
 				'conv_id': String(convId),
@@ -97,10 +93,8 @@ export const deleteConversation = async (convId: string) => {
 
 export const createConversation = async (title: string) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
-		if (!access_token || !refresh_token) {
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
 		const { data } = await axios.request<any>({
@@ -108,8 +102,7 @@ export const createConversation = async (title: string) => {
 			url: API_URL.concat('conversations/').concat(title),
 			headers: {
 				'content-Type': 'application/json',
-				'access_Token': access_token,
-				'refresh_Token': refresh_token,
+				Authorization: `Bearer ${auth_token}`,
 			},
 			data: {
 				'message': String(title),
@@ -125,16 +118,13 @@ export const createConversation = async (title: string) => {
 
 export const updateConversation = async (convId: string, title: string) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+		const auth_token = await getAuthToken();
 		const data = await axios.request<Conversations>({
 			method: 'PATCH',
 			url: API_URL.concat('conversations/').concat(convId),
 			headers: {
 				'content-Type': 'application/json',
-				'access_Token': access_token,
-				'refresh_Token': refresh_token,
+				Authorization: `Bearer ${auth_token}`,
 			},
 			data: {
 				'name': String(title),
@@ -149,17 +139,14 @@ export const updateConversation = async (convId: string, title: string) => {
 
 export const sendMessage = async (convId: string, message: string, collection: string) => {
 	try {
-		const cookieStore = await cookies();
-		const access_token = cookieStore.get('access_token')?.value ?? null;
-		const refresh_token = cookieStore.get('refresh_token')?.value ?? null;
+		const auth_token = await getAuthToken();
 		if(collection != ""){
 			const data = await axios.request<any>({
 				method: 'POST',
-				url: API_URL.concat('chat/').concat(convId).concat('/').concat(collection),
+				url: API_URL.concat('chat/conversations/').concat(convId).concat('/collections/').concat(collection),
 				headers: {
 					'content-Type': 'application/json',
-					'access_Token': access_token,
-					'refresh_Token': refresh_token,
+					Authorization: `Bearer ${auth_token}`,
 				},
 				data: {
 					'message': String(message),
@@ -169,11 +156,10 @@ export const sendMessage = async (convId: string, message: string, collection: s
 		} else {
 			const data = await axios.request<Message>({
 				method: 'POST',
-				url: API_URL.concat('chat/').concat(convId),
+				url: API_URL.concat('chat/conversations/').concat(convId),
 				headers: {
 					'content-Type': 'application/json',
-					'access_Token': access_token,
-					'refresh_Token': refresh_token,
+					Authorization: `Bearer ${auth_token}`,
 				},
 				data: {
 					'message': String(message),

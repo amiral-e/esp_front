@@ -12,7 +12,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import { fetchCollections } from "@/app/actions/collection-action";
+import { Collections, fetchCollections } from "@/app/actions/collection-action";
 
 const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -22,7 +22,7 @@ const ChatPage = ({ activeConversation }: any) => {
   const [error, setError] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
-  const [collectionsGlobal, setCollectionsGlobal] = useState<any[]>([]);
+  const [collections, setCollections] = useState<Collections[]>([]);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
 
   const showConversation = async (convId: string) => {
@@ -80,13 +80,14 @@ const ChatPage = ({ activeConversation }: any) => {
   };
 
   const getCollections = async () => {
+    console.log('getCollections');
     try {
       const fetchedCollection = await fetchCollections();
       if (fetchedCollection.error) {
         console.error(fetchedCollection.error);
       }
-      if (fetchedCollection.collection) {
-        setCollectionsGlobal(fetchedCollection.collection);
+      if (fetchedCollection.collections) {
+        setCollections(fetchedCollection.collections);
       }
     } catch (error) {
       console.error("Error fetching collection:", error);
@@ -155,7 +156,9 @@ const ChatPage = ({ activeConversation }: any) => {
             className="p-2 h-12 w-12"
           >
             {selectedCollection ? (
-              <span className="truncate text-sm">{selectedCollection}</span>
+              <span className="truncate text-sm">
+                {collections.find(c => c.table_name === selectedCollection)?.name}
+              </span>
             ) : (
               <Plus className="h-6 w-6" />
             )}
@@ -163,11 +166,11 @@ const ChatPage = ({ activeConversation }: any) => {
           {isDropdownOpen && (
             <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
               <ul className="py-2">
-                {collectionsGlobal.map((option, index) => (
-                  <li key={option} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                {collections.map((option, index) => (
+                  <li key={option.table_name} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <button
                       onClick={() => {
-                        setSelectedCollection(option);
+                        setSelectedCollection(option.table_name);
                         setIsDropdownOpen(false);
                       }}
                       onKeyDown={(e) => {
@@ -177,7 +180,7 @@ const ChatPage = ({ activeConversation }: any) => {
                       }}
                       className="w-full text-left"
                     >
-                      {option}
+                      {option.name}
                     </button>
                   </li>
                 ))}

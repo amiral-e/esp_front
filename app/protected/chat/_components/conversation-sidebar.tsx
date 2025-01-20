@@ -38,7 +38,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       if (listeConvs.error) {
         console.log(listeConvs.error);
       }
-      if (listeConvs.conversation?.convs) {
+      if (listeConvs.conversation?.conversations) {
         setConversations(listeConvs.conversation);
         console.log('listeConvs', conversations);
       } else {
@@ -161,7 +161,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
 
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
-          {conversations?.convs
+          {conversations?.conversations
             ?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
             .map((conversation: any) => (
               <ConversationButton
