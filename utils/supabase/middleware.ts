@@ -40,13 +40,18 @@ export const updateSession = async (request: NextRequest) => {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
     const cookieStore = await cookies();
-		const auth_token = cookieStore.get('auth_token')?.value ?? null;
+		let auth_token = cookieStore.get('auth_token')?.value ?? null;
     // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected/chat") && user.error && !auth_token) {
+    if (request.nextUrl.pathname.startsWith("/protected/chat") && auth_token == null) {
+      console.log("redirecting to /sign-in");
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    if (request.nextUrl.pathname === "/" && !user.error) {
+    if (request.nextUrl.pathname === "/" && !user.error && auth_token) {
+      return NextResponse.redirect(new URL("/protected/chat", request.url));
+    }
+
+    if(request.nextUrl.pathname.startsWith("/sign-in") && auth_token) {
       return NextResponse.redirect(new URL("/protected/chat", request.url));
     }
 

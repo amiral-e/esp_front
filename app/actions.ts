@@ -4,7 +4,7 @@ import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import axios from "axios";
+import jwt from "jsonwebtoken";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000/";
 
@@ -42,25 +42,31 @@ export const signUpAction = async (formData: FormData) => {
 export const signInAction = async (formData: FormData) => {
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
-	try {
-		const response = await axios.post(`${API_URL}login`, {
-			email: email,
-			password,
-		});
-		console.log("response", response);
-		const { token } = response.data;
-		console.log("Login successful. Token:", token);
+	const supabase = await createClient();
+	const secret = process.env.JWT_SECRET;
+	if (!secret) {
+		throw new Error("JWT_SECRET is not defined");
+	}
+
+	const { data, error } = await supabase.auth.signInWithPassword({
+		email,
+		password,
+	});
+
+	if (error) {
+		return encodedRedirect("error", "/sign-in", error.message);
+	}
+	if (data) {
+		const payload = {
+			uid: data.user.id,
+		};
+		const token = jwt.sign(payload, secret);
 		(await
 			cookies()).set("auth_token", token, { httpOnly: true, secure: true });
-		const supabase = await createClient();
-		await supabase.auth.signInWithPassword({
-			email,
-			password,
-		});
+
 		return redirect("/protected/chat");
-	} catch (error) {
-		return encodedRedirect("error", "/sign-in", (error as Error).message);
 	}
+	return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
 
 
@@ -158,4 +164,9 @@ export const isAdministrator = async () => {
 		}
 	}
 	return isAdministrator;
+}
+
+export const getUserInfo = async () => {
+	const { data: { user } } = await (await createClient()).auth.getUser();
+	return user;
 }

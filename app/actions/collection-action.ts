@@ -2,8 +2,7 @@
 
 import axios from "axios";
 import { cookies } from "next/headers";
-import { isAdministrator } from "../actions";
-import { is } from "cypress/types/bluebird";
+import { getUserInfo, isAdministrator } from "../actions";
 
 const API_URL = process.env.API_URL ?? "http://localhost:3000/";
 
@@ -19,12 +18,14 @@ export interface Collection {
 export interface Collections {
 	table_name: string;
 	name: string;
+	status: string;
 }
 
 export const fetchCollections = async () => {
 	try {
-		const isAdmin = await isAdministrator()
+		const isAdmin = await isAdministrator();
 		const auth_token = await getAuthToken();
+		const user = await getUserInfo();
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
@@ -35,32 +36,43 @@ export const fetchCollections = async () => {
 					Authorization: `Bearer ${auth_token}`,
 				},
 			});
-			globalCollections = globalResponse.data.collections;
+			globalCollections = globalResponse.data.collections.map((collection) => ({
+				...collection,
+				status: 'global',
+			}));
 		}
 		const collectionsResponse = await axios.get<Collection>(API_URL.concat('collections'), {
 			headers: {
 				Authorization: `Bearer ${auth_token}`,
 			},
 		});
-		const normalCollections = collectionsResponse.data.collections;
-		const combinedCollections = [...globalCollections, ...normalCollections];
+		const normalCollections = collectionsResponse.data.collections.map((collection) => ({
+			...collection,
+			status: 'normal',
+		}));
+		const userCollections = normalCollections.filter((collection) => {
+			const [collectionUid] = collection.table_name.split('_');
+			return collectionUid === user?.id;
+		  });
+		const combinedCollections = [...globalCollections, ...userCollections];
 		return { collections: combinedCollections };
 	} catch (err: any) {
-		console.error('Error fetching conversations:', err);
+		console.error('Error fetching collections:', err);
 		return { error: err };
 	}
 };
 
+
 export const createCollection = async (name: string, files: File | File[]) => {
 	try {
-		const isAdmin = await isAdministrator()
+		const isAdmin = await isAdministrator();
 		const auth_token = await getAuthToken();
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
 		const url_api = !isAdmin
-			? API_URL.concat('collections/').concat(name)
-			: API_URL.concat('global/collections/').concat(name);
+			? API_URL.concat('collections/').concat(name).concat('/documents')
+			: API_URL.concat('global/collections/').concat(name).concat('/documents');
 		const formData = new FormData();
 		if (Array.isArray(files)) {
 			files.forEach((file) => formData.append("files", file));
@@ -90,7 +102,7 @@ export const deleteCollection = async (name: string) => {
 	try {
 		const isAdmin = await isAdministrator()
 		const url_api = !isAdmin
-			? API_URL.concat('collections/').concat(name).concat('/documents')
+			? API_URL.concat('collections/').concat(name)
 			: API_URL.concat('global/collections/').concat(name);
 		const auth_token = await getAuthToken();
 		if (!auth_token) {

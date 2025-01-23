@@ -6,18 +6,26 @@ import { PlusIcon } from "lucide-react";
 import ConversationButton from "./conversation-button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  // AlertDialog,
+  // AlertDialogAction,
+  // AlertDialogCancel,
+  // AlertDialogContent,
+  // AlertDialogDescription,
+  // AlertDialogFooter,
+  // AlertDialogHeader,
+  // AlertDialogTitle,
+  // AlertDialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input";
 import { Conversation, createConversation, deleteConversation, fetchConversations, updateConversation } from "../conversation-action";
+import { toast } from "@/hooks/use-toast";
 
 interface ConversationSidebarProps {
   activeConversation: string | null;
@@ -27,12 +35,9 @@ interface ConversationSidebarProps {
 const ConversationSidebar = ({ activeConversation, setActiveConversation }: ConversationSidebarProps) => {
   const [conversations, setConversations] = useState<Conversation | null>(null);
   const [newTitle, setNewTitle] = useState("");
-  const [oldTitle, setOldTitle] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isUpdateOpen, setIsUpdateOpen] = useState(false);
 
   const fetchData = async () => {
-    console.log("Fetching conversations");
     try {
       const listeConvs = await fetchConversations();
       if (listeConvs.error) {
@@ -40,12 +45,12 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       }
       if (listeConvs.conversation?.conversations) {
         setConversations(listeConvs.conversation);
-        console.log('listeConvs', conversations);
       } else {
         console.log("No conversations found");
       }
     } catch (err) {
       console.log("Failed to fetch conversations");
+      setConversations(null);
     }
   };
 
@@ -53,111 +58,87 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
     fetchData();
   }, []);
 
-  const handleNewChat = () => {
-    setIsDialogOpen(true);
-  };
-
   const handleCreateConversation = async () => {
     if (newTitle.trim()) {
       const newConv = await createConversation(newTitle.trim());
-      const msg = newConv.conv?.message.split(' ');
-      const newId = msg[msg.length - 1];
-      setActiveConversation(newId);
-      fetchData();
-      setNewTitle("");
-      setIsDialogOpen(false);
+      if(newConv.message) {
+        const msg = newConv.message.split(' ');
+        const newId = msg[msg.length - 1];
+        setActiveConversation(newId);
+        fetchData();
+        setNewTitle("");
+        setIsDialogOpen(false);
+        toast({
+          title: "Conversation created",
+          description: JSON.stringify(newConv.message),
+          variant: "default",
+        });
+      }
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (activeConversation === id) {
-      setActiveConversation(null);
-    }
     try {
-      const fetchedConv = await deleteConversation(id);
-      if (fetchedConv.error) {
-        console.error(fetchedConv.error);
+      const deletedConv = await deleteConversation(id);
+      if (deletedConv.error) {
+        console.error(deletedConv.error);
       }
-      if (fetchedConv.conversation) {
-        fetchData();
-      }
+      setActiveConversation(null);
+      fetchData();
+      toast({
+        title: "Conversation deleted",
+        description: JSON.stringify(deletedConv.message),
+        variant: "default",
+      });
     } catch (error) {
+      console.log(error);
+      toast({
+        title: "Error deleting conversation",
+        description: JSON.stringify(error),
+        variant: "destructive",
+      });
     }
   };
 
   const handleUpdate = async (id: string, title: string) => {
-    setActiveConversation(id)
-    setIsUpdateOpen(true);
-    setOldTitle(title);
+    if (id) {
+      await updateConversation(id, title);
+    }
+    setActiveConversation(id);
+    fetchData()
   };
 
-  const handleUpdateConversation = async () => {
-    if (oldTitle.trim()) {
-      const convId = activeConversation ?? null
-      console.log('convId', convId)
-      if (convId) {
-        await updateConversation(convId, oldTitle);
-      }
-      fetchData();
-      setIsUpdateOpen(false);
-    }
-  }
-
   return (
-    <div className="flex flex-col gap-4 border-r p-4 max-w-96 h-screen">
-      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogTrigger asChild>
-          <Button onClick={handleNewChat} className="gap-2">
+    <div className="flex flex-col gap-4 border-r p-4 max-w-96 min-h-screen">
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogTrigger asChild>
+          <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
             <PlusIcon className="h-4 w-4" />
             Nouvelle conversation
           </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Nommez votre conversation</AlertDialogTitle>
-            <AlertDialogDescription>
-              <Input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="Entrez le titre de la conversation"
-              />
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setNewTitle("")}>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Nommez votre conversation</DialogTitle>
+            <DialogDescription>
+              Entrez un titre pour la nouvelle conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            type="text"
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="Entrez le titre de la conversation"
+            className="my-4"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleCreateConversation}>
-              Créer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Nommez votre conversation</AlertDialogTitle>
-            <AlertDialogDescription>
-              <Input
-                type="text"
-                value={oldTitle}
-                onChange={(e) => setOldTitle(e.target.value)}
-                placeholder="Entrez le nouveau titre de la conversation"
-              />
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setNewTitle("")}>
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleUpdateConversation}>
-              Modifier
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+            <Button onClick={handleCreateConversation}>Créer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ScrollArea className="flex-1 pr-4">
         <div className="space-y-2">
@@ -171,7 +152,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
                 isActive={activeConversation === conversation.id}
                 onSelect={() => setActiveConversation(conversation.id)}
                 onDelete={() => handleDelete(conversation.id)}
-                onUpdate={() => handleUpdate(conversation.id, conversation.name)}
+                onUpdate={(updatedTitle) => handleUpdate(conversation.id, updatedTitle)}
               />
             ))}
         </div>

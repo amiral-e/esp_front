@@ -1,16 +1,15 @@
 "use client";
 
-import { Collections, createCollection, fetchCollections } from "@/app/actions/collection-action";
+import { Collections, fetchCollections } from "@/app/actions/collection-action";
 import { DataTable } from "./data-table";
 import { columns } from "./_components/columns";
 import { useEffect, useState } from "react";
-import { Input } from "@/components/ui/input";
 
 interface CollectionsClientProps {
     initialData: Collections[];
 }
 
-export default function CollectionsClient({ initialData }: CollectionsClientProps) {
+export default function CollectionsClient({ initialData }: Readonly<CollectionsClientProps>) {
     const [data, setData] = useState<Collections[]>(initialData);
 
     useEffect(() => {
@@ -29,7 +28,7 @@ export default function CollectionsClient({ initialData }: CollectionsClientProp
 
     return (
         <div className="container mx-auto py-10">
-            <DataTable columns={columns} data={data} />
+            <DataTable columns={columns(setData)} data={data} />
         </div>
     );
 }

@@ -73,7 +73,7 @@ export const deleteConversation = async (convId: string) => {
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.request<Conversations>({
+		const { data } = await axios.request<{message: string}>({
 			method: 'DELETE',
 			url: API_URL.concat('conversations/').concat(convId),
 			headers: {
@@ -84,7 +84,7 @@ export const deleteConversation = async (convId: string) => {
 				'conv_id': String(convId),
 			},
 		});
-		return { conversation: data };
+		return { message: data.message };
 	} catch (err: any) {
 		console.error('Error deleting conversation:', err);
 		return { error: err.message || 'An unexpected error occurred' };
@@ -97,7 +97,7 @@ export const createConversation = async (title: string) => {
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
-		const { data } = await axios.request<any>({
+		const { data } = await axios.request<{message: string}>({
 			method: 'POST',
 			url: API_URL.concat('conversations/').concat(title),
 			headers: {
@@ -108,8 +108,7 @@ export const createConversation = async (title: string) => {
 				'message': String(title),
 			},
 		});
-		console.log('Conversation created:', data);
-		return { conv: data };
+		return { message: data.message };
 	} catch (err: any) {
 		console.error('Error deleting conversation:', err);
 		return { error: err.message || 'An unexpected error occurred' };
@@ -120,7 +119,7 @@ export const updateConversation = async (convId: string, title: string) => {
 	try {
 		const auth_token = await getAuthToken();
 		const data = await axios.request<Conversations>({
-			method: 'PATCH',
+			method: 'PUT',
 			url: API_URL.concat('conversations/').concat(convId),
 			headers: {
 				'content-Type': 'application/json',
@@ -130,7 +129,7 @@ export const updateConversation = async (convId: string, title: string) => {
 				'name': String(title),
 			},
 		});
-		console.log('Conversation updated:', data);
+		return { conversation: data.data };
 	} catch (err: any) {
 		console.error('Error updating conversation:', err);
 		return { error: err.message || 'An unexpected error occurred' };

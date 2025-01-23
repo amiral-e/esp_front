@@ -11,7 +11,7 @@ import { GithubSSO } from '@/components/github-sso'
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
   return (
-    <div className="flex flex-col md:flex-row w-full max-w-12lg mx-auto p-8">
+    <div className="flex-grow flex justify-center items-center md:flex-row w-full max-w-12lg mx-auto p-8">
       <form className="flex-[0.7] flex flex-col space-y-4 p-4 ml-4">
         <h1 className="text-2xl text-orange-500 font-medium">Login</h1>
         <p className="text-sm text-foreground">

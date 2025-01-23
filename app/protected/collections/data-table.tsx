@@ -15,6 +15,7 @@ import {
 import {
     Table,
     TableBody,
+    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -33,7 +34,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { createCollection } from "@/app/actions/collection-action"
+import { createCollection, fetchCollections } from "@/app/actions/collection-action"
+import { deleteDocument, Doc, fetchDocumentByCollection } from "@/app/actions/document-action"
+import { TrashIcon } from "lucide-react"
+import { toast } from "@/hooks/use-toast"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
@@ -43,13 +47,14 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
     columns,
     data,
-}: DataTableProps<TData, TValue>) {
+}: Readonly<DataTableProps<TData, TValue>>) {
+    const [dataState, setDataState] = React.useState<TData[]>(data || []);
     const [sorting, setSorting] = React.useState<SortingState>([])
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
         []
     )
     const table = useReactTable({
-        data: data || [],
+        data: dataState,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -64,18 +69,86 @@ export function DataTable<TData, TValue>({
     })
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [newTitle, setNewTitle] = useState("");
+    const [collection, setCollection] = useState<Doc | null>(null);
     const [files, setFiles] = useState<File[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+    const [status, setStatus] = useState<string | null>(null);
 
     const handleCreateCollection = async () => {
         try {
-            await createCollection(newTitle, files);
+            const creation = await createCollection(newTitle, files);
             setNewTitle("");
             setFiles([]);
             setIsDialogOpen(false);
+            // Refresh the data after creating a new collection
+            const updatedCollections = await fetchCollections();
+            if (updatedCollections?.collections) {
+                setDataState(updatedCollections.collections as TData[]);
+            }
+            if(isModalOpen && selectedCollection && status) {
+                getDocumentByCollection(selectedCollection, status);
+            }
+            toast({
+                title: "Collection Created",
+                description: JSON.stringify(creation.response),
+                variant: "default",
+            });
         } catch (error) {
             console.error("Error creating collection:", error);
         }
     };
+
+    const handleRowClick = (name: string, status: string) => {
+        getDocumentByCollection(name, status);
+        setIsModalOpen(true);
+        setSelectedCollection(name);
+        setStatus(status);
+    };
+
+    // const closeModal = () => {
+    //     setIsModalOpen(false);
+    //     setCollection(null);
+    // };
+
+    const getDocumentByCollection = async (collection: string, status: string) => {
+        try {
+            const documentData = await fetchDocumentByCollection(collection, status);
+            if ('error' in documentData) {
+                console.error("Error fetching document:", documentData.error);
+                // Check if the error is specifically "Collection not found"
+                if (documentData.error === "Collection not found") {
+                    setCollection(null); // Set the collection state to null
+                }
+                return;
+            }
+            setCollection(documentData);
+        } catch (error) {
+            setCollection(null);
+        }
+    };
+
+    const handleDelete = async (collection: Doc, doc_id: string) => {
+        try {
+            const deletedDoc = await deleteDocument(collection, doc_id);
+            // refresh data after deletion
+            if (selectedCollection && status) {
+                await getDocumentByCollection(selectedCollection, status);
+            }
+            toast({
+                title: "Document Deleted",
+                description: JSON.stringify(deletedDoc),
+                variant: "default",
+            });
+        } catch (error) {
+            toast({
+                title: "Error Deleting Document",
+                description: JSON.stringify(error),
+                variant: "destructive",
+            });
+            console.error("Error deleting document:", error);
+        }
+    }
 
     return (
         <div>
@@ -126,7 +199,7 @@ export function DataTable<TData, TValue>({
                                     data-state={row.getIsSelected() && "selected"}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell key={cell.id} onClick={() => { handleRowClick(row.getValue("name"), row.getValue("status")) }}>
                                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                                         </TableCell>
                                     ))}
@@ -160,6 +233,31 @@ export function DataTable<TData, TValue>({
                     Next
                 </Button>
             </div>
+
+            {/* List of documents */}
+            {isModalOpen && document && (
+                <Table>
+                    <TableCaption>A list of your documents.</TableCaption>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="text-left">File</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {collection?.response.docs.map((doc) => (
+                            <TableRow key={doc.doc_id}>
+                                <TableCell className="text-left">{doc.filename}</TableCell>
+                                <TableCell className="text-destructive focus:text-destructive">
+                                    <TrashIcon className="mr-2 h-4 w-4" onClick={() => handleDelete(collection, doc.doc_id)} />
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
+            {/*  */}
+
             <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

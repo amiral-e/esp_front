@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageCircleIcon, EllipsisIcon, TrashIcon, FilePenIcon } from "lucide-react";
 import {
@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface ConversationButtonProps {
@@ -16,7 +17,7 @@ interface ConversationButtonProps {
   isActive?: boolean;
   onSelect?: () => void;
   onDelete?: () => void;
-  onUpdate?: () => void;
+  onUpdate?: (newTitle: string) => void;
   createdAt?: string;
 }
 
@@ -28,19 +29,43 @@ const ConversationButton = ({
   onUpdate,
   createdAt,
 }: ConversationButtonProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(title);
+
+  const handleEdit = () => {
+    if (onUpdate && editedTitle.trim() !== "") {
+      console.log("editedTitle", editedTitle);
+      onUpdate(editedTitle);
+      setIsEditing(false);
+    }
+  };
+
   return (
     <div className="flex items-center">
       <Button
         variant="ghost"
         className={cn(
-          "w-64 justify-start gap-2 rounded-lg px-3 py-2 text-left",
+          "w-72 justify-start gap-3 rounded-lg px-4 py-3 text-left",
           isActive && "bg-accent",
           "group-hover:bg-accent/50"
         )}
         onClick={onSelect}
       >
         <MessageCircleIcon className="h-4 w-4 shrink-0" />
-        <div className="flex-1 truncate w-52">{title}</div>
+        {isEditing ? (
+          <Input
+            value={editedTitle}
+            onChange={(e) => setEditedTitle(e.target.value)}
+            onBlur={handleEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleEdit();
+            }}
+          />
+        ) : (
+          <div className="flex-1 truncate w-52" onDoubleClick={() => setIsEditing(true)}>
+            {title}
+          </div>
+        )}
         <div className="text-xs text-muted-foreground">
           {createdAt && new Date(createdAt).toLocaleDateString()}
         </div>
@@ -53,9 +78,7 @@ const ConversationButton = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            onClick={onUpdate}
-          >
+          <DropdownMenuItem onClick={() => setIsEditing(true)}>
             <FilePenIcon className="mr-2 h-4 w-4" />
             Update
           </DropdownMenuItem>
@@ -64,7 +87,7 @@ const ConversationButton = ({
             onClick={onDelete}
           >
             <TrashIcon className="mr-2 h-4 w-4" />
-            Supprimer
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

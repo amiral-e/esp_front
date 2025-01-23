@@ -80,14 +80,17 @@ const ChatPage = ({ activeConversation }: any) => {
   };
 
   const getCollections = async () => {
-    console.log('getCollections');
     try {
       const fetchedCollection = await fetchCollections();
       if (fetchedCollection.error) {
         console.error(fetchedCollection.error);
       }
       if (fetchedCollection.collections) {
-        setCollections(fetchedCollection.collections);
+        const formattedCollections = fetchedCollection.collections.map((collection) => ({
+          ...collection,
+          status: collection.status as "global" | "normal",
+        }));
+        setCollections(formattedCollections);
       }
     } catch (error) {
       console.error("Error fetching collection:", error);
@@ -105,7 +108,7 @@ const ChatPage = ({ activeConversation }: any) => {
   }, []);
 
   return (
-    <div className="flex flex-col w-full h-screen p-4">
+    <div className="flex flex-col w-full min-h-screen p-4">
       <Card className="flex-1 p-4 mb-4 overflow-hidden">
         <ScrollArea
           className="h-full pr-4 overflow-y-auto"
