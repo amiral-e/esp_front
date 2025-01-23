@@ -2,8 +2,12 @@
 
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
+import jwt from "jsonwebtoken";
+
+const API_URL = process.env.API_URL ?? "http://localhost:3000/";
+
 
 export const signUpAction = async (formData: FormData) => {
 	const email = formData.get("email")?.toString();
@@ -39,8 +43,12 @@ export const signInAction = async (formData: FormData) => {
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
 	const supabase = await createClient();
+	const secret = process.env.JWT_SECRET;
+	if (!secret) {
+		throw new Error("JWT_SECRET is not defined");
+	}
 
-	const { error } = await supabase.auth.signInWithPassword({
+	const { data, error } = await supabase.auth.signInWithPassword({
 		email,
 		password,
 	});
@@ -48,9 +56,19 @@ export const signInAction = async (formData: FormData) => {
 	if (error) {
 		return encodedRedirect("error", "/sign-in", error.message);
 	}
+	if (data) {
+		const payload = {
+			uid: data.user.id,
+		};
+		const token = jwt.sign(payload, secret);
+		(await
+			cookies()).set("auth_token", token, { httpOnly: true, secure: true });
 
-	return redirect("/protected");
+		return redirect("/protected/chat");
+	}
+	return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
+
 
 export const forgotPasswordAction = async (formData: FormData) => {
 	const email = formData.get("email")?.toString();
@@ -126,5 +144,29 @@ export const resetPasswordAction = async (formData: FormData) => {
 export const signOutAction = async () => {
 	const supabase = await createClient();
 	await supabase.auth.signOut();
+	const cookieStore = cookies();
+	(await cookieStore).delete("auth_token");
 	return redirect("/sign-in");
 };
+
+
+export const isAdministrator = async () => {
+	let isAdministrator = false;
+	const {
+		data: { user },
+	} = await (await createClient()).auth.getUser();
+	if (user) {
+		try {
+		const response = await (await createClient()).rpc('verify_user_is_admin', { auth_user_id: user.id });
+		isAdministrator = response.data;	
+	} catch (error) {
+			console.error("Error verifying admin status:", (error as Error).message);
+		}
+	}
+	return isAdministrator;
+}
+
+export const getUserInfo = async () => {
+	const { data: { user } } = await (await createClient()).auth.getUser();
+	return user;
+}

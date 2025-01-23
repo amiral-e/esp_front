@@ -1,4 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const updateSession = async (request: NextRequest) => {
@@ -38,14 +39,20 @@ export const updateSession = async (request: NextRequest) => {
     // This will refresh session if expired - required for Server Components
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
-
+    const cookieStore = await cookies();
+		let auth_token = cookieStore.get('auth_token')?.value ?? null;
     // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
+    if (request.nextUrl.pathname.startsWith("/protected/chat") && auth_token == null) {
+      console.log("redirecting to /sign-in");
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    if (request.nextUrl.pathname === "/" && !user.error) {
-      return NextResponse.redirect(new URL("/protected", request.url));
+    if (request.nextUrl.pathname === "/" && !user.error && auth_token) {
+      return NextResponse.redirect(new URL("/protected/chat", request.url));
+    }
+
+    if(request.nextUrl.pathname.startsWith("/sign-in") && auth_token) {
+      return NextResponse.redirect(new URL("/protected/chat", request.url));
     }
 
     return response;
