@@ -21,7 +21,9 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           </Link>
         </p>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Input variant="outline" size="md" name="email" placeholder="you@example.com" className="w-full" required/>
+          <Input
+              // variant = 'outline' size='md'
+                 name="email" placeholder="you@example.com" className="w-full" required/>
           <div className="flex justify-between items-center">
             <Link
                 className="text-xs text-foreground underline"
@@ -31,14 +33,14 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
             </Link>
           </div>
           <Input
-              variant="outline"
-              size="md"
+              // variant="outline"
+              // size="md"
               type="password"
               name="password"
               placeholder="Your password"
               required
           />
-          <SubmitButton pendingText="Signing In..." formAction={signInAction}>
+          <SubmitButton pendingText="Signing In..." formAction={signInAction} id="sign-in-button">
             Sign in
           </SubmitButton>
           <FormMessage message={searchParams}/>
