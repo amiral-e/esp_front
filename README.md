@@ -1,21 +1,6 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# ComptaCompanion
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
-
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+ComptaCompanion is an online chat platform that allows you to access information and advice on accounting and finance quickly and easily.
 
 ## Features
 
@@ -25,12 +10,10 @@
   - Middleware
   - Client
   - Server
-  - It just works!
 - supabase-ssr. A package to configure Supabase Auth to use cookies
 - Styling with [Tailwind CSS](https://tailwindcss.com)
 - Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+- Authentication with [Supabase](https://supabase.io)
 
 ## Demo
 
@@ -64,11 +47,13 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
    cd name-of-new-app
    ```
 
-4. Rename `.env.local.example` to `.env.local` and update the following:
+4. Copy and rename `.env.example` to `.env` and update the following:
 
    ```
    NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
    NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
+   API_URL=https://esp-back.fly.dev/
+   JWT_SECRET=[YOUR JWT SECRET]
    ```
 
    Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
@@ -76,30 +61,34 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
 5. You can now run the Next.js local development server:
 
    ```bash
-   npm run dev
+   bun run dev
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+   The starter kit should now be running on [localhost:8080](http://localhost:8080/).
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+# Run app with docker
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+Build an image with the following command:
 
-## Feedback and issues
+```sh
+docker build -t esp_front .
+```
+And run the app:
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
-
-
-# Build image docker
-
-- docker build -t esp_front .
-
-# Run app with image
-
+```sh
 docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
+```
+
+# Test the app with Cypress
+
+1. Run the app locally
+
+    ```sh
+      bun run dev
+    ```
+2. Copy and rename `cypress.env.example.json` to  `cypress.env.json` and update the test data.
+
+3. Run cypress directly in a browser:
+```sh
+  bun run cy:open
+```
