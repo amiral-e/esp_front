@@ -275,6 +275,7 @@ export function DataTable<TData, TValue>({
                                 id="new-collection-files"
                                 type="file"
                                 multiple
+                                accept="text/plain,.md"
                                 onChange={(e) => setFiles(Array.from(e.target.files || []))}
                                 className="mt-4"
                             />
