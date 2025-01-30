@@ -162,6 +162,7 @@ export function DataTable<TData, TValue>({
                     className="max-w-sm"
                 />
                 <Button
+                    id="ingest-documents-button"
                     type="button"
                     variant="outline" className="ml-auto"
                     onClick={() => {
@@ -191,7 +192,7 @@ export function DataTable<TData, TValue>({
                             </TableRow>
                         ))}
                     </TableHeader>
-                    <TableBody>
+                    <TableBody id="collection-table-body">
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
@@ -244,10 +245,10 @@ export function DataTable<TData, TValue>({
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody id="document-table-body">
                         {collection?.response.docs.map((doc) => (
                             <TableRow key={doc.doc_id}>
-                                <TableCell className="text-left">{doc.filename}</TableCell>
+                                <TableCell className="text-left" id={doc.filename}>{doc.filename}</TableCell>
                                 <TableCell className="text-destructive focus:text-destructive">
                                     <TrashIcon className="mr-2 h-4 w-4" onClick={() => handleDelete(collection, doc.doc_id)} />
                                 </TableCell>
@@ -264,12 +265,14 @@ export function DataTable<TData, TValue>({
                         <AlertDialogTitle>Nommez votre collection</AlertDialogTitle>
                         <AlertDialogDescription>
                             <Input
+                                id="new-collection-title"
                                 type="text"
                                 value={newTitle}
                                 onChange={(e) => setNewTitle(e.target.value)}
                                 placeholder="Entrez le nouveau titre de la collection"
                             />
                             <Input
+                                id="new-collection-files"
                                 type="file"
                                 multiple
                                 onChange={(e) => setFiles(Array.from(e.target.files || []))}
@@ -281,7 +284,7 @@ export function DataTable<TData, TValue>({
                         <AlertDialogCancel onClick={() => setNewTitle("")}>
                             Annuler
                         </AlertDialogCancel>
-                        <AlertDialogAction onClick={handleCreateCollection}>
+                        <AlertDialogAction onClick={handleCreateCollection} id="create-collection">
                             Créer
                         </AlertDialogAction>
                     </AlertDialogFooter>
