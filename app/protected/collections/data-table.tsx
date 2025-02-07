@@ -35,7 +35,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { createCollection, fetchCollections } from "@/app/actions/collection-action"
-import { deleteDocument, Doc, fetchDocumentByCollection } from "@/app/actions/document-action"
+import { deleteDocument, ResponseData, fetchDocumentByCollection } from "@/app/actions/document-action"
 import { TrashIcon } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
 
@@ -69,7 +69,7 @@ export function DataTable<TData, TValue>({
     })
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [newTitle, setNewTitle] = useState("");
-    const [collection, setCollection] = useState<Doc | null>(null);
+    const [collection, setCollection] = useState<ResponseData | null>(null);
     const [files, setFiles] = useState<File[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
@@ -128,7 +128,7 @@ export function DataTable<TData, TValue>({
         }
     };
 
-    const handleDelete = async (collection: Doc, doc_id: string) => {
+    const handleDelete = async (collection: ResponseData, doc_id: string) => {
         try {
             const deletedDoc = await deleteDocument(collection, doc_id);
             // refresh data after deletion
@@ -246,9 +246,9 @@ export function DataTable<TData, TValue>({
                         </TableRow>
                     </TableHeader>
                     <TableBody id="document-table-body">
-                        {collection?.response.docs.map((doc) => (
+                        {collection?.documents.map((doc) => (
                             <TableRow key={doc.doc_id}>
-                                <TableCell className="text-left" id={doc.filename}>{doc.filename}</TableCell>
+                                <TableCell className="text-left" id={doc.doc_file}>{doc.doc_file}</TableCell>
                                 <TableCell className="text-destructive focus:text-destructive">
                                     <TrashIcon className="mr-2 h-4 w-4" onClick={() => handleDelete(collection, doc.doc_id)} />
                                 </TableCell>

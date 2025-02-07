@@ -16,7 +16,8 @@ export interface Collection {
 }
 
 export interface Collections {
-	table_name: string;
+	collection: string;
+	user: string;
 	name: string;
 	status: string;
 }
@@ -50,10 +51,7 @@ export const fetchCollections = async () => {
 			...collection,
 			status: 'normal',
 		}));
-		const userCollections = normalCollections.filter((collection) => {
-			const [collectionUid] = collection.table_name.split('_');
-			return collectionUid === user?.id;
-		  });
+		const userCollections = normalCollections.filter((collection) => collection.user === user?.id);
 		const combinedCollections = [...globalCollections, ...userCollections];
 		return { collections: combinedCollections };
 	} catch (err: any) {
@@ -89,7 +87,6 @@ export const createCollection = async (name: string, files: File | File[]) => {
 			},
 			data: formData,
 		});
-		console.log('data', data);
 		return { response: data.data.response };
 	} catch (err: any) {
 		console.error('Error creating conversation:', err);
