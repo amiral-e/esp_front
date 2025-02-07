@@ -27,6 +27,7 @@
 //
 
 
+/* @ts-ignore */
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -35,13 +36,14 @@ declare global {
     }
 }
 
+/* @ts-ignore */
 Cypress.Commands.add('login', (email: string, password: string) => {
     cy.session([email, password], () => {
         cy.visit('/sign-in')
         cy.get('input[name=email]').type(email)
         cy.get('input[name=password]').type(password)
         cy.get('#sign-in-button').click()
-        cy.url().should('contain', '/protected')
+        cy.url().should('include', '/protected')
     })
 })
 
