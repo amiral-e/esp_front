@@ -22,17 +22,32 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Conversation, createConversation, deleteConversation, fetchConversations, updateConversation } from "../conversation-action";
+import {
+  Conversation,
+  createConversation,
+  deleteConversation,
+  fetchConversations,
+  updateConversation,
+} from "../conversation-action";
 import { toast } from "@/hooks/use-toast";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 
 interface ConversationSidebarProps {
   activeConversation: string | null;
   setActiveConversation: (id: string | null) => void;
 }
 
-const ConversationSidebar = ({ activeConversation, setActiveConversation }: ConversationSidebarProps) => {
+const ConversationSidebar = ({
+  activeConversation,
+  setActiveConversation,
+}: ConversationSidebarProps) => {
   const [conversations, setConversations] = useState<Conversation | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -61,8 +76,8 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
   const handleCreateConversation = async () => {
     if (newTitle.trim()) {
       const newConv = await createConversation(newTitle.trim());
-      if(newConv.message) {
-        const msg = newConv.message.split(' ');
+      if (newConv.message) {
+        const msg = newConv.message.split(" ");
         const newId = msg[msg.length - 1];
         setActiveConversation(newId);
         fetchData();
@@ -75,7 +90,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
         });
       }
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -105,59 +120,77 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       await updateConversation(id, title);
     }
     setActiveConversation(id);
-    fetchData()
+    fetchData();
   };
 
   return (
-    <div className="flex flex-col gap-4 border-r p-4 max-w-96 min-h-screen">
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-            <PlusIcon className="h-4 w-4" />
-            Nouvelle conversation
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Nommez votre conversation</DialogTitle>
-            <DialogDescription>
-              Entrez un titre pour la nouvelle conversation.
-            </DialogDescription>
-          </DialogHeader>
-          <Input
-            type="text"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-            placeholder="Entrez le titre de la conversation"
-            className="my-4"
-          />
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Annuler
-            </Button>
-            <Button onClick={handleCreateConversation}>Créer</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <ScrollArea className="flex-1 pr-4">
-        <div className="space-y-2">
-          {conversations?.conversations
-            ?.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-            .map((conversation: any) => (
-              <ConversationButton
-                key={conversation.id}
-                title={conversation.name}
-                createdAt={conversation.created_at}
-                isActive={activeConversation === conversation.id}
-                onSelect={() => setActiveConversation(conversation.id)}
-                onDelete={() => handleDelete(conversation.id)}
-                onUpdate={(updatedTitle) => handleUpdate(conversation.id, updatedTitle)}
+    <SidebarProvider defaultOpen>
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => setIsDialogOpen(true)}
+                className="gap-2 w-full"
+              >
+                <PlusIcon className="h-4 w-4" />
+                Nouvelle conversation
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Nommez votre conversation</DialogTitle>
+                <DialogDescription>
+                  Entrez un titre pour la nouvelle conversation.
+                </DialogDescription>
+              </DialogHeader>
+              <Input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Entrez le titre de la conversation"
+                className="my-4"
               />
-            ))}
-        </div>
-      </ScrollArea>
-    </div>
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Annuler
+                </Button>
+                <Button onClick={handleCreateConversation}>Créer</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <ScrollArea className="flex-1">
+            <div className="space-y-2 px-2">
+              {conversations?.conversations
+                ?.sort(
+                  (a: any, b: any) =>
+                    new Date(a.created_at).getTime() -
+                    new Date(b.created_at).getTime()
+                )
+                .map((conversation: any) => (
+                  <ConversationButton
+                    key={conversation.id}
+                    title={conversation.name}
+                    createdAt={conversation.created_at}
+                    isActive={activeConversation === conversation.id}
+                    onSelect={() => setActiveConversation(conversation.id)}
+                    onDelete={() => handleDelete(conversation.id)}
+                    onUpdate={(updatedTitle) =>
+                      handleUpdate(conversation.id, updatedTitle)
+                    }
+                  />
+                ))}
+            </div>
+          </ScrollArea>
+        </SidebarContent>
+      </Sidebar>
+    </SidebarProvider>
   );
 };
 

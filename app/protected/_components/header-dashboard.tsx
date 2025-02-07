@@ -3,11 +3,12 @@ import React from "react";
 
 const NAV_ITEMS = [
   { title: "Chat", href: "/protected/chat" },
+  { title: "Collections", href: "/protected/collections" },
 ];
 
 const HeaderDashboard = () => {
   return (
-    <header className="flex justify-between p-4 border-b">
+    <header className="flex justify-between p-4 border-b w-full">
       {NAV_ITEMS.map((item) => (
         <NavItem key={item.href} {...item} />
       ))}

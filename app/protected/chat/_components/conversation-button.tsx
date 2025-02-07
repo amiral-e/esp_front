@@ -2,7 +2,12 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, EllipsisIcon, TrashIcon, FilePenIcon } from "lucide-react";
+import {
+  MessageCircleIcon,
+  EllipsisIcon,
+  TrashIcon,
+  FilePenIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +50,7 @@ const ConversationButton = ({
       <Button
         variant="ghost"
         className={cn(
-          "w-72 justify-start gap-3 rounded-lg px-4 py-3 text-left",
+          "w-48 justify-start gap-3 rounded-lg px-4 py-3 text-left",
           isActive && "bg-accent",
           "group-hover:bg-accent/50"
         )}
@@ -62,7 +67,10 @@ const ConversationButton = ({
             }}
           />
         ) : (
-          <div className="flex-1 truncate w-52" onDoubleClick={() => setIsEditing(true)}>
+          <div
+            className="flex-1 truncate w-52"
+            onDoubleClick={() => setIsEditing(true)}
+          >
             {title}
           </div>
         )}

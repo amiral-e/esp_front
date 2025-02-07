@@ -3,16 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { fetchConversationsByConvId, Message, sendMessage } from "./conversation-action";
+import {
+  fetchConversationsByConvId,
+  Message,
+  sendMessage,
+} from "./conversation-action";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Send, AlertCircle, Plus } from "lucide-react";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Collections, fetchCollections } from "@/app/actions/collection-action";
+import ChatForm from "./_components/chat-form";
+import UserChat from "./_components/user-chat";
+import TypingEffect from "@/components/typing-effect";
 
 const ChatPage = ({ activeConversation }: any) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -23,7 +26,6 @@ const ChatPage = ({ activeConversation }: any) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
   const [collections, setCollections] = useState<Collections[]>([]);
-  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
 
   const showConversation = async (convId: string) => {
     if (!convId) return;
@@ -41,44 +43,6 @@ const ChatPage = ({ activeConversation }: any) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const newMessage: Message = { role: "user", content: input.trim() };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-    setIsLoading(true);
-
-    try {
-      const responseChat = await sendMessage(activeConversation, input, selectedCollection ?? "");
-      if (responseChat) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: responseChat.role ?? "",
-            content: responseChat.content
-              ? `${responseChat.content}\n\n${responseChat.sources
-                ? `(Sources:\n${Object.entries(responseChat.sources)
-                  .map(([id, details]) => {
-                    const detail = details as { filename: string };
-                    return `- ${detail.filename} id: ${id}`;
-                  })
-                  .join("\n")})`
-                : ""
-              }`
-              : "",
-          },
-        ]);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const getCollections = async () => {
     try {
       const fetchedCollection = await fetchCollections();
@@ -86,15 +50,27 @@ const ChatPage = ({ activeConversation }: any) => {
         console.error(fetchedCollection.error);
       }
       if (fetchedCollection.collections) {
-        const formattedCollections = fetchedCollection.collections.map((collection) => ({
-          ...collection,
-          status: collection.status as "global" | "normal",
-        }));
+        const formattedCollections = fetchedCollection.collections.map(
+          (collection) => ({
+            ...collection,
+            status: collection.status as "global" | "normal",
+          })
+        );
         setCollections(formattedCollections);
       }
     } catch (error) {
       console.error("Error fetching collection:", error);
     }
+  };
+
+  const handleNewMessage = (message: Message) => {
+    setMessages((prev) => [...prev, message]);
+    setIsLoading(true);
+  };
+
+  const handleMessageResponse = (response: Message) => {
+    setMessages((prev) => [...prev, response]);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -108,39 +84,37 @@ const ChatPage = ({ activeConversation }: any) => {
   }, []);
 
   return (
-    <div className="flex flex-col w-full min-h-screen p-4">
-      <Card className="flex-1 p-4 mb-4 overflow-hidden">
-        <ScrollArea
-          className="h-full pr-4 overflow-y-auto"
-          ref={scrollAreaRef}
-        >
+    <div className="flex flex-col min-w-full p-4 h-[900px]">
+      <Card className="flex-1 p-4 mb-4 overflow-hidden w-full">
+        <ScrollArea className="h-full w-full" ref={scrollAreaRef}>
           {messages?.map((message, i) => (
-            <div
-              key={i}
-              className={`mb-4 flex ${message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-            >
-              <div
-                className={`p-4 rounded-xl rounded-br-none max-w-[80%] text-sm ${message.role === "user"
-                  ? "bg-orange-500 text-primary-foreground"
-                  : "bg-muted"
-                  }`}
-              >
-                {message.content}
-              </div>
+            <div key={i} className={"flex justify-start mx-32 mt-8"}>
+              {message.role === "user" ? (
+                <UserChat
+                  message={message.content}
+                  userAvatar={"https://github.com/shadcn.png"}
+                />
+              ) : (
+                <h2>{message.content}</h2>
+              )}
             </div>
           ))}
           {isLoading && (
-            <div className="flex justify-start">
-              <div className="p-4 rounded-xl rounded-br-none bg-muted">
-                En train d'écrire...
-              </div>
+            <div className="flex justify-center items-center">
+              <div className="">En train d'écrire...</div>
             </div>
           )}
         </ScrollArea>
       </Card>
-      <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-        {/* Input de saisie */}
+      <ChatForm
+        convId={activeConversation}
+        collections={collections}
+        isLoading={isLoading}
+        onMessageSubmit={handleNewMessage}
+        onMessageResponse={handleMessageResponse}
+        sendMessage={sendMessage}
+      />
+      {/* <form onSubmit={handleSubmit} className="flex gap-2 items-center">
         <Input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -149,7 +123,6 @@ const ChatPage = ({ activeConversation }: any) => {
           disabled={isLoading}
         />
 
-        {/* Bouton "+" avec menu déroulant */}
         <div className="relative">
           <Button
             type="button"
@@ -199,7 +172,7 @@ const ChatPage = ({ activeConversation }: any) => {
         >
           <Send className="h-6 w-6" />
         </Button>
-      </form>
+      </form> */}
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />

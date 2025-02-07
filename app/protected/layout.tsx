@@ -5,9 +5,9 @@ import HeaderDashboard from "./_components/header-dashboard";
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col">
-      {/* <HeaderDashboard /> */}
-      <div className="h-4/5">{children}</div>
+    <div className="w-full">
+      <HeaderDashboard />
+      <div>{children}</div>
     </div>
   );
 };
