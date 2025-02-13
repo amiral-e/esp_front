@@ -13,15 +13,8 @@ export interface Message {
 export interface Conversation {
   id: string;
   name: string;
-  conversations: Message[];
-  createAt: string;
-}
-
-export interface Conversations {
-  id: string;
-  name: string;
   history: Message[];
-  createAt: string;
+  createdAt: string;
 }
 
 const getAuthToken = async (): Promise<string | null> => {
@@ -43,7 +36,6 @@ export const fetchConversations = async () => {
         },
       }
     );
-    console.log("data", data);
     return { conversation: data };
   } catch (err: any) {
     console.error("Error fetching conversations:", err);
@@ -57,7 +49,7 @@ export const fetchConversationsByConvId = async (conv_id: string) => {
     if (!auth_token) {
       throw new Error("Tokens are missing");
     }
-    const { data } = await axios.get<Conversations>(
+    const { data } = await axios.get<Conversation>(
       API_URL.concat(`conversations/${conv_id}`),
       {
         headers: {
@@ -67,7 +59,7 @@ export const fetchConversationsByConvId = async (conv_id: string) => {
     );
     return { conversation: data };
   } catch (err: any) {
-    console.error("Error fetching conversations:", err);
+    console.error("Error fetching conversations by id:", err);
     return { error: err };
   }
 };
@@ -123,7 +115,7 @@ export const createConversation = async (title: string) => {
 export const updateConversation = async (convId: string, title: string) => {
   try {
     const auth_token = await getAuthToken();
-    const data = await axios.request<Conversations>({
+    const data = await axios.request<Conversation>({
       method: "PUT",
       url: API_URL.concat("conversations/").concat(convId),
       headers: {

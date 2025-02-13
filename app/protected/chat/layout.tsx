@@ -1,25 +1,19 @@
-"use client";
-
-import { ReactNode, useState } from "react";
+import { getUserInfo } from "@/app/actions";
 import ConversationSidebar from "./_components/conversation-sidebar";
-import ChatPage from "./page";
+import {
+  fetchConversations,
+  getConversationByUser,
+} from "@/actions/conversations";
+import { fetchConversationsByConvId } from "./conversation-action";
 
-const ChatLayout = () => {
-  const [activeConversation, setActiveConversation] = useState<string | null>(
-    null
-  );
-
+const ChatLayout = async ({ children }: { children: React.ReactNode }) => {
+  const user = await getUserInfo();
+  const conversations = await getConversationByUser(user?.id || "");
+  console.log(conversations);
   return (
     <div className="flex items-start">
-      <div className="w-1/5">
-        <ConversationSidebar
-          activeConversation={activeConversation}
-          setActiveConversation={setActiveConversation}
-        />
-      </div>
-      <div className="relative w-full">
-        <ChatPage activeConversation={activeConversation} />
-      </div>
+      <ConversationSidebar conversations={conversations || []} />
+      <div className="w-full">{children}</div>
     </div>
   );
 };

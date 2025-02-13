@@ -4,12 +4,7 @@ import React from "react";
 import HeaderDashboard from "./_components/header-dashboard";
 
 const ProtectedLayout = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className="w-full">
-      <HeaderDashboard />
-      <div>{children}</div>
-    </div>
-  );
+  return <div>{children}</div>;
 };
 
 export default ProtectedLayout;

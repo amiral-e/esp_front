@@ -114,7 +114,7 @@ const ChatForm = ({
           <Button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="p-2 h-12 w-12"
+            size="icon"
           >
             {selectedCollection ? (
               <span className="truncate text-sm">
@@ -137,16 +137,16 @@ const ChatForm = ({
                     setIsDropdownOpen(false);
                   }}
                 >
-                  <button className="w-full text-left">
+                  <Button className="w-full text-left">
                     Aucune collection
-                  </button>
+                  </Button>
                 </li>
                 {collections.map((option) => (
                   <li
                     key={option.table_name}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   >
-                    <button
+                    <Button
                       type="button"
                       onClick={() => {
                         setSelectedCollection(option.table_name);
@@ -155,7 +155,7 @@ const ChatForm = ({
                       className="w-full text-left"
                     >
                       {option.name}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -163,12 +163,7 @@ const ChatForm = ({
           )}
         </div>
 
-        <Button
-          type="submit"
-          disabled={isLoading}
-          size="icon"
-          className="p-2 h-12 w-12"
-        >
+        <Button type="submit" disabled={isLoading} size="icon">
           <Send className="h-6 w-6" />
         </Button>
       </form>

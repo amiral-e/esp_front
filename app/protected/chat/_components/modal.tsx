@@ -1,8 +1,5 @@
-import {
-  AlertDialogHeader,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+"use client";
+
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -11,12 +8,39 @@ import {
   AlertDialogDescription,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@radix-ui/react-alert-dialog";
+  AlertDialogHeader,
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import React from "react";
+import React, { useState } from "react";
+import { createConversation } from "@/actions/conversations";
+import { useRouter } from "next/navigation";
 
-const Modal = ({ children }: { children: React.ReactNode }) => {
+const Modal = ({
+  children,
+  userId,
+}: {
+  children: React.ReactNode;
+  userId: string;
+}) => {
+  const [name, setName] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async () => {
+    if (!name.trim()) return;
+
+    try {
+      const conversation = await createConversation(name, userId);
+      console.log(conversation);
+      router.refresh();
+      setName("");
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+    }
+  };
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
@@ -24,12 +48,18 @@ const Modal = ({ children }: { children: React.ReactNode }) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Nommez votre conversation</AlertDialogTitle>
           <AlertDialogDescription>
-            <Input type="text" />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              type="text"
+            />
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction onClick={handleSubmit}>
+            Continuer
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

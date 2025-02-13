@@ -22,6 +22,7 @@ import {
 import { getUserInfo, isAdministrator } from "@/app/actions";
 import { NavUser } from "./nav-user";
 import { use } from "chai";
+import PageSwitcher from "./page-switcher";
 
 const data = {
   teams: [
@@ -29,7 +30,7 @@ const data = {
       name: "ComptaCompanion",
       logo: GalleryVerticalEnd,
       plan: "Enterprise",
-    }
+    },
   ],
   navMain: [
     {
@@ -41,10 +42,9 @@ const data = {
         {
           title: "List",
           url: "/protected/collections",
-        }
+        },
       ],
     },
-    
   ],
   admin: [
     {
@@ -56,10 +56,9 @@ const data = {
         {
           title: "User List",
           url: "/protected/admin",
-        }
+        },
       ],
     },
-    
   ],
   chat: [
     {
@@ -71,15 +70,18 @@ const data = {
         {
           title: "Chat Page",
           url: "/protected/chat",
-        }
+        },
       ],
     },
-    
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [user, setUser] = React.useState<{ name: string; email: string; avatar: string } | null>(null);
+  const [user, setUser] = React.useState<{
+    name: string;
+    email: string;
+    avatar: string;
+  } | null>(null);
   const [isAdmin, setIsAdmin] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -88,7 +90,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       setUser({
         name: "User",
         email: user?.email ?? "unknown@example.com",
-        avatar: "https://imgs.search.brave.com/M8vUaXuaKOoY5ieJEV0yRbVyx98IAIRuFZ8tdnsiykw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdGV1cnMtbGli/cmUvaG9tbWUtYWZm/YWlyZXMtY2FyYWN0/ZXJlLWF2YXRhci1p/c29sZV8yNDg3Ny02/MDExMS5qcGc_c2Vt/dD1haXNfaHlicmlk",
+        avatar:
+          "https://imgs.search.brave.com/M8vUaXuaKOoY5ieJEV0yRbVyx98IAIRuFZ8tdnsiykw/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/dmVjdGV1cnMtbGli/cmUvaG9tbWUtYWZm/YWlyZXMtY2FyYWN0/ZXJlLWF2YXRhci1p/c29sZV8yNDg3Ny02/MDExMS5qcGc_c2Vt/dD1haXNfaHlicmlk",
       });
     };
     fetchUser();
@@ -107,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        <PageSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.chat} />
