@@ -2,6 +2,44 @@
 
 import { createClient } from "@/utils/supabase/server";
 
+import axios from "axios";
+import { cookies } from "next/headers";
+
+const API_URL = "http://localhost:3000";
+
+const getAuthToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? null;
+};
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+// Add auth token interceptor
+api.interceptors.request.use(async (config) => {
+  const auth_token = await getAuthToken();
+  if (!auth_token) {
+    throw new Error("Tokens are missing");
+  }
+  config.headers.Authorization = `Bearer ${auth_token}`;
+  config.headers["Content-Type"] = "application/json";
+  return config;
+});
+
+export interface Message {
+  role: string;
+  content: string;
+}
+
+export interface Conversation {
+  id: string;
+  name: string;
+  history: Message[];
+  createdAt: string;
+}
+
 export interface Message {
   role: string;
   content: string;
@@ -11,7 +49,7 @@ export interface Conversation {
   name: string;
   history: Message[];
   user_id: string;
-  createdAt: string;
+  created_at: string;
 }
 
 export const fetchConversations = async () => {
@@ -81,5 +119,45 @@ export const deleteConversation = async (id: string) => {
     .from("conversations")
     .delete()
     .eq("id", id);
+  return data;
+};
+
+export const sendMessage = async (
+  convId: string,
+  message: string,
+  collection?: string
+) => {
+  try {
+    if (collection !== "") {
+      const { data } = await api.post<any>(`conversations/${convId}`, {
+        message: message,
+        collection: collection,
+      });
+      return {
+        role: data.role,
+        content: data.content,
+        sources: data.sources,
+      };
+    } else {
+      const { data } = await api.post<Message>(`conversations/${convId}`, {
+        message: message,
+      });
+      return { role: data.role, content: data.content };
+    }
+  } catch (err: any) {
+    console.error("Error sending message:", err);
+    return { error: err.message || "An unexpected error occurred" };
+  }
+};
+
+export const sendMessageWithCollection = async (
+  convId: string,
+  message: string,
+  collection: string[]
+) => {
+  const { data } = await api.post(`conversations/${convId}/collections`, {
+    message: message,
+    collection: collection,
+  });
   return data;
 };

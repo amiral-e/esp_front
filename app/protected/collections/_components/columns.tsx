@@ -1,76 +1,97 @@
 "use client";
 
-import {
-  Collections,
-  deleteCollection,
-  fetchCollections,
-} from "@/app/actions/collection-action";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import { EyeIcon, FileText } from "lucide-react";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CellAction } from "./cell-action";
 
-export const columns: ColumnDef<Collections>[] = [
+export interface Collection {
+  id: string;
+  name: string;
+  external_id: string;
+  collection: string;
+  document: string;
+  metadata: {
+    user: string;
+    doc_id: string;
+    doc_file: string;
+    create_date: string;
+  };
+  embeddings: string;
+}
+
+export const columns: ColumnDef<Collection>[] = [
   {
-    accessorKey: "name",
-    header: ({ column }) => {
+    accessorKey: "document",
+    header: "Document",
+    cell: ({ row }) => {
+      const document = row.original.document;
+      const lines = document.split("\n").filter((line) => line.trim() !== "");
+
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <EyeIcon />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{row.original.metadata.doc_file}</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4 space-y-2 whitespace-pre-wrap">{document}</div>
+          </DialogContent>
+        </Dialog>
       );
     },
   },
   {
-    accessorKey: "status",
-    header: "Status",
+    accessorKey: "collection",
+    header: "Collection",
   },
-  // {
-  //   id: "actions",
-  //   cell: ({ row }) => {
-  //     const collections = row.original
-  //     const handleDeleteRow = async () => {
-  //       try {
-  //         await deleteCollection(collections.name);
-  //         // Refresh data
-  //         const updatedCollections = await fetchCollections();
-  //         if (updatedCollections?.collections) {
-  //           setData(updatedCollections.collections);
-  //         }
-  //       } catch (error) {
-  //         console.error("Error deleting collection:", error);
-  //       }
-  //     };
+  {
+    accessorKey: "metadata.doc_file",
+    header: "Fichier",
+  },
+  {
+    accessorKey: "metadata.create_date",
+    header: "Date de création",
+    cell: ({ row }) => {
+      const metadata = row.original.metadata;
+      const dateStr = metadata?.create_date;
 
-  //     return (
-  //       <DropdownMenu>
-  //         <DropdownMenuTrigger asChild>
-  //           <Button variant="ghost" className="h-8 w-8 p-0">
-  //             <span className="sr-only">Open menu</span>
-  //             <MoreHorizontal className="h-4 w-4" />
-  //           </Button>
-  //         </DropdownMenuTrigger>
-  //         <DropdownMenuContent align="end">
-  //           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-  //           <DropdownMenuItem
-  //             onClick={handleDeleteRow} className="text-destructive"
-  //           >
-  //             Delete
-  //           </DropdownMenuItem>
-  //         </DropdownMenuContent>
-  //       </DropdownMenu>
-  //     )
-  //   },
-  // },
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) {
+          return "Date invalide";
+        }
+        return date.toLocaleString("fr-FR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      } catch (error) {
+        return "Date invalide";
+      }
+    },
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const document = row.original.document;
+      const lines = document.split("\n").filter((line) => line.trim() !== "");
+
+      return <CellAction data={row.original} />;
+    },
+  },
 ];

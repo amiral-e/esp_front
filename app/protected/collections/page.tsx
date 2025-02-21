@@ -1,4 +1,3 @@
-import { Collections, fetchCollections } from "@/app/actions/collection-action";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   Breadcrumb,
@@ -14,34 +13,31 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { columns } from "./_components/columns";
 import { DataTable } from "./_components/data-table";
+import { columns } from "./_components/columns";
+import ModalCollection from "./_components/modal-collection";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
+import { getUserInfo } from "@/app/actions";
+import { getCollectionByUserId, getCollections } from "@/actions/collections";
 
 export default async function CollectionsPage() {
-  const collections = await fetchCollections();
+  const user = await getUserInfo();
+  const collections = await getCollectionByUserId(user?.id || "");
+  console.log("COLLECTIONS", collections);
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">Protected</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Collection</BreadcrumbPage>
-                </BreadcrumbItem>
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
+        <h1 className="text-2xl font-bold p-4">Collections</h1>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <DataTable columns={columns} data={collections.collections || []} />
+          <ModalCollection userId={user?.id || ""}>
+            <Button variant="outline" className="flex items-center gap-2">
+              <PlusIcon />
+              Ajouter une collection
+            </Button>
+          </ModalCollection>
+          <DataTable columns={columns} data={collections || []} />
         </div>
       </SidebarInset>
     </SidebarProvider>
