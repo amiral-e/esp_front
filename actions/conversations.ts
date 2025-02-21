@@ -2,19 +2,11 @@
 
 import { createClient } from "@/utils/supabase/server";
 
-interface Message {
+export interface Message {
   role: string;
   content: string;
 }
-
-interface Conversations {
-  id: string;
-  name: string;
-  history: Message[];
-  createdAt: string;
-}
-
-interface Conversation {
+export interface Conversation {
   id: string;
   name: string;
   history: Message[];
@@ -43,13 +35,21 @@ export const getConversationById = async (id: string) => {
   return data;
 };
 
-export const getConversationByUser = async (userId: string) => {
+export const getConversationByUser = async (
+  userId: string
+): Promise<Conversation[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("conversations")
     .select("*")
-    .eq("user_id", userId);
-  return data;
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching conversations:", error);
+    throw error;
+  }
+  return data || [];
 };
 
 export const createConversation = async (title: string, userId: string) => {

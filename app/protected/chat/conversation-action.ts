@@ -3,7 +3,23 @@
 import axios from "axios";
 import { cookies } from "next/headers";
 
-const API_URL = process.env.API_URL ?? "http://localhost:3000/";
+const API_URL = "http://localhost:3000";
+
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: API_URL,
+});
+
+// Add auth token interceptor
+api.interceptors.request.use(async (config) => {
+  const auth_token = await getAuthToken();
+  if (!auth_token) {
+    throw new Error("Tokens are missing");
+  }
+  config.headers.Authorization = `Bearer ${auth_token}`;
+  config.headers["Content-Type"] = "application/json";
+  return config;
+});
 
 export interface Message {
   role: string;
@@ -24,19 +40,9 @@ const getAuthToken = async (): Promise<string | null> => {
 
 export const fetchConversations = async () => {
   try {
-    const auth_token = await getAuthToken();
-    if (!auth_token) {
-      throw new Error("Tokens are missing");
-    }
-    const { data } = await axios.get<Conversation>(
-      API_URL.concat("conversations"),
-      {
-        headers: {
-          Authorization: `Bearer ${auth_token}`,
-        },
-      }
-    );
-    return { conversation: data };
+    const { data } = await api.get<Conversation>("conversations");
+    console.log(data);
+    return data;
   } catch (err: any) {
     console.error("Error fetching conversations:", err);
     return { error: err };
@@ -46,17 +52,13 @@ export const fetchConversations = async () => {
 export const fetchConversationsByConvId = async (conv_id: string) => {
   try {
     const auth_token = await getAuthToken();
-    if (!auth_token) {
-      throw new Error("Tokens are missing");
-    }
-    const { data } = await axios.get<Conversation>(
-      API_URL.concat(`conversations/${conv_id}`),
-      {
-        headers: {
-          Authorization: `Bearer ${auth_token}`,
-        },
-      }
-    );
+    const { data } = await axios.get(`${API_URL}/conversations/${conv_id}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+    console.log(data);
     return { conversation: data };
   } catch (err: any) {
     console.error("Error fetching conversations by id:", err);
@@ -66,21 +68,12 @@ export const fetchConversationsByConvId = async (conv_id: string) => {
 
 export const deleteConversation = async (convId: string) => {
   try {
-    const auth_token = await getAuthToken();
-    if (!auth_token) {
-      throw new Error("Tokens are missing");
-    }
-    const { data } = await axios.request<{ message: string }>({
-      method: "DELETE",
-      url: API_URL.concat("conversations/").concat(convId),
-      headers: {
-        "content-Type": "application/json",
-        Authorization: `Bearer ${auth_token}`,
-      },
-      data: {
-        conv_id: String(convId),
-      },
-    });
+    const { data } = await api.delete<{ message: string }>(
+      `conversations/${convId}`,
+      {
+        data: { conv_id: String(convId) },
+      }
+    );
     return { message: data.message };
   } catch (err: any) {
     console.error("Error deleting conversation:", err);
@@ -90,43 +83,25 @@ export const deleteConversation = async (convId: string) => {
 
 export const createConversation = async (title: string) => {
   try {
-    const auth_token = await getAuthToken();
-    if (!auth_token) {
-      throw new Error("Tokens are missing");
-    }
-    const { data } = await axios.request<{ message: string }>({
-      method: "POST",
-      url: API_URL.concat("conversations/").concat(title),
-      headers: {
-        "content-Type": "application/json",
-        Authorization: `Bearer ${auth_token}`,
-      },
-      data: {
+    const { data } = await api.post<{ message: string }>(
+      `conversations/${title}`,
+      {
         message: String(title),
-      },
-    });
+      }
+    );
     return { message: data.message };
   } catch (err: any) {
-    console.error("Error deleting conversation:", err);
+    console.error("Error creating conversation:", err);
     return { error: err.message || "An unexpected error occurred" };
   }
 };
 
 export const updateConversation = async (convId: string, title: string) => {
   try {
-    const auth_token = await getAuthToken();
-    const data = await axios.request<Conversation>({
-      method: "PUT",
-      url: API_URL.concat("conversations/").concat(convId),
-      headers: {
-        "content-Type": "application/json",
-        Authorization: `Bearer ${auth_token}`,
-      },
-      data: {
-        name: String(title),
-      },
+    const { data } = await api.put<Conversation>(`conversations/${convId}`, {
+      name: String(title),
     });
-    return { conversation: data.data };
+    return { conversation: data };
   } catch (err: any) {
     console.error("Error updating conversation:", err);
     return { error: err.message || "An unexpected error occurred" };
@@ -139,40 +114,20 @@ export const sendMessage = async (
   collection: string
 ) => {
   try {
-    const auth_token = await getAuthToken();
-    if (collection != "") {
-      const data = await axios.request<any>({
-        method: "POST",
-        url: API_URL.concat("chat/conversations/")
-          .concat(convId)
-          .concat("/collections/")
-          .concat(collection),
-        headers: {
-          "content-Type": "application/json",
-          Authorization: `Bearer ${auth_token}`,
-        },
-        data: {
-          message: String(message),
-        },
+    if (collection !== "") {
+      const { data } = await api.post<any>(`conversations/${convId}`, {
+        message: message,
       });
       return {
-        role: data.data.role,
-        content: data.data.content,
-        sources: data.data.sources,
+        role: data.role,
+        content: data.content,
+        sources: data.sources,
       };
     } else {
-      const data = await axios.request<Message>({
-        method: "POST",
-        url: API_URL.concat("chat/conversations/").concat(convId),
-        headers: {
-          "content-Type": "application/json",
-          Authorization: `Bearer ${auth_token}`,
-        },
-        data: {
-          message: String(message),
-        },
+      const { data } = await api.post<Message>(`conversations/${convId}`, {
+        message: message,
       });
-      return { role: data.data.role, content: data.data.content };
+      return { role: data.role, content: data.content };
     }
   } catch (err: any) {
     console.error("Error sending message:", err);

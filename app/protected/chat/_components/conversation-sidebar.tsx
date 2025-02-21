@@ -11,18 +11,10 @@ import {
 import { NavUser } from "@/components/nav-user";
 import { PlusIcon } from "lucide-react";
 import { getUserInfo } from "@/app/actions";
-import { createConversation } from "@/actions/conversations";
+import { Conversation, createConversation } from "@/actions/conversations";
 import Modal from "./modal";
 import { CellAction } from "@/components/cell-action";
 import PageSwitcher from "@/components/page-switcher";
-
-interface Conversation {
-  id: number;
-  created_at: string;
-  history: any[];
-  user_id: string;
-  name: string;
-}
 
 interface ConversationSidebarProps {
   conversations: Conversation[];
@@ -55,14 +47,13 @@ const ConversationSidebar = async ({
                   className="flex items-center justify-between border-md hover:bg-muted p-2"
                 >
                   <Link
-                    className="w-full "
+                    className="w-full"
                     href={`/protected/chat/${conversation.id}`}
-                    passHref
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-base">{conversation.name}</span>
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(conversation.created_at).toLocaleDateString(
+                        {new Date(conversation.createdAt).toLocaleDateString(
                           "fr-FR",
                           {
                             day: "2-digit",
@@ -75,7 +66,7 @@ const ConversationSidebar = async ({
                   </Link>
                   <CellAction
                     data={{
-                      id: conversation.id,
+                      id: Number(conversation.id),
                       name: conversation.name,
                     }}
                   />

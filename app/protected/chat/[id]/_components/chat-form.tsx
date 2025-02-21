@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { SendIcon } from "lucide-react";
 import { createConversation, sendMessage } from "../../conversation-action";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
@@ -24,6 +24,7 @@ const formSchema = z.object({
 
 export default function ChatForm() {
   const { id } = useParams();
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,12 +33,18 @@ export default function ChatForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await sendMessage(
-      id?.toString() || "",
-      values.message,
-      "user"
-    );
-    console.log(values);
+    try {
+      const response = await sendMessage(
+        id?.toString() || "",
+        values.message,
+        "user"
+      );
+      console.log(response);
+      form.reset();
+      router.refresh();
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   }
 
   return (
@@ -52,13 +59,16 @@ export default function ChatForm() {
           render={({ field }) => (
             <FormItem className="w-full">
               <FormControl>
-                <Input placeholder="Posez une question" {...field} />
+                <Input
+                  placeholder="Posez une question"
+                  className="h-12"
+                  {...field}
+                />
               </FormControl>
-              <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" size="icon">
+        <Button type="submit" className="h-12">
           <SendIcon />
         </Button>
       </form>
