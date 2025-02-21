@@ -14,7 +14,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { PaperclipIcon, SendIcon, TrashIcon, XIcon } from "lucide-react";
+import {
+  Loader2,
+  PaperclipIcon,
+  SendIcon,
+  TrashIcon,
+  XIcon,
+} from "lucide-react";
 import { createConversation, sendMessage } from "../../conversation-action";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -44,6 +50,7 @@ const formSchema = z.object({
 export default function ChatForm() {
   const { id } = useParams();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,24 +61,25 @@ export default function ChatForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
     console.log(values);
     try {
-      const response = await sendMessage(
+      await sendMessage(
         id?.toString() || "",
         values.message,
         values.collection || ""
       );
-      console.log(response);
-      form.reset();
-      router.refresh();
-
       if (values.collection) {
         await sendMessageWithCollection(id?.toString() || "", values.message, [
           values.collection,
         ]);
       }
+      form.reset();
+      router.refresh();
+      setIsLoading(false);
     } catch (error) {
       console.error("Error sending message:", error);
+      setIsLoading(false);
     }
   }
 
@@ -90,17 +98,6 @@ export default function ChatForm() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex items-end space-x-4 w-full"
       >
-        {/* <Input
-          type="file"
-          multiple
-          accept=".pdf,.doc,.docx,.txt"
-          onChange={(e) => {
-            if (e.target.files && e.target.files.length > 0) {
-              handleUpload(Array.from(e.target.files));
-            }
-          }}
-        /> */}
-
         <DropdownMenu>
           <DropdownMenuTrigger>
             <Button variant="secondary" className="h-12">
@@ -112,15 +109,15 @@ export default function ChatForm() {
             <DropdownMenuSeparator />
             {collections.map((collection) => (
               <DropdownMenuRadioGroup
-                defaultValue={collections[0].metadata.doc_file}
+                defaultValue={collections[0].collection}
                 onValueChange={(value) => form.setValue("collection", value)}
               >
                 <DropdownMenuRadioItem
                   key={collection.id}
                   onClick={() =>
-                    form.setValue("collection", collection.metadata.doc_file)
+                    form.setValue("collection", collection.collection)
                   }
-                  value={collection.metadata.doc_file}
+                  value={collection.collection}
                 >
                   {collection.metadata.doc_file}
                 </DropdownMenuRadioItem>
@@ -146,13 +143,16 @@ export default function ChatForm() {
                   </Button>
                 </Badge>
               )}
-              <FormControl>
-                <Input
-                  placeholder="Posez une question"
-                  className="h-12"
-                  {...field}
-                />
-              </FormControl>
+              <div className="flex items-center space-x-2">
+                <FormControl>
+                  <Input
+                    placeholder="Posez une question"
+                    className="h-12"
+                    {...field}
+                  />
+                </FormControl>
+                {isLoading && <Loader2 className="w-6 h-6 animate-spin" />}
+              </div>
             </FormItem>
           )}
         />

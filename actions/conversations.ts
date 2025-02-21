@@ -157,7 +157,7 @@ export const sendMessageWithCollection = async (
 ) => {
   const { data } = await api.post(`conversations/${convId}/collections`, {
     message: message,
-    collection: collection,
+    collections: collection,
   });
   return data;
 };
