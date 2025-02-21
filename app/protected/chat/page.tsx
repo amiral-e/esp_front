@@ -53,25 +53,30 @@ const ChatPage = ({ activeConversation }: any) => {
 
     try {
       const responseChat = await sendMessage(activeConversation, input, selectedCollection ?? "");
+
+      let docFiles = null;
+      console.log('responseChat', responseChat.sources);
+      if (responseChat.sources) {
+        docFiles = responseChat.sources
+          .flatMap((item: { documents: { metadata: { doc_file: string } }[] }) =>
+            item.documents.map(doc => doc.metadata.doc_file)
+          )
+          .join(", ");
+      }
+      const messageContent = docFiles
+        ? `${responseChat.content}\nSources: ${docFiles}`
+        : responseChat.content;
+
       if (responseChat) {
         setMessages((prev) => [
           ...prev,
           {
             role: responseChat.role ?? "",
-            content: responseChat.content
-              ? `${responseChat.content}\n\n${responseChat.sources
-                ? `(Sources:\n${Object.entries(responseChat.sources)
-                  .map(([id, details]) => {
-                    const detail = details as { filename: string };
-                    return `- ${detail.filename} id: ${id}`;
-                  })
-                  .join("\n")})`
-                : ""
-              }`
-              : "",
+            content: messageContent,
           },
         ]);
       }
+
     } catch (error) {
       console.error("Error sending message:", error);
     } finally {
@@ -82,20 +87,18 @@ const ChatPage = ({ activeConversation }: any) => {
   const getCollections = async () => {
     try {
       const fetchedCollection = await fetchCollections();
-      if (fetchedCollection.error) {
-        console.error(fetchedCollection.error);
-      }
-      if (fetchedCollection.collections) {
-        const formattedCollections = fetchedCollection.collections.map((collection) => ({
+      if ((fetchedCollection.collections ?? []).length > 0) {
+        const formattedCollections = (fetchedCollection.collections ?? []).map((collection) => ({
           ...collection,
           status: collection.status as "global" | "normal",
         }));
         setCollections(formattedCollections);
       }
     } catch (error) {
-      console.error("Error fetching collection:", error);
+      console.error("Error fetching collections:", error);
     }
   };
+
 
   useEffect(() => {
     if (activeConversation) {
@@ -160,7 +163,7 @@ const ChatPage = ({ activeConversation }: any) => {
           >
             {selectedCollection ? (
               <span className="truncate text-sm">
-                {collections.find(c => c.table_name === selectedCollection)?.name}
+                {collections.find(c => c.collection === selectedCollection)?.name}
               </span>
             ) : (
               <Plus className="h-6 w-6" />
@@ -170,10 +173,10 @@ const ChatPage = ({ activeConversation }: any) => {
             <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
               <ul className="py-2">
                 {collections.map((option, index) => (
-                  <li key={option.table_name} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  <li key={option.collection} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <button
                       onClick={() => {
-                        setSelectedCollection(option.table_name);
+                        setSelectedCollection(option.collection);
                         setIsDropdownOpen(false);
                       }}
                       onKeyDown={(e) => {

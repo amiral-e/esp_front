@@ -152,14 +152,19 @@ export const signOutAction = async () => {
 
 export const isAdministrator = async () => {
 	let isAdministrator = false;
+	const supabase = await createClient();
 	const {
 		data: { user },
 	} = await (await createClient()).auth.getUser();
 	if (user) {
 		try {
-		const response = await (await createClient()).rpc('verify_user_is_admin', { auth_user_id: user.id });
-		isAdministrator = response.data;	
-	} catch (error) {
+			let { data, error } = await supabase
+				.rpc('is_admin_uid', {
+					user_id: user.id,
+				})
+			if (error) console.error(error)
+			else isAdministrator = data;
+		} catch (error) {
 			console.error("Error verifying admin status:", (error as Error).message);
 		}
 	}
