@@ -60,7 +60,7 @@ export const columns = (setData: React.Dispatch<React.SetStateAction<Collections
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={handleDeleteRow} className="text-destructive"
+              onClick={handleDeleteRow} className="text-destructive" id="delete-collection"
             >
               Delete
             </DropdownMenuItem>

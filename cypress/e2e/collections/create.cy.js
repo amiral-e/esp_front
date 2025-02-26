@@ -1,5 +1,4 @@
 describe('Collection Creation', () => {
-  const collectionName = 'Music VR Project'
   beforeEach(() => {
     cy.login(
       Cypress.env('testUser').email,
@@ -7,20 +6,20 @@ describe('Collection Creation', () => {
     )
   })
 
+  /**
+   * Create a new collection
+   * 1. Click on the "Ingest Documents" button
+   * 2. Type the collection name
+   * 3. Select the description file
+   * 4. Click on the "Create Collection" button
+   * 5. Check if the collection was created
+   */
   it('can create a collection', () => {
+    const collectionName = 'Music VR Project'
+    const collectionContent = 'music-vr-description.txt'
+
     cy.visit('/protected/collections')
 
-
-    /**
-     * Create a new collection
-     * 1. Click on the "Ingest Documents" button
-     * 2. Type the collection name
-     * 3. Select the description file
-     * 4. Click on the "Create Collection" button
-     * 5. Check if the collection was created
-     */
-
-    const collectionContent = 'music-vr-description.txt'
 
     cy.fixture(collectionContent, null).as('projectDescription')
     cy.get('#ingest-documents-button').click()
@@ -30,6 +29,25 @@ describe('Collection Creation', () => {
 
     cy.get('#collection-table-body > tr').contains(collectionName, { timeout: 10000 }).click()
     cy.get('#document-table-body').contains(collectionContent, { timeout: 10000 })
+  })
+
+
+  /**
+   * Create a new collection without a file
+   * 1. Click on the "Ingest Documents" button
+   * 2. Type the collection name
+   * 3. Click on the "Create Collection" button
+   * 4. Check if the error message is displayed
+   */
+  it('should not create a collection without a file', () => {
+    const collectionName = 'No File Collection'
+
+    cy.visit('/protected/collections')
+    cy.get('#ingest-documents-button').click()
+    cy.get('#new-collection-title').type(collectionName)
+    cy.get('#create-collection').click()
+
+    cy.get('#collection-table-body').should('not.contain', collectionName)
   })
 
 })
