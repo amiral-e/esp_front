@@ -16,13 +16,13 @@ export default async function Register(props: { searchParams: Promise<Message> }
         <h1 className="text-3xl font-semibold text-black">Start now!</h1>
         <br />
         <div className="space-y-2">
-          <Input variant="outline" size="md" name="name" placeholder="Name" className="w-full" required />
+          <Input name="name" placeholder="Name" className="w-full" required />
         </div>
         <div className="space-y-2">
-          <Input variant="outline" size="md" name="email" placeholder="Email" className="w-full" required />
+          <Input name="email" placeholder="Email" className="w-full" required />
         </div>
         <div className="space-y-2">
-          <Input variant="outline" size="md" type="password" name="password" placeholder="Mot de passe" className="w-full" required />
+          <Input type="password" name="password" placeholder="Mot de passe" className="w-full" required />
         </div>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -46,7 +46,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
 
         <p className="text-sm text-center text-gray-600 mt-4">
           Already have an account?{" "}
-          <Link className="text-orange-500 font-medium" href="/login">
+          <Link className="text-orange-500 font-medium" href="/sign-in">
             Sign up
           </Link>
         </p>

@@ -160,7 +160,7 @@ const ChatPage = ({ activeConversation }: any) => {
           >
             {selectedCollection ? (
               <span className="truncate text-sm">
-                {collections.find(c => c.table_name === selectedCollection)?.name}
+                {collections.find(c => c.name === selectedCollection)?.name}
               </span>
             ) : (
               <Plus className="h-6 w-6" />
@@ -169,11 +169,11 @@ const ChatPage = ({ activeConversation }: any) => {
           {isDropdownOpen && (
             <div className="absolute right-0 bottom-full mb-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
               <ul className="py-2">
-                {collections.map((option, index) => (
-                  <li key={option.table_name} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                {collections.map((option) => (
+                  <li key={option.name} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <button
                       onClick={() => {
-                        setSelectedCollection(option.table_name);
+                        setSelectedCollection(option.name);
                         setIsDropdownOpen(false);
                       }}
                       onKeyDown={(e) => {
