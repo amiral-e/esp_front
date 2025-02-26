@@ -9,12 +9,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup bun
-        uses: oven-sh/setup-bun@v2
       # Install npm dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          build: bun run build
-          start: bun run dev
+          install: npm install
+          build: npm run build
+          start: npm run dev
