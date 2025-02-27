@@ -19,7 +19,7 @@ import ModalCollection from "./_components/modal-collection";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { getUserInfo } from "@/app/actions";
-import { getCollectionByUserId, getCollections } from "@/actions/collections";
+import { getCollectionByUserId } from "@/actions/collections";
 
 export default async function CollectionsPage() {
   const user = await getUserInfo();

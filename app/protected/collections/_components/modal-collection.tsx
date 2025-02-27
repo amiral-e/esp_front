@@ -17,7 +17,10 @@ import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { createConversation } from "@/actions/conversations";
 import { useRouter } from "next/navigation";
-import { createCollection } from "@/actions/collections";
+import {
+  createCollection,
+  addDocumentsToCollection,
+} from "@/actions/collections";
 
 const ModalCollection = ({
   children,
@@ -34,22 +37,46 @@ const ModalCollection = ({
     if (!name.trim() || files.length === 0) return;
 
     try {
-      // Convertir le fichier en texte
+      // Convertir les fichiers en texte
       const fileContents = await Promise.all(
         files.map(async (file) => {
-          return new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              resolve(e.target?.result as string);
-            };
-            reader.readAsText(file);
-          });
+          return new Promise<{ content: string; fileName: string }>(
+            (resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                resolve({
+                  content: e.target?.result as string,
+                  fileName: file.name,
+                });
+              };
+              reader.readAsText(file);
+            }
+          );
         })
       );
 
-      // Créer la collection avec le contenu du fichier
-      const collection = await createCollection(name, userId, fileContents[0]);
-      console.log("Collection créée:", collection);
+      // Créer la collection avec le premier document
+      await createCollection(
+        name, // Utiliser le nom de collection saisi par l'utilisateur
+        userId,
+        fileContents[0].content,
+        fileContents[0].fileName
+      );
+
+      // Si il y a plus d'un document, les ajouter à la collection
+      if (fileContents.length > 1) {
+        const remainingDocuments = fileContents.slice(1);
+
+        // Ajouter chaque document individuellement
+        for (let i = 0; i < remainingDocuments.length; i++) {
+          await addDocumentsToCollection(
+            name, // Utiliser le même nom de collection pour tous les documents
+            userId,
+            [remainingDocuments[i].content],
+            remainingDocuments[i].fileName
+          );
+        }
+      }
 
       router.refresh();
       setName("");

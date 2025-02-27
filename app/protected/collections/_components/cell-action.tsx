@@ -8,13 +8,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
+import { Copy, Edit, MoreHorizontal, PlusIcon, Trash } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useState } from "react";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { Collection } from "./columns";
-import { deleteCollection, updateCollection } from "@/actions/collections";
+import {
+  createCollection,
+  deleteCollection,
+  updateCollection,
+} from "@/actions/collections";
+import { toast } from "@/hooks/use-toast";
 
 interface CellActionProps {
   data: Collection;
@@ -43,11 +48,18 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
     }
   };
 
-  //   const onUpdate = async () => {
-  //     try {
-  //       await updateCollection(data.id, data.name);
-  //     } catch (error) {}
-  //   };
+  const onAdd = async () => {
+    try {
+      const response = await createCollection(
+        data.name,
+        data.id,
+        data.document
+      );
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -66,6 +78,9 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuItem onClick={() => onAdd()}>
+            <PlusIcon className="mr-2 w-4 h-4" /> Ajouter
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 w-4 h-4" /> Supprimer
           </DropdownMenuItem>

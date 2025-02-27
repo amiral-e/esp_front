@@ -108,27 +108,22 @@ export const updateConversation = async (convId: string, title: string) => {
   }
 };
 
-export const sendMessage = async (
-  convId: string,
-  message: string,
-  collection: string
-) => {
+export const sendMessage = async (convId: string, message: string) => {
   try {
-    if (collection !== "") {
-      const { data } = await api.post<any>(`conversations/${convId}`, {
-        message: message,
-      });
-      return {
-        role: data.role,
-        content: data.content,
-        sources: data.sources,
-      };
-    } else {
-      const { data } = await api.post<Message>(`conversations/${convId}`, {
-        message: message,
-      });
-      return { role: data.role, content: data.content };
-    }
+    //   const { data } = await api.post<any>(`conversations/${convId}`, {
+    //     message: message,
+    //   });
+    //   return {
+    //     role: data.role,
+    //     content: data.content,
+    //     sources: data.sources,
+    //   };
+    // } else {
+    const { data } = await api.post<Message>(`conversations/${convId}`, {
+      message: message,
+    });
+    return { role: data.role, content: data.content };
+    // }
   } catch (err: any) {
     console.error("Error sending message:", err);
     return { error: err.message || "An unexpected error occurred" };

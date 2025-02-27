@@ -44,7 +44,7 @@ import { Badge } from "@/components/ui/badge";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
-  collection: z.string().optional(),
+  collections: z.array(z.string()).default([]),
 });
 
 export default function ChatForm() {
@@ -52,11 +52,13 @@ export default function ChatForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [selectedCollection, setSelectedCollection] = useState<string>("");
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
-      collection: "",
+      collections: [],
     },
   });
 
@@ -64,19 +66,25 @@ export default function ChatForm() {
     setIsLoading(true);
     console.log(values);
     try {
-      await sendMessage(
-        id?.toString() || "",
-        values.message,
-        values.collection || ""
-      );
-      if (values.collection) {
-        await sendMessageWithCollection(id?.toString() || "", values.message, [
-          values.collection,
-        ]);
+      if (values.collections && values.collections.length > 0) {
+        // Assurons-nous que collections est bien un tableau
+        const collectionsArray = Array.isArray(values.collections)
+          ? values.collections
+          : [values.collections];
+
+        const response = await sendMessageWithCollection(
+          id?.toString() || "",
+          "Décris le document",
+          ["Document 02/25"]
+        );
+        console.log(response);
+      } else {
+        await sendMessage(id?.toString() || "", values.message);
       }
       form.reset();
       router.refresh();
       setIsLoading(false);
+      setSelectedCollection("");
     } catch (error) {
       console.error("Error sending message:", error);
       setIsLoading(false);
@@ -91,6 +99,16 @@ export default function ChatForm() {
     };
     fetchData();
   }, []);
+
+  const handleCollectionSelect = (collection: string) => {
+    setSelectedCollection(collection);
+    form.setValue("collections", [collection]);
+  };
+
+  const handleRemoveCollection = () => {
+    setSelectedCollection("");
+    form.setValue("collections", []);
+  };
 
   return (
     <Form {...form}>
@@ -110,14 +128,14 @@ export default function ChatForm() {
             {collections.map((collection) => (
               <DropdownMenuRadioGroup
                 defaultValue={collections[0].collection}
-                onValueChange={(value) => form.setValue("collection", value)}
+                onValueChange={(value) => form.setValue("collections", [value])}
               >
                 <DropdownMenuRadioItem
                   key={collection.id}
                   onClick={() =>
-                    form.setValue("collection", collection.collection)
+                    handleCollectionSelect(collection.metadata.doc_file)
                   }
-                  value={collection.collection}
+                  value={collection.metadata.doc_file}
                 >
                   {collection.metadata.doc_file}
                 </DropdownMenuRadioItem>
@@ -131,11 +149,11 @@ export default function ChatForm() {
           name="message"
           render={({ field }) => (
             <FormItem className="w-full">
-              {form.watch("collection") && (
+              {selectedCollection && (
                 <Badge className="inline-flex">
-                  {form.watch("collection")}
+                  {selectedCollection}
                   <Button
-                    onClick={() => form.reset({ collection: "" })}
+                    onClick={handleRemoveCollection}
                     variant="ghost"
                     className="h-5 w-5 hover:bg-transparent"
                   >

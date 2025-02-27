@@ -29,14 +29,15 @@ export const getCollectionByUserId = async (userId: string) => {
 export const createCollection = async (
   name: string,
   userId: string,
-  document: string
+  document: string,
+  fileName: string
 ) => {
   const supabase = await createClient();
 
   const metadata = {
     user: userId,
     doc_id: crypto.randomUUID(),
-    doc_file: name + ".txt",
+    doc_file: fileName,
     create_date: new Date().toISOString(),
   };
 
@@ -45,7 +46,7 @@ export const createCollection = async (
 
   const { data, error } = await supabase.from("llamaindex_embedding").insert({
     id: crypto.randomUUID(),
-    collection: `${userId}_${name}`,
+    collection: `${name}`,
     document: document,
     metadata: metadata,
     external_id: "",
@@ -81,4 +82,40 @@ export const updateCollection = async (id: string, name: string) => {
     throw error;
   }
   return true;
+};
+
+export const addDocumentsToCollection = async (
+  collectionName: string,
+  userId: string,
+  documents: string[],
+  documentName: string
+) => {
+  const supabase = await createClient();
+
+  const documentsToInsert = documents.map((document) => ({
+    id: crypto.randomUUID(),
+    collection: collectionName,
+    document: document,
+    metadata: {
+      user: userId,
+      doc_id: crypto.randomUUID(),
+      doc_file: `${documentName}`,
+      create_date: new Date().toISOString(),
+    },
+    external_id: "",
+    embeddings: new Array(1536).fill(0),
+  }));
+
+  const { data, error } = await supabase
+    .from("llamaindex_embedding")
+    .insert(documentsToInsert);
+
+  if (error) {
+    console.error(
+      "Erreur lors de l'ajout des documents à la collection:",
+      error
+    );
+    throw error;
+  }
+  return data;
 };

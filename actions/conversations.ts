@@ -153,11 +153,16 @@ export const sendMessage = async (
 export const sendMessageWithCollection = async (
   convId: string,
   message: string,
-  collection: string[]
+  collections: string[]
 ) => {
-  const { data } = await api.post(`conversations/${convId}/collections`, {
-    message: message,
-    collections: collection,
-  });
-  return data;
+  try {
+    const { data } = await api.post(`conversations/${convId}/collections`, {
+      message: message,
+      collections: collections,
+    });
+    return data;
+  } catch (err: any) {
+    console.error("Error sending message with collections:", err);
+    return { error: err.message || "An unexpected error occurred" };
+  }
 };

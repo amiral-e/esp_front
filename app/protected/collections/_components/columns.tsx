@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { CellAction } from "./cell-action";
+import ModalAddDocuments from "./modal-add-documents";
 
 export interface Collection {
   id: string;
@@ -55,10 +56,17 @@ export const columns: ColumnDef<Collection>[] = [
   {
     accessorKey: "collection",
     header: "Collection",
+    cell: ({ row }) => {
+      const documentName = row.original.metadata.doc_file;
+      return <span>{row.original.collection}</span>;
+    },
   },
   {
     accessorKey: "metadata.doc_file",
     header: "Fichier",
+    cell: ({ row }) => {
+      return <span>{row.original.metadata.doc_file}</span>;
+    },
   },
   {
     accessorKey: "metadata.create_date",
@@ -91,7 +99,15 @@ export const columns: ColumnDef<Collection>[] = [
       const document = row.original.document;
       const lines = document.split("\n").filter((line) => line.trim() !== "");
 
-      return <CellAction data={row.original} />;
+      return (
+        <div className="flex items-center gap-2">
+          <ModalAddDocuments
+            collection={row.original}
+            userId={row.original.metadata.user}
+          />
+          <CellAction data={row.original} />
+        </div>
+      );
     },
   },
 ];
