@@ -23,7 +23,7 @@ interface ConversationButtonProps {
   onSelect?: () => void;
   onDelete?: () => void;
   onUpdate?: (newTitle: string) => void;
-  createdAt?: string;
+  created_at?: string;
 }
 
 const ConversationButton = ({
@@ -32,7 +32,7 @@ const ConversationButton = ({
   onSelect,
   onDelete,
   onUpdate,
-  createdAt,
+  created_at,
 }: ConversationButtonProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
@@ -75,15 +75,13 @@ const ConversationButton = ({
           </div>
         )}
         <div className="text-xs text-muted-foreground">
-          {createdAt && new Date(createdAt).toLocaleDateString()}
+          {created_at && new Date(created_at).toLocaleDateString()}
         </div>
       </Button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-background">
-            <EllipsisIcon className="h-4 w-4" />
-          </Button>
+        <DropdownMenuTrigger className="h-8 w-8 p-0 hover:bg-background">
+          <EllipsisIcon className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditing(true)}>

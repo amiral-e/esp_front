@@ -26,6 +26,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { signOutAction } from "@/app/actions";
+import { Button } from "./ui/button";
 
 export function NavUser({
   user,
@@ -77,10 +78,10 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <Button variant="ghost" onClick={signOutAction}>
               <LogOut />
-              <form action={signOutAction}>Se déconnecter</form>
-            </DropdownMenuItem>
+              Se déconnecter
+            </Button>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

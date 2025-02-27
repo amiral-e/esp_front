@@ -1,11 +1,13 @@
 "use server";
 
+import { getUserInfo } from "@/app/actions";
 import { createClient } from "@/utils/supabase/server";
 
 import axios from "axios";
 import { cookies } from "next/headers";
 
-const API_URL = "http://localhost:3000";
+const NEXT_PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
@@ -14,7 +16,7 @@ const getAuthToken = async (): Promise<string | null> => {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: NEXT_PUBLIC_API_URL,
 });
 
 // Add auth token interceptor
@@ -70,6 +72,10 @@ export const getConversationById = async (id: string) => {
     .from("conversations")
     .select("*")
     .eq("id", id);
+  if (error) {
+    console.error("Error fetching conversation:", error);
+    throw error;
+  }
   return data;
 };
 
@@ -99,6 +105,7 @@ export const createConversation = async (title: string, userId: string) => {
   });
 
   if (error) {
+    console.error("Error creating conversation:", error);
     throw error;
   }
   return data;
@@ -129,10 +136,19 @@ export const sendMessage = async (
 ) => {
   try {
     if (collection !== "") {
-      const { data } = await api.post<any>(`conversations/${convId}`, {
-        message: message,
-        collection: collection,
-      });
+      const auth_token = await getAuthToken();
+      const { data } = await axios.post<any>(
+        `${NEXT_PUBLIC_API_URL}/conversations/${convId}`,
+        {
+          message: message,
+          collection: collection,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth_token}`,
+          },
+        }
+      );
       return {
         role: data.role,
         content: data.content,
@@ -156,13 +172,34 @@ export const sendMessageWithCollection = async (
   collections: string[]
 ) => {
   try {
-    const { data } = await api.post(`conversations/${convId}/collections`, {
-      message: message,
-      collections: collections,
-    });
-    return data;
+    if (collections.length > 0) {
+      const auth_token = await getAuthToken();
+      const { data } = await axios.post<any>(
+        `${NEXT_PUBLIC_API_URL}/conversations/${convId}/collections`,
+        {
+          message: message,
+          collections: collections,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth_token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return {
+        role: data.role,
+        content: data.content,
+        sources: data.sources,
+      };
+    } else {
+      const { data } = await api.post<Message>(`conversations/${convId}`, {
+        message: message,
+      });
+      return { role: data.role, content: data.content };
+    }
   } catch (err: any) {
-    console.error("Error sending message with collections:", err);
+    console.error("Error sending message:", err);
     return { error: err.message || "An unexpected error occurred" };
   }
 };

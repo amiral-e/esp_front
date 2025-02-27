@@ -1,13 +1,24 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Conversation } from "../../conversation-action";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import UserChat from "../../_components/user-chat";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export interface Message {
+  role: string;
+  content: string;
+}
+
+export interface Conversation {
+  id: string;
+  name: string;
+  history: Message[];
+  createdAt: string;
+}
 
 interface ChatAreaProps {
   conversation: Conversation;

@@ -53,7 +53,7 @@ const ConversationSidebar = async ({
                     <div className="flex items-center justify-between">
                       <span className="text-base">{conversation.name}</span>
                       <span className="text-[10px] text-muted-foreground">
-                        {new Date(conversation.created_at).toLocaleDateString(
+                        {new Date(conversation.createdAt).toLocaleDateString(
                           "fr-FR",
                           {
                             day: "2-digit",
