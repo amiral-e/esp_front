@@ -21,6 +21,11 @@ export default function NavigationMenuBar() {
               Admin
             </NavigationMenuLink>
           </Link>
+          <Link href="/protected/credits" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              Credits
+            </NavigationMenuLink>
+          </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
