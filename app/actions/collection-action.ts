@@ -65,7 +65,6 @@ export const fetchCollections = async () => {
 			})) || [];
 		} catch (error: any) {
 			console.warn("User collections not found:", error.response?.data || error.message);
-			console.warn("Returning empty collections.");
 		}
 		const finalCollections = [...globalCollections, ...userCollections];
 		return { collections: finalCollections };
