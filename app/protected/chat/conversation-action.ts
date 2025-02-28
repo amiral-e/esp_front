@@ -140,6 +140,7 @@ export const updateConversation = async (convId: string, title: string) => {
 export const sendMessage = async (convId: string, message: string, collection: string) => {
 	try {
 		const auth_token = await getAuthToken();
+		console.log('collection', collection);
 		if(collection != ""){
 			const data = await axios.request<any>({
 				method: 'POST',
@@ -153,6 +154,7 @@ export const sendMessage = async (convId: string, message: string, collection: s
 					'collections': [collection]
 				},
 			});
+			
 			return { role: data.data.role, content: data.data.content, sources: data.data.sources }; 
 		} else {
 			const data = await axios.request<Message>({

@@ -27,15 +27,13 @@ export interface ResponseMessage {
 
 export const fetchCollections = async () => {
 	try {
-		const isAdmin = await isAdministrator();
+		// const isAdmin = await isAdministrator();
 		const auth_token = await getAuthToken();
 		if (!auth_token) {
 			throw new Error("Tokens are missing");
 		}
 		let globalCollections: Collections[] = [];
 		let userCollections: Collections[] = [];
-
-		if (isAdmin) {
 			try {
 				console.log("Fetching global collections...");
 				const globalResponse = await axios.get<{ collections: Collections[] }>(
@@ -51,7 +49,6 @@ export const fetchCollections = async () => {
 			} catch (error: any) {
 				console.warn("Error fetching global collections:", error.response?.data || error.message);
 			}
-		}
 		try {
 			const collectionsResponse = await axios.get<{ collections: Collections[] }>(
 				API_URL.concat("collections"),

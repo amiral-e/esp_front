@@ -175,3 +175,31 @@ export const getUserInfo = async () => {
 	const { data: { user } } = await (await createClient()).auth.getUser();
 	return user;
 }
+
+export async function updateMontant(newMontant: number) {
+	try {
+		const supabase = await createClient();
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser();
+
+		if (authError || !user) {
+			console.error("Utilisateur non connecté ou erreur d'authentification", authError);
+			return;
+		}
+
+		const { error } = await supabase
+			.from("profiles")
+			.update({ montant: newMontant })
+			.eq("uid", user.id);
+
+		if (error) {
+			console.error("Erreur lors de la mise à jour du montant :", error);
+		} else {
+			console.log("Montant mis à jour avec succès !");
+		}
+	}catch (error) {
+		console.error("Erreur lors de la mise à jour du crédit :", error);
+	}
+}
