@@ -47,10 +47,9 @@ const ChatPage = ({ activeConversation }: any) => {
     setIsLoading(true)
 
     try {
-      const responseChat = await sendMessage(activeConversation, input, selectedCollections.join(","))
+      const responseChat = await sendMessage(activeConversation, input, selectedCollections)
 
       let docFiles = null
-      console.log("responseChat", responseChat.sources)
       if (responseChat.sources) {
         docFiles = responseChat.sources
           .flatMap((item: { documents: { metadata: { doc_file: string } }[] }) =>

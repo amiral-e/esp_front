@@ -1,6 +1,8 @@
 import { fetchCollections } from "@/app/actions/collection-action";
 import CollectionTable from "./_components/CollectionTable";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const collections = await fetchCollections();
 

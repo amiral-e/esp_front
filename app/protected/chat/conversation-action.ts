@@ -137,11 +137,10 @@ export const updateConversation = async (convId: string, title: string) => {
 	}
 }
 
-export const sendMessage = async (convId: string, message: string, collection: string) => {
+export const sendMessage = async (convId: string, message: string, collection: string[]) => {
 	try {
 		const auth_token = await getAuthToken();
-		console.log('collection', collection);
-		if(collection != ""){
+		if(collection != null) {
 			const data = await axios.request<any>({
 				method: 'POST',
 				url: API_URL.concat('conversations/').concat(convId).concat('/collections'),
@@ -151,7 +150,7 @@ export const sendMessage = async (convId: string, message: string, collection: s
 				},
 				data: {
 					'message': String(message),
-					'collections': [collection]
+					'collections': collection,
 				},
 			});
 			

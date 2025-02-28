@@ -61,34 +61,33 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-full justify-between px-3 py-2 border border-gray-300", className, "rounded-md")}
           disabled={disabled}
           onClick={() => setOpen(!open)}
         >
-          <div className="flex flex-wrap gap-1 items-center">
+          <div className="flex flex-wrap gap-2 items-center w-full">
             {selected.length === 0 && <span className="text-muted-foreground">{placeholder}</span>}
 
-            {selectedLabels.slice(0, maxDisplayItems).map((label, i) => (
-              <Badge key={i} variant="secondary" className="mr-1">
-                {label}
-                <span
-                  className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleUnselect(selected[i])
-                  }}
-                >
-                  <X className="h-3 w-3" />
-                  <span className="sr-only">Remove {label}</span>
-                </span>
+            {selected.length >= 2 ? (
+              <Badge variant="secondary" className="px-2 py-1">
+                {selected.length} sélectionnés
               </Badge>
-            ))}
-
-            {selected.length > maxDisplayItems && (
-              <Badge variant="secondary">+{selected.length - maxDisplayItems} more</Badge>
+            ) : (
+              selectedLabels.slice(0, maxDisplayItems).map((label, i) => (
+                <Badge key={i} variant="secondary" className="flex items-center space-x-1 px-2 py-1 text-sm">
+                  <span>{label}</span>
+                  <X
+                    className="h-3 w-3 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleUnselect(selected[i])
+                    }}
+                  />
+                </Badge>
+              ))
             )}
           </div>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50 ml-2" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0" align="start">
@@ -115,8 +114,8 @@ export function MultiSelect({
                       >
                         <div
                           className={cn(
-                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                            isSelected ? "bg-primary text-primary-foreground" : "opacity-50",
+                            "mr-2 flex h-4 w-4 items-center justify-center border border-primary",
+                            isSelected ? "bg-primary text-primary-foreground" : "opacity-50"
                           )}
                         >
                           {isSelected && <Check className="h-3 w-3" />}
@@ -134,4 +133,3 @@ export function MultiSelect({
     </Popover>
   )
 }
-
