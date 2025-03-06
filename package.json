@@ -1,5 +1,6 @@
 {
   "private": true,
+  "version": "1.0.0",
   "scripts": {
     "dev": "next dev --turbopack -p 8080",
     "build": "next build",
