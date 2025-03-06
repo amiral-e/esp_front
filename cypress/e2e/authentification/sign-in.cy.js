@@ -1,15 +1,26 @@
 describe('Login', () => {
+  beforeEach(() => {
+    cy.visit('/sign-in')
+  })
+
   it('should log in', () => {
     cy.login(Cypress.env('testUser').email, Cypress.env('testUser').password)
     cy.visit('/protected/chat')
     cy.get('#sign-out-button').should('be.visible')
+    cy.visit('/sign-in')
   })
 
   it('should not log in with wrong credentials', () => {
-    cy.visit('/sign-in')
-    cy.get('input[name=email]').type('fakeUser')
-    cy.get('input[name=password]').type('fakePassword')
-    cy.get('#sign-in-button').click()
-    cy.url().should('include', 'error')
-  })
+    cy.get('input[name="email"]').type('invalid-email');
+    cy.get('input[name="password"]').type('password123');
+    cy.get('#sign-in-button').click();
+
+    cy.get('#form-error-message').should('be.visible')
+      .and('contain', 'Invalid login credentials');
+  });
+
+  it('should redirect to sign-up page when clicking on the sign up link', () => {
+    cy.get('#sign-up-link').click();
+    cy.url().should('include', '/sign-up');
+  });
 })

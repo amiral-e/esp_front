@@ -64,7 +64,7 @@ export const signInAction = async (formData: FormData) => {
 
 		return redirect("/protected/chat");
 	}
-	return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
+	return encodedRedirect("error", "/sign-in", "Une erreur s'est produite");
 };
 
 
@@ -75,7 +75,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 	const callbackUrl = formData.get("callbackUrl")?.toString();
 
 	if (!email) {
-		return encodedRedirect("error", "/forgot-password", "Email is required");
+		return encodedRedirect("error", "/forgot-password", "Un email est requis");
 	}
 
 	const { error } = await supabase.auth.resetPasswordForEmail(email, {
