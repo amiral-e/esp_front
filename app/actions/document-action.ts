@@ -67,7 +67,7 @@ export const fetchDocumentByCollection = async (
 };
 
 
-export const deleteDocument = async (collection: ResponseData, doc_id: string) => {
+export const deleteDocument = async (collection: Doc, doc_id: string) => {
     try {
         const auth_token = await getAuthToken();
         if (!auth_token) {

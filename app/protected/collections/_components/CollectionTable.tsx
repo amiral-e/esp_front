@@ -100,7 +100,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
 
   const handleDeleteDocuments = async (collection: Doc, doc_id: string) => {
     try {
-      const deletedDoc = await deleteDocument(collection.response, doc_id);
+      const deletedDoc = await deleteDocument(collection, doc_id);
       // refresh data after deletion
       if (selected && status) {
         await getDocumentByCollection(collection.collection_name, status);
