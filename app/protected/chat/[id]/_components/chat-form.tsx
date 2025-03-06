@@ -95,7 +95,22 @@ export default function ChatForm() {
     const fetchData = async () => {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
-      setCollections(collections);
+
+      // Filter out duplicate collections based on collection.collection
+      const uniqueCollections = collections.reduce(
+        (acc: Collection[], current) => {
+          const isDuplicate = acc.find(
+            (item) => item.collection === current.collection
+          );
+          if (!isDuplicate) {
+            acc.push(current);
+          }
+          return acc;
+        },
+        []
+      );
+
+      setCollections(uniqueCollections);
     };
     fetchData();
   }, []);
@@ -122,6 +137,12 @@ export default function ChatForm() {
     );
   };
 
+  // Fonction pour extraire le nom de la collection (après l'underscore)
+  const getCollectionDisplayName = (collectionId: string) => {
+    const parts = collectionId.split("_");
+    return parts.length > 1 ? parts.slice(1).join("_") : collectionId;
+  };
+
   return (
     <div>
       <Form {...form}>
@@ -136,7 +157,7 @@ export default function ChatForm() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>Ajouter des documents</DropdownMenuLabel>
+              <DropdownMenuLabel>Ajouter une collection</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {collections.map((collection) => (
                 <DropdownMenuCheckboxItem
@@ -146,7 +167,7 @@ export default function ChatForm() {
                     handleCollectionToggle(collection.collection)
                   }
                 >
-                  {collection.collection}
+                  {getCollectionDisplayName(collection.collection)}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
@@ -161,7 +182,7 @@ export default function ChatForm() {
                   <div className="flex flex-wrap gap-2 mb-2">
                     {selectedCollections.map((collection) => (
                       <Badge key={collection} className="inline-flex">
-                        {collection}
+                        {getCollectionDisplayName(collection)}
                         <Button
                           onClick={() => handleRemoveCollection(collection)}
                           variant="ghost"

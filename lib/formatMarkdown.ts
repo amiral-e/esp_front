@@ -28,8 +28,8 @@ export function formatMarkdown(markdown: string): string {
       '<div class="ml-4 before:content-["•"] before:mr-2">$1</div>'
     )
     .replace(
-      /^\s*\d+\. (.*$)/gm,
-      '<div class="ml-4 flex"><span class="mr-2">$&.</span><span>$1</span></div>'
+      /^\s*(\d+)\. (.*$)/gm,
+      '<div class="ml-4 flex"><span class="mr-2">$1.</span><span>$2</span></div>'
     );
 
   // Replace code blocks

@@ -70,17 +70,7 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
     <Card className="flex-1 p-4">
       <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="pr-4">
-          {isLoading && (
-            <div className="flex items-center space-x-4 mb-8 mx-32 mt-8">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[400px]" />
-                <Skeleton className="h-4 w-[300px]" />
-                <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
-          )}
-
-          {messages.map((message, i) => (
+          {messages?.map((message, i) => (
             <div key={i} className={"flex justify-start mx-32 mt-8"}>
               {message.role === "user" ? (
                 <UserChat
@@ -90,7 +80,12 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
               ) : (
                 <div className="w-full">
                   <h1 className="text-sm font-semibold">Assistant</h1>
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                  <div
+                    className="text-sm leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: formatMarkdown(message.content),
+                    }}
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
@@ -106,8 +101,16 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
               )}
             </div>
           ))}
+          {isLoading && (
+            <div className="flex items-center space-x-4 mb-8 mx-32 mt-8">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[400px]" />
+                <Skeleton className="h-4 w-[300px]" />
+                <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+          )}
 
-          {/* This empty div serves as a marker for scrolling to the bottom */}
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
