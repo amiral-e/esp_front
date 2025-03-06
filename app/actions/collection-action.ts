@@ -16,52 +16,60 @@ export interface Collection {
 }
 
 export interface Collections {
-	table_name: string;
+	collection: string;
 	name: string;
 	status: string;
 }
 
+export interface ResponseMessage {
+	message: string;
+}
+
 export const fetchCollections = async () => {
 	try {
-		const isAdmin = await isAdministrator();
+		// const isAdmin = await isAdministrator();
 		const auth_token = await getAuthToken();
-		const user = await getUserInfo();
 		if (!auth_token) {
-			throw new Error('Tokens are missing');
+			throw new Error("Tokens are missing");
 		}
 		let globalCollections: Collections[] = [];
-		if (isAdmin) {
-			const globalResponse = await axios.get<Collection>(API_URL.concat('global/collections'), {
-				headers: {
-					Authorization: `Bearer ${auth_token}`,
-				},
-			});
-			globalCollections = globalResponse.data.collections.map((collection) => ({
+		let userCollections: Collections[] = [];
+			try {
+				console.log("Fetching global collections...");
+				const globalResponse = await axios.get<{ collections: Collections[] }>(
+					API_URL.concat("admins/collections"),
+					{
+						headers: { Authorization: `Bearer ${auth_token}` },
+					}
+				);
+				globalCollections = globalResponse.data.collections?.map((collection) => ({
+					...collection,
+					status: "global",
+				})) || [];
+			} catch (error: any) {
+				console.warn("Error fetching global collections:", error.response?.data || error.message);
+			}
+		try {
+			const collectionsResponse = await axios.get<{ collections: Collections[] }>(
+				API_URL.concat("collections"),
+				{
+					headers: { Authorization: `Bearer ${auth_token}` },
+				}
+			);
+			userCollections = collectionsResponse.data.collections?.map((collection) => ({
 				...collection,
-				status: 'global',
-			}));
+				status: "normal",
+			})) || [];
+		} catch (error: any) {
+			console.warn("User collections not found:", error.response?.data || error.message);
 		}
-		const collectionsResponse = await axios.get<Collection>(API_URL.concat('collections'), {
-			headers: {
-				Authorization: `Bearer ${auth_token}`,
-			},
-		});
-		const normalCollections = collectionsResponse.data.collections.map((collection) => ({
-			...collection,
-			status: 'normal',
-		}));
-		const userCollections = normalCollections.filter((collection) => {
-			const [collectionUid] = collection.table_name.split('_');
-			return collectionUid === user?.id;
-		  });
-		const combinedCollections = [...globalCollections, ...userCollections];
-		return { collections: combinedCollections };
+		const finalCollections = [...globalCollections, ...userCollections];
+		return { collections: finalCollections };
 	} catch (err: any) {
-		console.error('Error fetching collections:', err);
+		console.error("Error fetching collections:", err);
 		return { error: err };
 	}
 };
-
 
 export const createCollection = async (name: string, files: File | File[]) => {
 	try {
@@ -70,32 +78,37 @@ export const createCollection = async (name: string, files: File | File[]) => {
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
+
+		const MAX_FILE_SIZE = 25 * 1024 * 1024;
 		const url_api = !isAdmin
 			? API_URL.concat('collections/').concat(name).concat('/documents')
-			: API_URL.concat('global/collections/').concat(name).concat('/documents');
+			: API_URL.concat('admins/collections/').concat(name).concat('/documents');
+
 		const formData = new FormData();
-		if (Array.isArray(files)) {
-			files.forEach((file) => formData.append("files", file));
-		} else {
-			formData.append("files", files);
+		const fileList = Array.isArray(files) ? files : [files];
+
+		for (const file of fileList) {
+			if (file.size > MAX_FILE_SIZE) {
+				console.error(`File too large: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+				return { error: `The file "${file.name}" exceeds the 25MB limit.` };
+			}
+			formData.append("files", file);
 		}
 
-		const data = await axios.request<any>({
-			method: 'POST',
-			url: url_api,
+		const response = await axios.post<ResponseMessage>(url_api, formData, {
 			headers: {
-				'content-Type': 'multipart/form-data',
+				'Content-Type': 'multipart/form-data',
 				Authorization: `Bearer ${auth_token}`,
 			},
-			data: formData,
 		});
-		console.log('data', data);
-		return { response: data.data.response };
+
+		return { response: response.data.message };
 	} catch (err: any) {
-		console.error('Error creating conversation:', err);
-		return { error: err };
+		console.error('Error creating collection:', err.response?.data.error);
+		return { error: err.response?.data.error };
 	}
-}
+};
+
 
 
 export const deleteCollection = async (name: string) => {
@@ -103,19 +116,19 @@ export const deleteCollection = async (name: string) => {
 		const isAdmin = await isAdministrator()
 		const url_api = !isAdmin
 			? API_URL.concat('collections/').concat(name)
-			: API_URL.concat('global/collections/').concat(name);
+			: API_URL.concat('admins/collections/').concat(name);
 		const auth_token = await getAuthToken();
 		if (!auth_token) {
 			throw new Error('Tokens are missing');
 		}
-		const data = await axios.request<any>({
+		const data = await axios.request<ResponseMessage>({
 			method: 'DELETE',
 			url: url_api,
 			headers: {
 				Authorization: `Bearer ${auth_token}`,
 			},
 		});
-		return { response: data.data.response };
+		return { response: data.data.message };
 	} catch (err: any) {
 		console.error('Error deleting conversation:', err);
 		return { error: err };

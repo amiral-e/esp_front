@@ -152,14 +152,19 @@ export const signOutAction = async () => {
 
 export const isAdministrator = async () => {
 	let isAdministrator = false;
+	const supabase = await createClient();
 	const {
 		data: { user },
 	} = await (await createClient()).auth.getUser();
 	if (user) {
 		try {
-		const response = await (await createClient()).rpc('verify_user_is_admin', { auth_user_id: user.id });
-		isAdministrator = response.data;	
-	} catch (error) {
+			let { data, error } = await supabase
+				.rpc('is_admin_uid', {
+					user_id: user.id,
+				})
+			if (error) console.error(error)
+			else isAdministrator = data;
+		} catch (error) {
 			console.error("Error verifying admin status:", (error as Error).message);
 		}
 	}
@@ -169,4 +174,32 @@ export const isAdministrator = async () => {
 export const getUserInfo = async () => {
 	const { data: { user } } = await (await createClient()).auth.getUser();
 	return user;
+}
+
+export async function updateMontant(newMontant: number) {
+	try {
+		const supabase = await createClient();
+		const {
+			data: { user },
+			error: authError,
+		} = await supabase.auth.getUser();
+
+		if (authError || !user) {
+			console.error("Utilisateur non connecté ou erreur d'authentification", authError);
+			return;
+		}
+
+		const { error } = await supabase
+			.from("profiles")
+			.update({ montant: newMontant })
+			.eq("uid", user.id);
+
+		if (error) {
+			console.error("Erreur lors de la mise à jour du montant :", error);
+		} else {
+			console.log("Montant mis à jour avec succès !");
+		}
+	}catch (error) {
+		console.error("Erreur lors de la mise à jour du crédit :", error);
+	}
 }
