@@ -43,6 +43,7 @@ import { getUserInfo } from "@/app/actions";
 import { getCollectionByUserId } from "@/actions/collections";
 import { Collection } from "@/app/protected/collections/_components/columns";
 import { Badge } from "@/components/ui/badge";
+import { useChatContext } from "./chat-context";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
@@ -52,7 +53,7 @@ const formSchema = z.object({
 export default function ChatForm() {
   const { id } = useParams();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, setIsLoading } = useChatContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
 
@@ -66,7 +67,6 @@ export default function ChatForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log(values);
     try {
       if (selectedCollections.length > 0) {
         // Envoyer le message avec toutes les collections sélectionnées
@@ -79,11 +79,7 @@ export default function ChatForm() {
           console.log(response);
         }
       } else {
-        const response = await sendMessage(
-          id?.toString() || "",
-          values.message
-        );
-        console.log(response);
+        await sendMessage(id?.toString() || "", values.message);
       }
       form.reset();
       router.refresh();
@@ -144,13 +140,13 @@ export default function ChatForm() {
               <DropdownMenuSeparator />
               {collections.map((collection) => (
                 <DropdownMenuCheckboxItem
-                  key={collection.id}
+                  key={collection.collection}
                   checked={selectedCollections.includes(collection.collection)}
                   onCheckedChange={() =>
                     handleCollectionToggle(collection.collection)
                   }
                 >
-                  {collection.metadata.doc_file}
+                  {collection.collection}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
@@ -189,7 +185,7 @@ export default function ChatForm() {
               </FormItem>
             )}
           />
-          {isLoading && <Loader2 className="w-6 h-6 animate-spin" />}
+          {isLoading && <Loader2 className="w-6 h-6 animate-spin mb-3" />}
           <Button type="submit" className="h-12" disabled={isLoading}>
             <SendIcon />
           </Button>

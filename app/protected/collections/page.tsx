@@ -24,6 +24,7 @@ import { getCollectionByUserId } from "@/actions/collections";
 export default async function CollectionsPage() {
   const user = await getUserInfo();
   const collections = await getCollectionByUserId(user?.id || "");
+  console.log(collections);
   return (
     <SidebarProvider>
       <AppSidebar />

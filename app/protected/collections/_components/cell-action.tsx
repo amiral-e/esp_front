@@ -20,6 +20,7 @@ import {
   updateCollection,
 } from "@/actions/collections";
 import { toast } from "@/hooks/use-toast";
+import ModalAddDocuments from "./modal-add-documents";
 
 interface CellActionProps {
   data: Collection;
@@ -49,16 +50,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
   };
 
   const onAdd = async () => {
-    try {
-      const response = await createCollection(
-        data.name,
-        data.id,
-        data.document
-      );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
+    <ModalAddDocuments collection={data} userId={data.metadata.user} />;
   };
 
   return (

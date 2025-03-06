@@ -21,9 +21,11 @@ import { useRouter } from "next/navigation";
 const Modal = ({
   children,
   userId,
+  asChild = true,
 }: {
   children: React.ReactNode;
   userId: string;
+  asChild?: boolean;
 }) => {
   const [name, setName] = useState("");
   const router = useRouter();
@@ -33,7 +35,6 @@ const Modal = ({
 
     try {
       const conversation = await createConversation(name, userId);
-      console.log(conversation);
       router.refresh();
       setName("");
     } catch (error) {
@@ -43,7 +44,7 @@ const Modal = ({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger>{children}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild={asChild}>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Nommez votre conversation</AlertDialogTitle>

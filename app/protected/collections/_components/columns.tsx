@@ -2,7 +2,12 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { EyeIcon, FileText } from "lucide-react";
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  EyeIcon,
+  FileText,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { CellAction } from "./cell-action";
 import ModalAddDocuments from "./modal-add-documents";
+import { Accordion } from "@/components/ui/accordion";
 
 export interface Collection {
   id: string;
@@ -30,42 +36,63 @@ export interface Collection {
 
 export const columns: ColumnDef<Collection>[] = [
   {
-    accessorKey: "document",
-    header: "Document",
+    id: "expander",
+    header: () => null,
     cell: ({ row }) => {
-      const document = row.original.document;
-      const lines = document.split("\n").filter((line) => line.trim() !== "");
-
-      return (
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <EyeIcon />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{row.original.metadata.doc_file}</DialogTitle>
-            </DialogHeader>
-            <div className="mt-4 space-y-2 whitespace-pre-wrap">{document}</div>
-          </DialogContent>
-        </Dialog>
-      );
+      return row.getCanExpand() ? (
+        <Button
+          {...{
+            className: "size-7 shadow-none text-muted-foreground",
+            onClick: row.getToggleExpandedHandler(),
+            "aria-expanded": row.getIsExpanded(),
+            "aria-label": row.getIsExpanded()
+              ? `Collapse details for ${row.original.collection}`
+              : `Expand details for ${row.original.collection}`,
+            size: "icon",
+            variant: "ghost",
+          }}
+        >
+          {row.getIsExpanded() ? (
+            <ChevronUpIcon
+              className="opacity-60"
+              size={16}
+              aria-hidden="true"
+            />
+          ) : (
+            <ChevronDownIcon
+              className="opacity-60"
+              size={16}
+              aria-hidden="true"
+            />
+          )}
+        </Button>
+      ) : undefined;
     },
   },
   {
     accessorKey: "collection",
     header: "Collection",
     cell: ({ row }) => {
-      const documentName = row.original.metadata.doc_file;
-      return <span>{row.original.collection}</span>;
+      const collectionName = row.original.collection;
+      const displayName = collectionName.includes("_")
+        ? collectionName.split("_").slice(1).join("_")
+        : collectionName;
+
+      return <span>{displayName}</span>;
     },
   },
   {
     accessorKey: "metadata.doc_file",
-    header: "Fichier",
+    header: "Nombre de fichiers",
     cell: ({ row }) => {
-      return <span>{row.original.metadata.doc_file}</span>;
+      // Récupérer le nombre de documents dans cette collection
+      const documentsCount = (row.original as any).documents?.length || 0;
+
+      return (
+        <span>
+          {documentsCount} {documentsCount > 1 ? "fichiers" : "fichier"}
+        </span>
+      );
     },
   },
   {
@@ -96,16 +123,13 @@ export const columns: ColumnDef<Collection>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => {
-      const document = row.original.document;
-      const lines = document.split("\n").filter((line) => line.trim() !== "");
-
       return (
         <div className="flex items-center gap-2">
           <ModalAddDocuments
             collection={row.original}
             userId={row.original.metadata.user}
           />
-          <CellAction data={row.original} />
+          {/* <CellAction data={row.original} /> */}
         </div>
       );
     },

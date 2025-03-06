@@ -84,7 +84,8 @@ const ModalAddDocuments = ({
               />
               {files.length > 0 && (
                 <div className="text-sm text-muted-foreground">
-                  {files.length} fichier(s) sélectionné(s)
+                  <p>{files.length} fichier(s) sélectionné(s)</p>
+                  <p>{files.map((file) => file.name).join(", ")}</p>
                 </div>
               )}
             </div>

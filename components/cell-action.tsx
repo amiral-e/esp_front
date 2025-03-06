@@ -43,8 +43,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onDelete = async () => {
     try {
-      const response = await deleteConversation(data?.id.toString());
-      console.log(response);
+      await deleteConversation(data?.id.toString());
       router.refresh();
       setShowEditDialog(false);
     } catch (error) {
@@ -54,8 +53,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onRename = async () => {
     try {
-      const response = await updateConversation(data?.id.toString(), newName);
-      console.log(response);
+      await updateConversation(data?.id.toString(), newName);
       router.refresh();
       setShowEditDialog(false);
     } catch (error) {
