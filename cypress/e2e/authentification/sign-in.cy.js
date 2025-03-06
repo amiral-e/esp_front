@@ -8,7 +8,7 @@ describe('Login', () => {
     cy.get('input[name="email"]').should('be.visible');
     cy.get('input[name="password"]').should('be.visible');
     cy.get('#sign-in-button').should('have.text', 'Se connecter');
-    cy.get('#forgot-password-link').should('have.text', 'Mot de passe oublié');
+    cy.get('#forgot-password-link').should('have.text', 'Mot de passe oublié?');
     cy.get('#sign-up-link').should('have.text', 'S\'inscrire');
   });
 
