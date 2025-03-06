@@ -146,12 +146,18 @@ export default function CollectionTable({ collections }: { collections: Collecti
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">Nom de la collection</Label>
                 <Input id="name" onChange={(e) => setNewName(e.target.value)} required />
               </div>
               <div>
                 <Label htmlFor="file">Fichier</Label>
-                <Input id="file" type="file" onChange={(e) => setFiles(Array.from(e.target.files || []))} />
+                <Input
+                    id="file"
+                    type="file"
+                    onChange={(e) => setFiles(Array.from(e.target.files || []))}
+                    accept="text/plain,.md"
+                    multiple
+                />
                 <p className="text-sm text-gray-500 mt-1">Max file size: 25MB. Only .txt and .md allowed.</p>
               </div>
               <Button onClick={handleCreateCollection} className="w-full">
