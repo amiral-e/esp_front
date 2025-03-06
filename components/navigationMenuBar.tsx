@@ -23,7 +23,7 @@ export default function NavigationMenuBar() {
           </Link>
           <Link href="/protected/payment" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              payment
+              Paiement
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
