@@ -99,13 +99,14 @@ export const createConversation = async (title: string) => {
 		}
 		const { data } = await axios.request<{message: string}>({
 			method: 'POST',
-			url: API_URL.concat('conversations/').concat(title),
+			url: API_URL.concat('conversations'),
 			headers: {
 				'content-Type': 'application/json',
 				Authorization: `Bearer ${auth_token}`,
 			},
 			data: {
-				'message': String(title),
+				'name': String(title),
+				'description': "", // à voir côté back
 			},
 		});
 		return { message: data.message };
@@ -136,26 +137,28 @@ export const updateConversation = async (convId: string, title: string) => {
 	}
 }
 
-export const sendMessage = async (convId: string, message: string, collection: string) => {
+export const sendMessage = async (convId: string, message: string, collection: string[]) => {
 	try {
 		const auth_token = await getAuthToken();
-		if(collection != ""){
+		if(collection != null) {
 			const data = await axios.request<any>({
 				method: 'POST',
-				url: API_URL.concat('chat/conversations/').concat(convId).concat('/collections/').concat(collection),
+				url: API_URL.concat('conversations/').concat(convId).concat('/collections'),
 				headers: {
 					'content-Type': 'application/json',
 					Authorization: `Bearer ${auth_token}`,
 				},
 				data: {
 					'message': String(message),
+					'collections': collection,
 				},
 			});
+			
 			return { role: data.data.role, content: data.data.content, sources: data.data.sources }; 
 		} else {
 			const data = await axios.request<Message>({
 				method: 'POST',
-				url: API_URL.concat('chat/conversations/').concat(convId),
+				url: API_URL.concat('conversations/').concat(convId),
 				headers: {
 					'content-Type': 'application/json',
 					Authorization: `Bearer ${auth_token}`,
