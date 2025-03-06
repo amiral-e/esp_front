@@ -30,16 +30,15 @@ interface ChatAreaProps {
 
 const ChatArea = ({ conversation }: ChatAreaProps) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isLoading } = useChatContext();
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
-  // Inverser l'ordre des messages pour afficher les plus récents en bas
-  const messages = conversation?.history
-    ? [...conversation.history].reverse()
-    : [];
+  const messages = conversation.history;
+
   const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -49,13 +48,27 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
     setTimeout(() => setCopiedId(null), 3000);
   };
 
+  // Scroll when messages change
   useEffect(() => {
-    scrollToBottom();
-  }, [conversation?.history]);
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [messages]);
+
+  // Scroll when loading state changes
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   return (
     <Card className="flex-1 p-4">
-      <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-200px)]">
+      <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="pr-4">
           {isLoading && (
             <div className="flex items-center space-x-4 mb-8 mx-32 mt-8">
@@ -76,13 +89,8 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
                 />
               ) : (
                 <div className="w-full">
-                  <h1 className="text-sm font-semibold">Compta</h1>
-                  <div
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: formatMarkdown(message.content),
-                    }}
-                  />
+                  <h1 className="text-sm font-semibold">Assistant</h1>
+                  <p className="text-sm leading-relaxed">{message.content}</p>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -98,6 +106,9 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
               )}
             </div>
           ))}
+
+          {/* This empty div serves as a marker for scrolling to the bottom */}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
     </Card>
