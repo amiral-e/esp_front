@@ -39,7 +39,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "List",
+          title: "Liste",
           url: "/protected/collections",
         }
       ],
@@ -54,7 +54,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "User List",
+          title: "Liste des utilisateurs",
           url: "/protected/admin",
         }
       ],
@@ -69,7 +69,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Chat Page",
+          title: "Chat IA",
           url: "/protected/chat",
         }
       ],

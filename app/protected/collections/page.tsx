@@ -9,7 +9,7 @@ export default async function Home() {
   if ('error' in collections) {
     return (
       <main className="p-6">
-        <p>Error loading collections</p>
+        <p>Erreur lors du chargement des collections</p>
       </main>
     );
   }

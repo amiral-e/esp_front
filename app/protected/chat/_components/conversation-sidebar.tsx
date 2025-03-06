@@ -69,7 +69,7 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
         setNewTitle("");
         setIsDialogOpen(false);
         toast({
-          title: "Conversation created",
+          title: "Conversation créée",
           description: JSON.stringify(newConv.message),
           variant: "default",
         });
@@ -86,14 +86,14 @@ const ConversationSidebar = ({ activeConversation, setActiveConversation }: Conv
       setActiveConversation(null);
       fetchData();
       toast({
-        title: "Conversation deleted",
+        title: "Conversation supprimée",
         description: JSON.stringify(deletedConv.message),
         variant: "default",
       });
     } catch (error) {
       console.log(error);
       toast({
-        title: "Error deleting conversation",
+        title: "Erreur lors de la suppression de la conversation",
         description: JSON.stringify(error),
         variant: "destructive",
       });

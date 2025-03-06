@@ -94,7 +94,7 @@ export function MultiSelect({
         <Command>
           <CommandInput placeholder="Search options..." />
           <CommandList>
-            <CommandEmpty>No options found.</CommandEmpty>
+            <CommandEmpty>Aucun résultat.</CommandEmpty>
             {options.map((group, index) => (
               <React.Fragment key={group.label}>
                 {index > 0 && <CommandSeparator />}

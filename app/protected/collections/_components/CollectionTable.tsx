@@ -57,7 +57,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
       }
 
       toast({
-        title: "Collection Created",
+        title: "Collection créée",
         description: creation.response,
         variant: "default",
       });
@@ -65,8 +65,8 @@ export default function CollectionTable({ collections }: { collections: Collecti
     } catch (error: any) {
       setIsDialogOpen(false);
       toast({
-        title: "Collection Creation Failed",
-        description: error.message || "An unknown error occurred",
+        title: "Erreur lors de la création de la collection",
+        description: error.message || "Une erreur s'est produite",
         variant: "destructive",
       });
     }
@@ -115,13 +115,13 @@ export default function CollectionTable({ collections }: { collections: Collecti
         }
       }
       toast({
-        title: "Document Deleted",
+        title: "Document supprimé",
         description: JSON.stringify(deletedDoc),
         variant: "default",
       });
     } catch (error) {
       toast({
-        title: "Error Deleting Document",
+        title: "Erreur lors de la suppression du document",
         description: JSON.stringify(error),
         variant: "destructive",
       });
@@ -137,12 +137,12 @@ export default function CollectionTable({ collections }: { collections: Collecti
           <DialogTrigger asChild>
             <Button variant="outline">
               <PlusCircle className="w-5 h-5 mr-2" />
-              Ingest a new document
+              Ingérer un nouveau document
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add a new collection</DialogTitle>
+              <DialogTitle>Ajouter une nouvelle collection</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
@@ -158,7 +158,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
                     accept="text/plain,.md"
                     multiple
                 />
-                <p className="text-sm text-gray-500 mt-1">Max file size: 25MB. Only .txt and .md allowed.</p>
+                <p className="text-sm text-gray-500 mt-1">Taille maximum d'un fichier: 25MB. Formats .txt et .md autorisés.</p>
               </div>
               <Button onClick={handleCreateCollection} className="w-full">
                 Ajouter
@@ -201,7 +201,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-100">
-                <TableHead>File</TableHead>
+                <TableHead>Fichier</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
