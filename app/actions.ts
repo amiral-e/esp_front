@@ -176,7 +176,7 @@ export const getUserInfo = async () => {
 	return user;
 }
 
-export async function updateMontant(newMontant: number) {
+export async function updateMontant(amountToAdd: number) {
 	try {
 		const supabase = await createClient();
 		const {
@@ -188,18 +188,18 @@ export async function updateMontant(newMontant: number) {
 			console.error("Utilisateur non connecté ou erreur d'authentification", authError);
 			return;
 		}
-
-		const { error } = await supabase
-			.from("profiles")
-			.update({ montant: newMontant })
-			.eq("uid", user.id);
+		const { error } = await supabase.rpc("increment_credits", {
+			user_id: user.id,
+			amount: amountToAdd,
+		});
 
 		if (error) {
-			console.error("Erreur lors de la mise à jour du montant :", error);
+			console.error("Erreur lors de l'incrémentation des crédits :", error);
 		} else {
-			console.log("Montant mis à jour avec succès !");
+			console.log(`Crédits incrémentés de ${amountToAdd} avec succès !`);
 		}
-	}catch (error) {
-		console.error("Erreur lors de la mise à jour du crédit :", error);
+	} catch (error) {
+		console.error("Erreur lors de l'incrémentation des crédits :", error);
 	}
 }
+
