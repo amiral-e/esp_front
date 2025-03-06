@@ -15,7 +15,7 @@ describe('Collection Creation', () => {
    * 5. Check if the collection was created
    */
   it('can create a collection', () => {
-    const collectionName = 'Music VR Project'
+    const collectionName = 'Music-VR'
     const collectionContent = 'music-vr-description.txt'
 
     cy.visit('/protected/collections')
@@ -27,8 +27,8 @@ describe('Collection Creation', () => {
     cy.get('#new-collection-files').selectFile('@projectDescription')
     cy.get('#create-collection').click()
 
-    cy.get('#collection-table-body > tr').contains(collectionName, { timeout: 10000 }).click()
-    cy.get('#document-table-body').contains(collectionContent, { timeout: 10000 })
+    cy.get(`#table-cell-${collectionName}`).click()
+    cy.get('#collection-documents').contains(collectionContent, { timeout: 10000 })
   })
 
 
@@ -47,7 +47,7 @@ describe('Collection Creation', () => {
     cy.get('#new-collection-title').type(collectionName)
     cy.get('#create-collection').click()
 
-    cy.get('#collection-table-body').should('not.contain', collectionName)
+    cy.get('#collections-table').should('not.contain', collectionName)
   })
 
 })

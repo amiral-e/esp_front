@@ -100,7 +100,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
 
   const handleDeleteDocuments = async (collection: Doc, doc_id: string) => {
     try {
-      const deletedDoc = await deleteDocument(collection, doc_id);
+      const deletedDoc = await deleteDocument(collection.response, doc_id);
       // refresh data after deletion
       if (selected && status) {
         await getDocumentByCollection(collection.collection_name, status);
@@ -135,7 +135,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
         <h2 className="text-xl font-semibold">Liste des Collections</h2>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline">
+            <Button variant="outline" id="ingest-documents-button">
               <PlusCircle className="w-5 h-5 mr-2" />
               Ingérer un nouveau document
             </Button>
@@ -146,13 +146,13 @@ export default function CollectionTable({ collections }: { collections: Collecti
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="name">Nom de la collection</Label>
-                <Input id="name" onChange={(e) => setNewName(e.target.value)} required />
+                <Label htmlFor="new-collection-title">Nom de la collection</Label>
+                <Input id="new-collection-title" onChange={(e) => setNewName(e.target.value)} required />
               </div>
               <div>
-                <Label htmlFor="file">Fichier</Label>
+                <Label htmlFor="new-collection-files">Fichier</Label>
                 <Input
-                    id="file"
+                    id="new-collection-files"
                     type="file"
                     onChange={(e) => setFiles(Array.from(e.target.files || []))}
                     accept="text/plain,.md"
@@ -160,7 +160,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
                 />
                 <p className="text-sm text-gray-500 mt-1">Taille maximum d'un fichier: 25MB. Formats .txt et .md autorisés.</p>
               </div>
-              <Button onClick={handleCreateCollection} className="w-full">
+              <Button onClick={handleCreateCollection} className="w-full" id="create-collection">
                 Ajouter
               </Button>
             </div>
@@ -176,10 +176,15 @@ export default function CollectionTable({ collections }: { collections: Collecti
             <TableHead className="w-1/3 text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody id="collections-table">
           {data.map((item) => (
-            <TableRow key={item.collection} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(item)}>
-              <TableCell>{item.name}</TableCell>
+            <TableRow
+                key={item.collection}
+                className="hover:bg-gray-50 cursor-pointer"
+                onClick={() => handleRowClick(item)}
+                id={`collection-${item.name}`}
+            >
+              <TableCell id={`table-cell-${item.name}`}>{item.name}</TableCell>
               <TableCell>{item.status}</TableCell>
               <TableCell className="text-center">
                 <Button
@@ -187,7 +192,7 @@ export default function CollectionTable({ collections }: { collections: Collecti
                   size="sm"
                   onClick={(e) => { e.stopPropagation(); handleDelete(item.name); }}
                 >
-                  <Trash className="w-4 h-4" />
+                  <Trash className="w-4 h-4" id={`delete-collection-${item.name}`}/>
                 </Button>
               </TableCell>
             </TableRow>
@@ -205,12 +210,15 @@ export default function CollectionTable({ collections }: { collections: Collecti
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody id="collection-documents">
               {selected?.response.documents.map((doc) => (
                 <TableRow key={doc.doc_id}>
                   <TableCell className="text-left">{doc.doc_file}</TableCell>
                   <TableCell className="text-destructive focus:text-destructive">
-                    <TrashIcon className="mr-2 h-4 w-4" onClick={() => handleDeleteDocuments(selected, doc.doc_id)} />
+                    <TrashIcon
+                        className="mr-2 h-4 w-4"
+                        id="delete-document"
+                        onClick={() => handleDeleteDocuments(selected, doc.doc_id)} />
                   </TableCell>
                 </TableRow>
               ))}
