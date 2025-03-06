@@ -29,11 +29,16 @@ export default async function Register(props: { searchParams: Promise<Message> }
               <input type="checkbox" id="remember" className="rounded" />
               <Label className="text-sm" htmlFor="remember">Se souvenir</Label>
           </div>
-          <Link className="text-xs text-orange-500 underline" href="/forgot-password">
+          <Link className="text-xs text-orange-500 underline" href="/forgot-password" id="forgot-password-link">
               Mot de passe oublié
           </Link>
         </div>
-        <SubmitButton pendingText="Connexion..." formAction={signUpAction} className="bg-orange-500 text-white w-full py-2">
+        <SubmitButton
+            pendingText="Connexion..."
+            formAction={signUpAction}
+            className="bg-orange-500 text-white w-full py-2"
+            id="sign-up-button"
+        >
           S'inscrire
         </SubmitButton>
         <FormMessage message={searchParams} />
@@ -46,7 +51,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
 
         <p className="text-sm text-center text-gray-600 mt-4">
           Déjà inscrit?{" "}
-          <Link className="text-orange-500 font-medium" href="/sign-in">
+          <Link className="text-orange-500 font-medium" href="/sign-in" id="sign-in-link">
             Se connecter
           </Link>
         </p>

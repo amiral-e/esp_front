@@ -26,6 +26,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
             <Link
                 className="text-xs text-foreground underline"
                 href="/forgot-password"
+                id="forgot-password-link"
             >
               Mot de passe oublié?
             </Link>

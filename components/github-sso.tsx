@@ -4,6 +4,7 @@ import { signInWithGithub } from "@/app/oauth";
 export const GithubSSO = () => (
     <div className="flex items-center gap-3">
         <div
+            id="github-sso"
             role="button"
             tabIndex={0}
             onClick={signInWithGithub}
