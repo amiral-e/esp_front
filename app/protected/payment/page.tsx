@@ -18,7 +18,7 @@ export default function Home() {
       <div className="mb-10">
         <h1 className="text-4xl font-extrabold mb-2">ComptaCompanion</h1>
         <h2 className="text-2xl">
-          has requested
+          a demandé
           <span className="font-bold"> ${amount}</span>
         </h2>
       </div>

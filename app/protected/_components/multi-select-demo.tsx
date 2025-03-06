@@ -49,16 +49,16 @@ export function MultiSelectDemo({ onSelectCollections }: MultiSelectDemoProps) {
   }
 
   if (loading) {
-    return <div>Loading collections...</div>
+    return <div>Chargement des collections...</div>
   }
 
   if (error) {
-    return <div>Error: {error}</div>
+    return <div>Erreur: {error}</div>
   }
 
   return (
     <div className="w-[200px]">
-      <MultiSelect options={options} selected={selected} onChange={handleChange} placeholder="Select collections..." />
+      <MultiSelect options={options} selected={selected} onChange={handleChange} placeholder="Choisir les collections..." />
     </div>
   )
 }

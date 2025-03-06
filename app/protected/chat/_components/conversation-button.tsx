@@ -86,14 +86,14 @@ const ConversationButton = ({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditing(true)}>
             <FilePenIcon className="mr-2 h-4 w-4" />
-            Update
+            Editer
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive focus:text-destructive"
             onClick={onDelete}
           >
             <TrashIcon className="mr-2 h-4 w-4" />
-            Delete
+            Supprimer
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
