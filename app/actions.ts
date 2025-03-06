@@ -6,8 +6,6 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 
-const API_URL = process.env.API_URL ?? "http://localhost:3000/";
-
 
 export const signUpAction = async (formData: FormData) => {
 	const email = formData.get("email")?.toString();
@@ -89,7 +87,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 		return encodedRedirect(
 			"error",
 			"/forgot-password",
-			"Could not reset password",
+			"Impossible de réinitialiser le mot de passe",
 		);
 	}
 
@@ -100,7 +98,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
 	return encodedRedirect(
 		"success",
 		"/forgot-password",
-		"Check your email for a link to reset your password.",
+		"Vérifiez votre email pour réinitialiser votre mot de passe",
 	);
 };
 

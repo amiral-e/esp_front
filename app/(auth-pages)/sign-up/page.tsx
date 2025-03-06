@@ -12,11 +12,11 @@ export default async function Register(props: { searchParams: Promise<Message> }
   return (
     <div className="flex flex-col md:flex-row w-full max-w-12lg mx-auto p-8">
       <form className="flex-[0.7] flex flex-col space-y-4 p-4 ml-4">
-        <p className="text-2sm font-semibold text-orange-500">S'inscrirep</p>
+        <p className="text-2sm font-semibold text-orange-500">S'inscrire</p>
         <h1 className="text-3xl font-semibold text-black">Commencer maintenant!</h1>
         <br />
         <div className="space-y-2">
-          <Input name="name" placeholder="Name" className="w-full" required />
+          <Input name="name" placeholder="Nom" className="w-full" required />
         </div>
         <div className="space-y-2">
           <Input name="email" placeholder="Email" className="w-full" required />
@@ -33,7 +33,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
               Mot de passe oublié
           </Link>
         </div>
-        <SubmitButton pendingText="Signing Up..." formAction={signUpAction} className="bg-orange-500 text-white w-full py-2">
+        <SubmitButton pendingText="Connexion..." formAction={signUpAction} className="bg-orange-500 text-white w-full py-2">
           S'inscrire
         </SubmitButton>
         <FormMessage message={searchParams} />
@@ -46,7 +46,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
 
         <p className="text-sm text-center text-gray-600 mt-4">
           Déjà inscrit?{" "}
-          <Link className="text-orange-500 font-medium" href="/login">
+          <Link className="text-orange-500 font-medium" href="/sign-in">
             Se connecter
           </Link>
         </p>
