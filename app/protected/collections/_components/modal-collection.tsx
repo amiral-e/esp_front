@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, PaperclipIcon } from "lucide-react";
+import { PlusIcon, PaperclipIcon } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { createConversation } from "@/actions/conversations";
@@ -83,7 +83,7 @@ const ModalCollection = ({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger>{children}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Créer une collection</AlertDialogTitle>
