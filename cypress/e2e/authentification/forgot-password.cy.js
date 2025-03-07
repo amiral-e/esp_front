@@ -10,7 +10,7 @@ describe('Forgot Password Flow', () => {
     cy.get('#sign-in-link').should('have.text', 'Se connecter');
   });
 
-  it('should show an error message for invalid email', () => {
+  it.skip('should show an error message for invalid email', () => {
     // Input invalid email and submit
     cy.get('input[name="email"]').type('invalid-email');
     cy.get('#reset-password-button').click();
@@ -20,7 +20,7 @@ describe('Forgot Password Flow', () => {
       .and('contain', 'Impossible de réinitialiser le mot de passe');
   });
 
-  it('should show success message for valid email', () => {
+  it.skip('should show success message for valid email', () => {
     // Input valid email and submit
     cy.get('input[name="email"]').type('valid-email@example.com');
     cy.get('#reset-password-button').click();

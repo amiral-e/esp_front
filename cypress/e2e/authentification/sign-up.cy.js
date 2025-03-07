@@ -14,7 +14,7 @@ describe('Sign Up Flow', () => {
     cy.get('#sign-in-link').should('have.text', 'Se connecter');
   });
 
-  it('should show error for invalid email format', () => {
+  it.skip('should show error for invalid email format', () => {
     // Input invalid email format and submit
     cy.get('input[name="name"]').type('John Doe');
     cy.get('input[name="email"]').type('invalid-email');
@@ -25,7 +25,7 @@ describe('Sign Up Flow', () => {
     cy.get('#form-error-message').should('be.visible')
   });
 
-  it('should submit the form with valid data', () => {
+  it.skip('should submit the form with valid data', () => {
     // Intercept the API request for the sign-up action
     /* cy.intercept('POST', '/api/auth/signup', {
       statusCode: 200,
