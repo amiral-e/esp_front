@@ -4,36 +4,15 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Loader2,
-  PaperclipIcon,
-  SendIcon,
-  TrashIcon,
-  XIcon,
-} from "lucide-react";
-import {
-  sendMessage,
-  sendMessageWithCollection,
-} from "@/actions/conversations";
+import { Loader2, PaperclipIcon, SendIcon, XIcon } from "lucide-react";
+import { sendMessage, sendMessageWithCollection } from "@/actions/conversations";
 import { useParams, useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
@@ -41,13 +20,15 @@ import {
 import { useEffect, useState } from "react";
 import { getUserInfo } from "@/app/actions";
 import { getCollectionByUserId } from "@/actions/collections";
-import { Collection } from "@/app/protected/collections/_components/columns";
-import { Badge } from "@/components/ui/badge";
+import { getKnowledges, KnowledgeLevel, Profile, getProfile, User, updateProfile } from "@/actions/profile";
+import type { Collection } from "@/app/protected/collections/_components/columns";
 import { useChatContext } from "./chat-context";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
   collections: z.array(z.string()).optional().default([]),
+  knowledgeLevel: z.string().default("intermediate"),
 });
 
 export default function ChatForm() {
@@ -56,12 +37,15 @@ export default function ChatForm() {
   const { isLoading, setIsLoading } = useChatContext();
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
+  const [knowledgeLevels, setKnowledgeLevels] = useState<KnowledgeLevel[]>([]);
+  const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState("intermediate");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
       collections: [],
+      knowledgeLevel: "intermediate",
     },
   });
 
@@ -69,89 +53,88 @@ export default function ChatForm() {
     setIsLoading(true);
     try {
       if (selectedCollections.length > 0) {
-        // Envoyer le message avec toutes les collections sélectionnées
         for (const collection of selectedCollections) {
-          const response = await sendMessageWithCollection(
+          await sendMessageWithCollection(
             id?.toString() || "",
             values.message,
             [collection]
           );
-          console.log(response);
         }
       } else {
         await sendMessage(id?.toString() || "", values.message);
       }
       form.reset();
       router.refresh();
-      setIsLoading(false);
       setSelectedCollections([]);
     } catch (error) {
       console.error("Error sending message:", error);
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }
 
   useEffect(() => {
     const fetchData = async () => {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
-
-      // Filter out duplicate collections based on collection.collection
-      const uniqueCollections = collections.reduce(
-        (acc: Collection[], current) => {
-          const isDuplicate = acc.find(
-            (item) => item.collection === current.collection
-          );
-          if (!isDuplicate) {
-            acc.push(current);
-          }
-          return acc;
-        },
-        []
-      );
-
+      const uniqueCollections = collections.reduce((acc: Collection[], current) => {
+        if (!acc.find((item) => item.collection === current.collection)) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
       setCollections(uniqueCollections);
     };
     fetchData();
   }, []);
 
-  const handleCollectionToggle = (collection: string) => {
-    setSelectedCollections((prev) => {
-      // Si la collection est déjà sélectionnée, la retirer
-      if (prev.includes(collection)) {
-        return prev.filter((c) => c !== collection);
+  useEffect(() => {
+    const fetchKnowledgeLevels = async () => {
+      const levels = await getKnowledges();
+      if (levels.length > 0) {
+        setKnowledgeLevels(levels);
       }
-      // Sinon, l'ajouter
-      return [...prev, collection];
-    });
+    };
+    fetchKnowledgeLevels();
+  }, []);
 
-    // Mettre à jour le formulaire
-    form.setValue("collections", selectedCollections);
+  useEffect(() => {
+    const fetchUserLevel = async () => {
+      const profile = await getProfile();
+      if (profile && profile.profile) {
+        setSelectedKnowledgeLevel(profile.profile.level);
+        form.setValue("knowledgeLevel", profile.profile.level);
+      }
+    };
+    fetchUserLevel();
+  }, []);
+
+  const handleCollectionToggle = (collection: string) => {
+    setSelectedCollections((prev) =>
+      prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]
+    );
   };
 
   const handleRemoveCollection = (collection: string) => {
     setSelectedCollections((prev) => prev.filter((c) => c !== collection));
-    form.setValue(
-      "collections",
-      selectedCollections.filter((c) => c !== collection)
-    );
   };
 
-  // Fonction pour extraire le nom de la collection (après l'underscore)
-  const getCollectionDisplayName = (collectionId: string) => {
-    const parts = collectionId.split("_");
-    return parts.length > 1 ? parts.slice(1).join("_") : collectionId;
+  const handleKnowledgeLevelChange = async (level: string) => {
+    setSelectedKnowledgeLevel(level);
+    form.setValue("knowledgeLevel", level);
+    // update user level
+    const response = await updateProfile(level);
+    if (response) {
+      toast({ description: response.message });
+    }
   };
 
   return (
     <div>
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex items-end space-x-4 w-full"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-end space-x-4 w-full">
+          {/* Collections Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button variant="secondary" className="h-12">
                 <PaperclipIcon />
               </Button>
@@ -163,46 +146,45 @@ export default function ChatForm() {
                 <DropdownMenuCheckboxItem
                   key={collection.collection}
                   checked={selectedCollections.includes(collection.collection)}
-                  onCheckedChange={() =>
-                    handleCollectionToggle(collection.collection)
-                  }
+                  onCheckedChange={() => handleCollectionToggle(collection.collection)}
                 >
-                  {getCollectionDisplayName(collection.collection)}
+                  {collection.collection}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Knowledge Level Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-12">
+                {selectedKnowledgeLevel.charAt(0).toUpperCase() + selectedKnowledgeLevel.slice(1)}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Niveau de connaissance</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {knowledgeLevels.map((level) => (
+                <DropdownMenuCheckboxItem
+                  key={level.id}
+                  checked={selectedKnowledgeLevel === level.name}
+                  onCheckedChange={() => handleKnowledgeLevelChange(level.name)}
+                >
+                  {level.name}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Message Input */}
           <FormField
             control={form.control}
             name="message"
             render={({ field }) => (
               <FormItem className="w-full">
-                {selectedCollections.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {selectedCollections.map((collection) => (
-                      <Badge key={collection} className="inline-flex">
-                        {getCollectionDisplayName(collection)}
-                        <Button
-                          onClick={() => handleRemoveCollection(collection)}
-                          variant="ghost"
-                          className="h-5 w-5 hover:bg-transparent"
-                        >
-                          <XIcon className="h-3 w-3" />
-                        </Button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-                <div className="flex items-center space-x-2">
-                  <FormControl>
-                    <Input
-                      placeholder="Posez une question"
-                      className="h-12"
-                      {...field}
-                    />
-                  </FormControl>
-                </div>
+                <FormControl>
+                  <Input placeholder="Posez une question" className="h-12" {...field} />
+                </FormControl>
               </FormItem>
             )}
           />

@@ -1,15 +1,13 @@
-
-import Link from "next/link";
-import { signInAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";
+import Link from "next/link"
+import { signInAction } from "@/app/actions"
+import { FormMessage, type Message } from "@/components/form-message"
+import { SubmitButton } from "@/components/submit-button"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { GithubSSO } from '@/components/github-sso'
-
+import { GithubSSO } from "@/components/github-sso"
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
+  const searchParams = await props.searchParams
   return (
     <div className="flex-grow flex justify-center items-center md:flex-row w-full max-w-12lg mx-auto p-8">
       <form className="flex-[0.7] flex flex-col space-y-4 p-4 ml-4">
@@ -21,33 +19,20 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           </Link>
         </p>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-          <Input variant="outline" size="md" name="email" placeholder="you@example.com" className="w-full" required/>
+          <Input name="email" placeholder="you@example.com" className="w-full" required />
           <div className="flex justify-between items-center">
-            <Link
-                className="text-xs text-foreground underline"
-                href="/forgot-password"
-            >
+            <Link className="text-xs text-foreground underline" href="/forgot-password">
               Forgot Password?
             </Link>
           </div>
-          <Input
-              variant="outline"
-              size="md"
-              type="password"
-              name="password"
-              placeholder="Your password"
-              required
-          />
+          <Input type="password" name="password" placeholder="Your password" required />
           <SubmitButton pendingText="Signing In..." formAction={signInAction}>
             Sign in
           </SubmitButton>
-          <FormMessage message={searchParams}/>
+          <FormMessage message={searchParams} />
 
-
-          <Separator/>
-          <p className="text-sm text-foreground">
-            Or sign in with SSO :
-          </p>
+          <Separator />
+          <p className="text-sm text-foreground">Or sign in with SSO :</p>
           <GithubSSO />
         </div>
       </form>
@@ -66,5 +51,5 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
         </div>
       </div>
     </div>
-);
+  )
 }

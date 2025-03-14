@@ -42,6 +42,10 @@ export const updateSession = async (request: NextRequest) => {
     const cookieStore = await cookies();
 		let auth_token = cookieStore.get('auth_token')?.value ?? null;
     // protected routes
+    if (!request.nextUrl.pathname.startsWith("/sign-in") && auth_token == null) {
+      console.log("redirecting to /sign-in");
+      return NextResponse.redirect(new URL("/sign-in", request.url));
+    }
     if (request.nextUrl.pathname.startsWith("/protected/chat") && auth_token == null) {
       console.log("redirecting to /sign-in");
       return NextResponse.redirect(new URL("/sign-in", request.url));

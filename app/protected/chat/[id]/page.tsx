@@ -1,14 +1,14 @@
-import React from "react";
-import ChatForm from "./_components/chat-form";
-import ChatArea from "./_components/chat-area";
-import { getConversationById } from "@/actions/conversations";
-import { ChatProvider } from "./_components/chat-context";
+import ChatForm from "./_components/chat-form"
+import ChatArea from "./_components/chat-area"
+import { getConversationById } from "@/actions/conversations"
+import { ChatProvider } from "./_components/chat-context"
 
-const ChatPage = async ({ params }: { params: { id: string } }) => {
-  const { id } = await params;
-  const conversations = await getConversationById(id || "");
+const ChatPage = async ({ params }: any) => {
+  const { id } = await params
+  const conversations = await getConversationById(id || "")
+
   if (!conversations) {
-    return <div>Conversation non trouvée</div>;
+    return <div>Conversation non trouvée</div>
   }
 
   return (
@@ -20,7 +20,7 @@ const ChatPage = async ({ params }: { params: { id: string } }) => {
         </div>
       </div>
     </ChatProvider>
-  );
-};
+  )
+}
 
-export default ChatPage;
+export default ChatPage
