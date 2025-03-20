@@ -1,11 +1,11 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import ProfileLayout from "./layout";
+import ProfileLayout from "./_components/layout";
 import { AppSidebar } from "@/components/app-sidebar";
 
 export default function ProfilePage() {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {/* <AppSidebar /> */}
       <SidebarInset>
         <ProfileLayout />
       </SidebarInset>

@@ -7,11 +7,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"
-import { Calendar, User, MessageSquare, FileText, BarChart3 } from "lucide-react"
+import { Calendar, User, MessageSquare, FileText, BarChart3, CreditCard } from "lucide-react"
 import { getKnowledges, getProfile, getProfileUsageData, KnowledgeLevel, ProfileUsage, updateProfile, UsageData } from "@/actions/profile"
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Progress } from "@/components/ui/progress"
 
 const formSchema = z.object({
   knowledgeLevel: z.string().default("intermediate"),
@@ -92,6 +93,50 @@ export default function ProfileLayout() {
     : [];
 
   const displayData = chartData.length > 0 ? chartData : [{ month: "No Data", messages: 0, documents: 0, reports: 0, credits: 0 }];
+
+  const CreditCircle = ({ percentage }: { percentage: number }) => {
+    const validPercentage = Math.min(Math.max(percentage, 0), 100); // Assurer que le pourcentage est entre 0 et 100
+
+    // Définition de la couleur en fonction du pourcentage
+    let strokeColor = "#22c55e"; // Vert par défaut
+    if (validPercentage < 20) strokeColor = "#ef4444"; // Rouge
+    else if (validPercentage < 50) strokeColor = "#f97316"; // Orange
+    else if (validPercentage < 80) strokeColor = "#3b82f6"; // Bleu
+
+    // Définition du message en fonction du pourcentage
+    let usageMessage = "Utilisation élevée";
+    if (validPercentage < 20) usageMessage = "Faible utilisation";
+    else if (validPercentage < 50) usageMessage = "Utilisation modérée";
+    else if (validPercentage < 80) usageMessage = "Bonne utilisation";
+
+    return (
+      <div className="relative flex flex-col items-center justify-center space-y-2">
+        <svg className="w-24 h-24" viewBox="0 0 100 100">
+          {/* Cercle de fond */}
+          <circle cx="50" cy="50" r="40" fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
+          {/* Cercle du pourcentage */}
+          <circle
+            cx="50"
+            cy="50"
+            r="40"
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth="10"
+            strokeDasharray={`${(2 * Math.PI * 40 * validPercentage) / 100} ${2 * Math.PI * 40 * (1 - validPercentage / 100)}`}
+            strokeDashoffset={2 * Math.PI * 40 * 0.25}
+            transform="rotate(-90 50 50)"
+            style={{ transition: "stroke-dasharray 0.5s ease-in-out" }}
+          />
+          {/* Texte affichant le pourcentage */}
+          <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="bold" fill="currentColor">
+            {validPercentage}%
+          </text>
+        </svg>
+        {/* Ajout d'un texte explicatif en dessous du cercle */}
+        <span className="text-sm font-semibold text-gray-700">{usageMessage}</span>
+      </div>
+    );
+  };
 
 
   return (
@@ -199,6 +244,26 @@ export default function ProfileLayout() {
                     </CardHeader>
                     <CardContent>
                       <p className="text-lg font-medium">{displayData[0]?.month || "March 2025"}</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="md:col-span-2">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <CreditCard className="h-4 w-4" /> Credits Usage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Used Credits</span>
+                          <span className="text-sm font-medium">{displayData[0]?.credits || 0}</span>
+                        </div>
+                        <Progress value={displayData[0]?.credits || 0} className="h-4" />
+
+                        <div className="grid grid-cols-3 gap-4 mt-6">
+                          <CreditCircle percentage={Math.min(usageData?.usage[0]?.used_credits ?? 0, 100)} />
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 </div>
