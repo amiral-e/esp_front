@@ -5,8 +5,28 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
-const API_URL = process.env.API_URL ?? "http://localhost:3000/";
+export interface Users {
+  users: User[];
+}
+
+export interface Admins {
+  admins: User[];
+}
+
+export interface User {
+  email: string;
+  uid: string;
+}
+
+const NEXT_PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+const getAuthToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? null;
+};
 
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
@@ -173,3 +193,66 @@ export const getUserInfo = async () => {
   } = await (await createClient()).auth.getUser();
   return user;
 };
+
+
+export const getAllUsers = async () => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Users>(
+    `${NEXT_PUBLIC_API_URL}admins/users`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.users;
+}
+
+export const getAdmins = async () => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Admins>(
+    `${NEXT_PUBLIC_API_URL}admins`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.admins;
+}
+
+export const addAdmin = async (user_id: string) => {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.post<any>(
+      `${NEXT_PUBLIC_API_URL}admins`,
+      {
+        user_id: user_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data;
+  } catch (error) {
+    return error;
+  }
+}
+
+export const removeAdmin = async (user_id: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.delete<any>(
+    `${NEXT_PUBLIC_API_URL}admins`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+      data: {
+        user_id: user_id,
+      },
+    }
+  );
+  return data;
+}
