@@ -5,20 +5,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ChevronsUpDown,
-  Layout,
-  LibraryBig,
-  MessageSquare,
-} from "lucide-react";
+import { ChevronsUpDown, Layout, LibraryBig, MessageSquare } from 'lucide-react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SidebarMenuButton } from "./ui/sidebar";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
+
 const routes = [
   {
     icon: <Layout size={16} />,
@@ -47,20 +40,22 @@ const PageSwitcher = () => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-between">
           <div className="flex items-center gap-2">
             {currentRoute?.icon}
             <h3 className="text-sm font-semibold">{currentRoute?.name}</h3>
           </div>
-          <ChevronsUpDown />
+          <ChevronsUpDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="ml-64">
         {routes.map((route, index) => (
-          <DropdownMenuItem key={index}>
-            {route.icon}
-            <Link href={route.href}>{route.name}</Link>
+          <DropdownMenuItem key={index} asChild>
+            <Link href={route.href} className="flex items-center gap-2">
+              {route.icon}
+              <span>{route.name}</span>
+            </Link>
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
