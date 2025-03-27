@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Progress } from "@/components/ui/progress"
+import Link from "next/link"
 
 const formSchema = z.object({
   knowledgeLevel: z.string().default("intermediate"),
@@ -56,7 +57,7 @@ export default function ProfileLayout() {
           setUsageData(data)
         }
       } catch (error) {
-        console.error("Failed to fetch usage data:", error)
+        console.error("Échec du chargement des données d'utilisation :", error)
       } finally {
         setIsLoading(false)
       }
@@ -79,7 +80,7 @@ export default function ProfileLayout() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString("en-FR", { year: "numeric", month: "long" })
+    return date.toLocaleDateString("fr-FR", { year: "numeric", month: "long" })
   }
 
   const chartData = Array.isArray(usageData?.usage)
@@ -92,7 +93,7 @@ export default function ProfileLayout() {
     }))
     : [];
 
-  const displayData = chartData.length > 0 ? chartData : [{ month: "No Data", messages: 0, documents: 0, reports: 0, credits: 0 }];
+  const displayData = chartData.length > 0 ? chartData : [{ month: "Aucune donnée", messages: 0, documents: 0, reports: 0, credits: 0 }];
 
   const CreditCircle = ({ percentage }: { percentage: number }) => {
     const validPercentage = Math.min(Math.max(percentage, 0), 100); // Assurer que le pourcentage est entre 0 et 100
@@ -141,20 +142,27 @@ export default function ProfileLayout() {
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-8 flex items-center gap-2">
-        <User className="h-8 w-8" /> User Profile
-      </h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold flex items-center gap-2">
+          <User className="h-8 w-8" /> Profil de l'utilisateur
+        </h1>
 
+        {/* Bouton correctement aligné à droite */}
+        <Button className="flex items-center gap-2">
+          <CreditCard className="h-5 w-5" />
+          <Link href="/protected/pricing">Acheter plus de crédits</Link>
+        </Button>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="md:col-span-1">
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
-            <CardDescription>Manage your account preferences</CardDescription>
+            <CardTitle>Paramètres du profil</CardTitle>
+            <CardDescription>Gérez les préférences de votre compte</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium mb-3">Knowledge Level</h3>
+                <h3 className="text-lg font-medium mb-3">Niveau de connaissance</h3>
                 <RadioGroup value={selectedKnowledgeLevel} onValueChange={setSelectedKnowledgeLevel} className="space-y-3">
                   {knowledgeLevels.map((level) => (
                     <div className="flex items-center space-x-2" key={level.id}>
@@ -170,24 +178,24 @@ export default function ProfileLayout() {
           </CardContent>
           <CardFooter>
             <Button onClick={handleSaveKnowledgeLevel} className="w-full">
-              Save Preferences
+              Enregistrer les préférences
             </Button>
           </CardFooter>
         </Card>
 
-        {/* Usage Statistics Card */}
+        {/* Carte des statistiques d'utilisation */}
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" /> Usage Statistics
+              <BarChart3 className="h-5 w-5" /> Statistiques d'utilisation
             </CardTitle>
-            <CardDescription>View your platform activity</CardDescription>
+            <CardDescription>Voir votre activité sur la plateforme</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="chart" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="chart">Chart View</TabsTrigger>
-                <TabsTrigger value="summary">Summary</TabsTrigger>
+                <TabsTrigger value="chart">Vue graphique</TabsTrigger>
+                <TabsTrigger value="summary">Résumé</TabsTrigger>
               </TabsList>
               <TabsContent value="chart" className="pt-4">
                 <div className="h-80 w-full">
@@ -199,7 +207,7 @@ export default function ProfileLayout() {
                       <Tooltip />
                       <Bar dataKey="messages" fill="#8884d8" name="Messages" />
                       <Bar dataKey="documents" fill="#82ca9d" name="Documents" />
-                      <Bar dataKey="reports" fill="#ffc658" name="Reports" />
+                      <Bar dataKey="reports" fill="#ffc658" name="Rapports" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -209,7 +217,7 @@ export default function ProfileLayout() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" /> Total Messages
+                        <MessageSquare className="h-4 w-4" /> Total des messages
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -219,7 +227,7 @@ export default function ProfileLayout() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <FileText className="h-4 w-4" /> Total Documents
+                        <FileText className="h-4 w-4" /> Total des documents
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -229,7 +237,7 @@ export default function ProfileLayout() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4" /> Total Reports
+                        <BarChart3 className="h-4 w-4" /> Total des rapports
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -239,23 +247,23 @@ export default function ProfileLayout() {
                   <Card>
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <Calendar className="h-4 w-4" /> Last Active
+                        <Calendar className="h-4 w-4" /> Dernière activité
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-lg font-medium">{displayData[0]?.month || "March 2025"}</p>
+                      <p className="text-lg font-medium">{displayData[0]?.month || "Mars 2025"}</p>
                     </CardContent>
                   </Card>
                   <Card className="md:col-span-2">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <CreditCard className="h-4 w-4" /> Credits Usage
+                        <CreditCard className="h-4 w-4" /> Utilisation des crédits
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">Used Credits</span>
+                          <span className="text-sm font-medium">Crédits utilisés</span>
                           <span className="text-sm font-medium">{displayData[0]?.credits || 0}</span>
                         </div>
                         <Progress value={displayData[0]?.credits || 0} className="h-4" />

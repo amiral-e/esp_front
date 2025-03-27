@@ -95,7 +95,6 @@ const ModalCollection = ({
               placeholder="Nom de la collection"
               disabled={isLoading}
             />
-            <div className="space-y-2">
               <Input
                 type="file"
                 multiple
@@ -108,11 +107,8 @@ const ModalCollection = ({
                 disabled={isLoading}
               />
               {files.length > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {files.length} fichier(s) sélectionné(s)
-                </div>
+                  <b>{files.length} fichier(s) sélectionné(s)</b>
               )}
-            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

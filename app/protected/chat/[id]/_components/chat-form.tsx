@@ -76,12 +76,14 @@ export default function ChatForm() {
     const fetchData = async () => {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
+      console.log(collections);
       const uniqueCollections = collections.reduce((acc: Collection[], current) => {
         if (!acc.find((item) => item.collection === current.collection)) {
           acc.push(current);
         }
         return acc;
       }, []);
+
       setCollections(uniqueCollections);
     };
     fetchData();
@@ -148,7 +150,7 @@ export default function ChatForm() {
                   checked={selectedCollections.includes(collection.collection)}
                   onCheckedChange={() => handleCollectionToggle(collection.collection)}
                 >
-                  {collection.collection}
+                  {collection.collection.split("_")[1]}
                 </DropdownMenuCheckboxItem>
               ))}
             </DropdownMenuContent>

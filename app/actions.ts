@@ -20,6 +20,16 @@ export interface User {
   uid: string;
 }
 
+export interface Prices {
+  prices: Price[];
+}
+
+export interface Price {
+  price: string,
+  description: string,
+  value: number
+}
+
 const NEXT_PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -255,4 +265,53 @@ export const removeAdmin = async (user_id: string) => {
     }
   );
   return data;
+}
+
+
+export const getPlatformPrices = async () => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Prices>(
+    `${NEXT_PUBLIC_API_URL}admins/config`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.prices;
+}
+
+
+export const updateCreditsAdmin = async (credits: number) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.post<any>(
+    `${NEXT_PUBLIC_API_URL}update-credits`,
+    {
+      credits: credits,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data;
+}
+
+export async function updateMontantForUser(userId: string, amountToAdd: number) {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc('increment_credits', {
+      new_credits: amountToAdd, 
+      user_id: userId
+    });
+    if (error) {
+      console.error("Erreur lors de l'incrémentation des crédits :", error);
+    } else {
+      console.log(`Crédits incrémentés de ${amountToAdd} avec succès pour l'utilisateur ${userId}!`);
+      return data;
+    }
+  } catch (error) {
+    console.error("Erreur lors de l'incrémentation des crédits :", error);
+  }
 }

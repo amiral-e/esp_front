@@ -138,7 +138,7 @@ export const sendMessage = async (
     if (collection !== "") {
       const auth_token = await getAuthToken();
       const { data } = await axios.post<any>(
-        `${NEXT_PUBLIC_API_URL}/conversations/${convId}`,
+        `${NEXT_PUBLIC_API_URL}conversations/${convId}`,
         {
           message: message,
           collection: collection,

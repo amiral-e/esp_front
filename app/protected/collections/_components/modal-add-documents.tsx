@@ -71,7 +71,6 @@ const ModalAddDocuments = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Ajouter des documents</AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
-            <div className="space-y-2">
               <Input
                 type="file"
                 multiple
@@ -83,12 +82,8 @@ const ModalAddDocuments = ({
                 }}
               />
               {files.length > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  <p>{files.length} fichier(s) sélectionné(s)</p>
-                  <p>{files.map((file) => file.name).join(", ")}</p>
-                </div>
+                  <><b>{files.length} fichier(s) sélectionné(s)</b><br /><b>{files.map((file) => file.name).join(", ")}</b></>
               )}
-            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
