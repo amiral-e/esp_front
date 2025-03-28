@@ -9,6 +9,7 @@ import {
   UserRoundCog,
   ChevronDown,
   Search,
+  Home,
 } from "lucide-react"
 import { getUserInfo, isAdministrator } from "@/app/actions"
 import {
@@ -33,6 +34,11 @@ import Link from "next/link"
 import { NavUser } from "./nav-user"
 
 const routes = [
+  {
+    icon: <Home className="size-4" />,
+    name: "Accueil",
+    href: "/",
+  },
   {
     icon: <LibraryBig className="size-4" />,
     name: "Collections",
