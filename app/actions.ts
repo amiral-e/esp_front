@@ -182,28 +182,41 @@ export const signOutAction = async () => {
 export const isAdministrator = async () => {
 	let isAdministrator = false;
 	const supabase = await createClient();
-	const supabase = await createClient();
 	const {
 		data: { user },
 	} = await (await createClient()).auth.getUser();
 	if (user) {
-		try {
-			let { data, error } = await supabase
-				.rpc('is_admin_uid', {
-					user_id: user.id,
-				})
-			if (error) console.error(error)
-			else isAdministrator = data;
-		} catch (error) {
-			let { data, error } = await supabase
-				.rpc('is_admin_uid', {
-					user_id: user.id,
-				})
-			if (error) console.error(error)
-			else isAdministrator = data;
-		} catch (error) {
-			console.error("Error verifying admin status:", (error as Error).message);
-		}
+		// try {
+		// 	let { data, error } = await supabase
+		// 		.rpc('is_admin_uid', {
+		// 			user_id: user.id,
+		// 		})
+		// 	if (rpcError) console.error(rpcError)
+		// 	else isAdministrator = data;
+		// } catch (rpcError) {
+		// 	let { data, error } = await supabase
+		// 		.rpc('is_admin_uid', {
+		// 			user_id: user.id,
+		// 		})
+		// 	if (error) console.error(error)
+		// 	else isAdministrator = data;
+		// } catch (error) {
+		// 	console.error("Error verifying admin status:", (error as Error).message);
+		// }
+    try {
+      let { data, error: rpcError } = await supabase.rpc('is_admin_uid', {
+          user_id: user.id,
+      });
+  
+      if (rpcError) {
+          console.error(rpcError);
+      } else {
+          isAdministrator = data;
+      }
+  } catch (catchError) {  
+      console.error("Error verifying admin status:", (catchError as Error).message);
+  }
+  
 	}
 	return isAdministrator;
 }
