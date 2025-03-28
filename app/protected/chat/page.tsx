@@ -5,7 +5,5 @@ const ConversationPage = () => {
     </div>
   )
 }
-  )
-}
 
 export default ConversationPage;
