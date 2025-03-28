@@ -1,108 +1,109 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, AlertCircle } from "lucide-react"
-import axios from "axios"
+import { Suspense } from "react"; // Import Suspense
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, AlertCircle } from "lucide-react";
+import axios from "axios";
 
-export default function SuccessPage() {
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const sessionId = searchParams.get("session_id")
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [sessionDetails, setSessionDetails] = useState<any>(null)
-  const [creditsUpdated, setCreditsUpdated] = useState(false)
-  const [updateAttempted, setUpdateAttempted] = useState(false)
+const SuccessPageContent = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const sessionId = searchParams.get("session_id");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionDetails, setSessionDetails] = useState<any>(null);
+  const [creditsUpdated, setCreditsUpdated] = useState(false);
+  const [updateAttempted, setUpdateAttempted] = useState(false);
 
   useEffect(() => {
     async function fetchSessionAndUpdateCredits() {
       if (!sessionId) {
-        setError("No session ID found")
-        setIsLoading(false)
-        return
+        setError("No session ID found");
+        setIsLoading(false);
+        return;
       }
 
       try {
         // Fetch session details
-        console.log(`[success] Fetching session details for ${sessionId}`)
-        const response = await fetch(`/api/get-session?session_id=${sessionId}`)
+        console.log(`[success] Fetching session details for ${sessionId}`);
+        const response = await fetch(`/api/get-session?session_id=${sessionId}`);
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch session details: ${response.status}`)
+          throw new Error(`Failed to fetch session details: ${response.status}`);
         }
 
-        const data = await response.json()
-        setSessionDetails(data.session)
-        console.log(`[success] Session details:`, data.session)
+        const data = await response.json();
+        setSessionDetails(data.session);
+        console.log(`[success] Session details:`, data.session);
 
         // Check if payment was successful
         if (data.session.payment_status === "paid") {
-          const amount = data.session.amount_total / 100
-          console.log(`[success] Payment successful. Amount: ${amount}`)
+          const amount = data.session.amount_total / 100;
+          console.log(`[success] Payment successful. Amount: ${amount}`);
 
           // Update user credits
           try {
-            setUpdateAttempted(true)
+            setUpdateAttempted(true);
             const updateResponse = await axios.post("/api/update-credits", {
               amount,
               sessionId,
-            })
+            });
 
             if (updateResponse.data.success) {
-              setCreditsUpdated(true)
-              console.log(`[success] Credits updated successfully`)
+              setCreditsUpdated(true);
+              console.log(`[success] Credits updated successfully`);
             } else {
-              console.error(`[success] Failed to update credits:`, updateResponse.data)
-              setError("Credits could not be updated. Please contact support.")
+              console.error(`[success] Failed to update credits:`, updateResponse.data);
+              setError("Credits could not be updated. Please contact support.");
             }
           } catch (updateError) {
-            console.error(`[success] Error updating credits:`, updateError)
-            setError("Failed to update credits. Please contact support.")
+            console.error(`[success] Error updating credits:`, updateError);
+            setError("Failed to update credits. Please contact support.");
           }
         } else {
-          console.log(`[success] Payment not completed. Status: ${data.session.payment_status}`)
-          setError(`Payment not completed. Status: ${data.session.payment_status}`)
+          console.log(`[success] Payment not completed. Status: ${data.session.payment_status}`);
+          setError(`Payment not completed. Status: ${data.session.payment_status}`);
         }
       } catch (err) {
-        console.error("[success] Error processing success page:", err)
-        setError("An error occurred while processing your payment")
+        console.error("[success] Error processing success page:", err);
+        setError("An error occurred while processing your payment");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     }
 
-    fetchSessionAndUpdateCredits()
-  }, [sessionId])
+    fetchSessionAndUpdateCredits();
+  }, [sessionId]);
 
   const handleManualUpdate = async () => {
     if (!sessionDetails?.amount_total) {
-      setError("No payment amount found")
-      return
+      setError("No payment amount found");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const amount = sessionDetails.amount_total / 100
+      const amount = sessionDetails.amount_total / 100;
       const response = await axios.post("/api/update-credits", {
         amount,
         sessionId,
-      })
+      });
 
       if (response.data.success) {
-        setCreditsUpdated(true)
-        setError(null)
+        setCreditsUpdated(true);
+        setError(null);
       } else {
-        setError("Failed to update credits. Please contact support.")
+        setError("Failed to update credits. Please contact support.");
       }
     } catch (err) {
-      console.error("[success] Manual update error:", err)
-      setError("Failed to update credits. Please contact support.")
+      console.error("[success] Manual update error:", err);
+      setError("Failed to update credits. Please contact support.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="container max-w-md py-16">
@@ -167,5 +168,13 @@ export default function SuccessPage() {
         )}
       </div>
     </div>
-  )
+  );
+};
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SuccessPageContent />
+    </Suspense>
+  );
 }
