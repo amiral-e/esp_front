@@ -1,15 +1,13 @@
-
-import Link from "next/link";
-import { signInAction } from "@/app/actions";
-import { FormMessage, Message } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
-import { Input } from "@/components/ui/input";
+import Link from "next/link"
+import { signInAction } from "@/app/actions"
+import { FormMessage, type Message } from "@/components/form-message"
+import { SubmitButton } from "@/components/submit-button"
+import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { GithubSSO } from '@/components/github-sso'
-
+import { GithubSSO } from "@/components/github-sso"
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
+  const searchParams = await props.searchParams
   return (
     <div className="flex-grow flex justify-center items-center md:flex-row w-full max-w-12lg mx-auto p-8">
       <form className="flex-[0.7] flex flex-col space-y-4 p-4 ml-4">
@@ -40,8 +38,7 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           <SubmitButton pendingText="Signing In..." formAction={signInAction}>
             Se connecter
           </SubmitButton>
-          <FormMessage message={searchParams}/>
-
+          <FormMessage message={searchParams} />
 
           <Separator/>
           <p className="text-sm text-foreground">
@@ -65,5 +62,5 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
         </div>
       </div>
     </div>
-);
+  )
 }

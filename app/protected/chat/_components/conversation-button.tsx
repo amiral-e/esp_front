@@ -2,7 +2,12 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircleIcon, EllipsisIcon, TrashIcon, FilePenIcon } from "lucide-react";
+import {
+  MessageCircleIcon,
+  EllipsisIcon,
+  TrashIcon,
+  FilePenIcon,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +23,7 @@ interface ConversationButtonProps {
   onSelect?: () => void;
   onDelete?: () => void;
   onUpdate?: (newTitle: string) => void;
-  createdAt?: string;
+  created_at?: string;
 }
 
 const ConversationButton = ({
@@ -27,7 +32,7 @@ const ConversationButton = ({
   onSelect,
   onDelete,
   onUpdate,
-  createdAt,
+  created_at,
 }: ConversationButtonProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(title);
@@ -45,7 +50,7 @@ const ConversationButton = ({
       <Button
         variant="ghost"
         className={cn(
-          "w-72 justify-start gap-3 rounded-lg px-4 py-3 text-left",
+          "w-48 justify-start gap-3 rounded-lg px-4 py-3 text-left",
           isActive && "bg-accent",
           "group-hover:bg-accent/50"
         )}
@@ -62,20 +67,21 @@ const ConversationButton = ({
             }}
           />
         ) : (
-          <div className="flex-1 truncate w-52" onDoubleClick={() => setIsEditing(true)}>
+          <div
+            className="flex-1 truncate w-52"
+            onDoubleClick={() => setIsEditing(true)}
+          >
             {title}
           </div>
         )}
         <div className="text-xs text-muted-foreground">
-          {createdAt && new Date(createdAt).toLocaleDateString()}
+          {created_at && new Date(created_at).toLocaleDateString()}
         </div>
       </Button>
 
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-background">
-            <EllipsisIcon className="h-4 w-4" />
-          </Button>
+        <DropdownMenuTrigger className="h-8 w-8 p-0 hover:bg-background">
+          <EllipsisIcon className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={() => setIsEditing(true)}>

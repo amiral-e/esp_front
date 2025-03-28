@@ -1,19 +1,12 @@
-"use client"
+"use client";
 
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
-} from "lucide-react"
+  UserRoundCog,
+} from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,25 +15,28 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { signOutAction } from "@/app/actions"
+} from "@/components/ui/sidebar";
+import { signOutAction } from "@/app/actions";
+import { Button } from "./ui/button";
+
+import Link from "next/link";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -81,13 +77,20 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuLabel className="p-0 font-normal">
+              <Link href="/protected/profile" className="flex items-center gap-2 px-1 py-1.5 text-left text-sm hover:bg-gray-100 rounded-md">
+                <UserRoundCog className="h-6 w-6 text-gray-600" />
+                <span className="truncate font-semibold">Profile</span>
+              </Link>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <Button variant="ghost" onClick={signOutAction}>
               <LogOut />
-              <form action={signOutAction}>Log out</form>
-            </DropdownMenuItem>
+              Se déconnecter
+            </Button>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
