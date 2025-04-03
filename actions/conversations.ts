@@ -6,8 +6,7 @@ import { createClient } from "@/utils/supabase/server";
 import axios from "axios";
 import { cookies } from "next/headers";
 
-const NEXT_PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
@@ -16,7 +15,7 @@ const getAuthToken = async (): Promise<string | null> => {
 
 // Create axios instance with default config
 const api = axios.create({
-  baseURL: NEXT_PUBLIC_API_URL,
+  baseURL: url,
 });
 
 // Add auth token interceptor
@@ -96,19 +95,46 @@ export const getConversationByUser = async (
   return data || [];
 };
 
-export const createConversation = async (title: string, userId: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("conversations").insert({
-    user_id: userId,
-    name: title,
-    history: [],
-  });
+// export const createConversation = async (title: string, userId: string) => {
+//   const supabase = await createClient();
+//   const { data, error } = await supabase.from("conversations").insert({
+//     user_id: userId,
+//     name: title,
+//     history: [],
+//   });
 
-  if (error) {
+//   if (error) {
+//     console.error("Error creating conversation:", error);
+//     throw error;
+//   }
+//   return data;
+// };
+
+export const createConversation = async (title: string) => {
+  try {
+    const auth_token = await getAuthToken();
+    if (!auth_token) {
+      throw new Error("Authentication token is missing");
+    }
+    // Utiliser l'URL complète de l'API
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    const response = await axios.post(
+      `${apiUrl}/conversations`,
+      {
+        name: title,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
     console.error("Error creating conversation:", error);
     throw error;
   }
-  return data;
 };
 
 export const updateConversation = async (id: string, name: string) => {
@@ -138,7 +164,7 @@ export const sendMessage = async (
     if (collection !== "") {
       const auth_token = await getAuthToken();
       const { data } = await axios.post<any>(
-        `${NEXT_PUBLIC_API_URL}conversations/${convId}`,
+        `${url}/conversations/${convId}`,
         {
           message: message,
           collection: collection,
@@ -175,7 +201,7 @@ export const sendMessageWithCollection = async (
     if (collections.length > 0) {
       const auth_token = await getAuthToken();
       const { data } = await axios.post<any>(
-        `${NEXT_PUBLIC_API_URL}/conversations/${convId}/collections`,
+        `${url}/conversations/${convId}/collections`,
         {
           message: message,
           collections: collections,

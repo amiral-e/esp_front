@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Loader2, PaperclipIcon, SendIcon, XIcon } from "lucide-react";
-import { sendMessage, sendMessageWithCollection } from "@/actions/conversations";
+import {
+  sendMessage,
+  sendMessageWithCollection,
+} from "@/actions/conversations";
 import { useParams, useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -20,10 +23,23 @@ import {
 import { useEffect, useState } from "react";
 import { getUserInfo } from "@/app/actions";
 import { getCollectionByUserId } from "@/actions/collections";
-import { getKnowledges, KnowledgeLevel, Profile, getProfile, User, updateProfile } from "@/actions/profile";
+import {
+  getKnowledges,
+  KnowledgeLevel,
+  Profile,
+  getProfile,
+  User,
+  updateProfile,
+} from "@/actions/profile";
 import type { Collection } from "@/app/protected/collections/_components/columns";
 import { useChatContext } from "./chat-context";
 import { toast } from "@/hooks/use-toast";
+import {
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputAction,
+  PromptInputActions,
+} from "@/components/ui/prompt-input";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
@@ -38,7 +54,8 @@ export default function ChatForm() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [knowledgeLevels, setKnowledgeLevels] = useState<KnowledgeLevel[]>([]);
-  const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState("intermediate");
+  const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] =
+    useState("intermediate");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,12 +94,15 @@ export default function ChatForm() {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
       console.log(collections);
-      const uniqueCollections = collections.reduce((acc: Collection[], current) => {
-        if (!acc.find((item) => item.collection === current.collection)) {
-          acc.push(current);
-        }
-        return acc;
-      }, []);
+      const uniqueCollections = collections.reduce(
+        (acc: Collection[], current) => {
+          if (!acc.find((item) => item.collection === current.collection)) {
+            acc.push(current);
+          }
+          return acc;
+        },
+        []
+      );
 
       setCollections(uniqueCollections);
     };
@@ -112,7 +132,9 @@ export default function ChatForm() {
 
   const handleCollectionToggle = (collection: string) => {
     setSelectedCollections((prev) =>
-      prev.includes(collection) ? prev.filter((c) => c !== collection) : [...prev, collection]
+      prev.includes(collection)
+        ? prev.filter((c) => c !== collection)
+        : [...prev, collection]
     );
   };
 
@@ -131,69 +153,55 @@ export default function ChatForm() {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="flex items-end space-x-4 w-full">
-          {/* Collections Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" className="h-12">
-                <PaperclipIcon />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Ajouter une collection</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {collections.map((collection) => (
-                <DropdownMenuCheckboxItem
-                  key={collection.collection}
-                  checked={selectedCollections.includes(collection.collection)}
-                  onCheckedChange={() => handleCollectionToggle(collection.collection)}
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <PromptInput>
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <PromptInputTextarea
+                  placeholder="Posez une question"
+                  {...field}
+                />
+              )}
+            />
+            <PromptInputActions>
+              <PromptInputAction tooltip="Collections">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    /* Handle collections dropdown */
+                  }}
                 >
-                  {collection.collection.split("_")[1]}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  Collections
+                </Button>
+              </PromptInputAction>
 
-          {/* Knowledge Level Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-12">
-                {selectedKnowledgeLevel.charAt(0).toUpperCase() + selectedKnowledgeLevel.slice(1)}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Niveau de connaissance</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {knowledgeLevels.map((level) => (
-                <DropdownMenuCheckboxItem
-                  key={level.id}
-                  checked={selectedKnowledgeLevel === level.name}
-                  onCheckedChange={() => handleKnowledgeLevelChange(level.name)}
+              <PromptInputAction tooltip="Niveau">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    /* Handle knowledge level dropdown */
+                  }}
                 >
-                  {level.name}
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {selectedKnowledgeLevel.charAt(0).toUpperCase() +
+                    selectedKnowledgeLevel.slice(1)}
+                </Button>
+              </PromptInputAction>
 
-          {/* Message Input */}
-          <FormField
-            control={form.control}
-            name="message"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input placeholder="Posez une question" className="h-12" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          {isLoading && <Loader2 className="w-6 h-6 animate-spin mb-3" />}
-          <Button type="submit" className="h-12" disabled={isLoading}>
-            <SendIcon />
-          </Button>
+              <PromptInputAction tooltip="Envoyer">
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Envoyer"
+                  )}
+                </Button>
+              </PromptInputAction>
+            </PromptInputActions>
+          </PromptInput>
         </form>
       </Form>
     </div>

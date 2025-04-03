@@ -30,7 +30,7 @@ const ConversationSidebar = async ({
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <PageSwitcher />
-          <Modal userId={user?.id || ""}>
+          <Modal>
             <Button className="w-full gap-2">
               <PlusIcon className="h-4 w-4" />
               Nouvelle conversation

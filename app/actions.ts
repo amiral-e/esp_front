@@ -25,9 +25,9 @@ export interface Prices {
 }
 
 export interface Price {
-  price: string,
-  description: string,
-  value: number
+  price: string;
+  description: string;
+  value: number;
 }
 
 const NEXT_PUBLIC_API_URL =
@@ -73,11 +73,13 @@ export const signInAction = async (formData: FormData) => {
   const password = formData.get("password") as string;
   const supabase = await createClient();
   const secret = process.env.JWT_SECRET;
+
   if (!secret) {
     throw new Error("JWT_SECRET is not defined");
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
+  // Authentification Supabase
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -85,18 +87,40 @@ export const signInAction = async (formData: FormData) => {
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   }
-  if (data) {
-    const payload = {
-      uid: data.user.id,
-    };
-    const token = jwt.sign(payload, secret);
-    (await cookies()).set("auth_token", token, {
-      httpOnly: true,
-      secure: true,
-    });
 
-    return redirect("/");
+  if (authData) {
+    try {
+      // Appel à votre API avec l'ID utilisateur de Supabase
+      const response = await axios.post(
+        "https://cc-back-dev.fly.dev/test",
+        { uid: authData.user.id },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Stockage du token retourné par votre API
+      const cookieStore = await cookies();
+      cookieStore.set("auth_token", response.data.access_token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
+
+      return redirect("/protected/chat");
+    } catch (apiError: any) {
+      console.error("API authentication error:", apiError);
+      return encodedRedirect(
+        "error",
+        "/sign-in",
+        "Error during API authentication"
+      );
+    }
   }
+
   return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
 
@@ -180,25 +204,28 @@ export const signOutAction = async () => {
 };
 
 export const isAdministrator = async () => {
-	let isAdministrator = false;
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await (await createClient()).auth.getUser();
-	if (user) {
-		try {
-			let { data, error } = await supabase
-				.rpc('is_admin_uid', {
-					user_id: user.id,
-				})
-			if (error) console.error(error)
-			else isAdministrator = data;
-		} catch (error) {
-			console.error("Error verifying admin status:", (error as Error).message);
-		}
-	}
-	return isAdministrator;
-}
+  let isAdministrator = false;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await (await createClient()).auth.getUser();
+  if (user) {
+    try {
+      let { data, error } = await supabase.rpc("is_admin_uid", {
+        user_id: user.id,
+      });
+      if (error) console.error(error);
+      else isAdministrator = data;
+    } catch (err) {
+      let { data, error } = await supabase.rpc("is_admin_uid", {
+        user_id: user.id,
+      });
+      if (error) console.error(error);
+      else isAdministrator = data;
+    }
+  }
+  return isAdministrator;
+};
 
 export const getUserInfo = async () => {
   const {
@@ -206,7 +233,6 @@ export const getUserInfo = async () => {
   } = await (await createClient()).auth.getUser();
   return user;
 };
-
 
 export const getAllUsers = async () => {
   const auth_token = await getAuthToken();
@@ -219,20 +245,17 @@ export const getAllUsers = async () => {
     }
   );
   return data.users;
-}
+};
 
 export const getAdmins = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Admins>(
-    `${NEXT_PUBLIC_API_URL}admins`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-    }
-  );
+  const { data } = await axios.get<Admins>(`${NEXT_PUBLIC_API_URL}admins`, {
+    headers: {
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
   return data.admins;
-}
+};
 
 export const addAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
@@ -252,24 +275,20 @@ export const addAdmin = async (user_id: string) => {
   } catch (error) {
     return error;
   }
-}
+};
 
 export const removeAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.delete<any>(
-    `${NEXT_PUBLIC_API_URL}admins`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-      data: {
-        user_id: user_id,
-      },
-    }
-  );
+  const { data } = await axios.delete<any>(`${NEXT_PUBLIC_API_URL}admins`, {
+    headers: {
+      Authorization: `Bearer ${auth_token}`,
+    },
+    data: {
+      user_id: user_id,
+    },
+  });
   return data;
-}
-
+};
 
 export const getPlatformPrices = async () => {
   const auth_token = await getAuthToken();
@@ -282,8 +301,7 @@ export const getPlatformPrices = async () => {
     }
   );
   return data.prices;
-}
-
+};
 
 export const updateCreditsAdmin = async (credits: number) => {
   const auth_token = await getAuthToken();
@@ -299,19 +317,24 @@ export const updateCreditsAdmin = async (credits: number) => {
     }
   );
   return data;
-}
+};
 
-export async function updateMontantForUser(userId: string, amountToAdd: number) {
+export async function updateMontantForUser(
+  userId: string,
+  amountToAdd: number
+) {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc('increment_credits', {
-      new_credits: amountToAdd, 
-      user_id: userId
+    const { data, error } = await supabase.rpc("increment_credits", {
+      new_credits: amountToAdd,
+      user_id: userId,
     });
     if (error) {
       console.error("Erreur lors de l'incrémentation des crédits :", error);
     } else {
-      console.log(`Crédits incrémentés de ${amountToAdd} avec succès pour l'utilisateur ${userId}!`);
+      console.log(
+        `Crédits incrémentés de ${amountToAdd} avec succès pour l'utilisateur ${userId}!`
+      );
       return data;
     }
   } catch (error) {

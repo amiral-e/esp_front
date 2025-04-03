@@ -20,11 +20,9 @@ import { useRouter } from "next/navigation";
 
 const Modal = ({
   children,
-  userId,
   asChild = true,
 }: {
   children: React.ReactNode;
-  userId: string;
   asChild?: boolean;
 }) => {
   const [name, setName] = useState("");
@@ -34,7 +32,7 @@ const Modal = ({
     if (!name.trim()) return;
 
     try {
-      const conversation = await createConversation(name, userId);
+      const conversation = await createConversation(name);
       router.refresh();
       setName("");
     } catch (error) {
