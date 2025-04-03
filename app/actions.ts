@@ -6,6 +6,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import { data } from "cypress/types/jquery";
 
 export interface Users {
   users: User[];
@@ -31,7 +32,7 @@ export interface Price {
 }
 
 const NEXT_PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
@@ -60,6 +61,7 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return { error: error.message };
   } else {
+
     return { success: "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de validation." };
   }
 };
@@ -82,11 +84,10 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
   if (data) {
-    const payload = {
-      uid: data.user.id,
-    };
-    const token = jwt.sign(payload, secret);
-    (await cookies()).set("auth_token", token, {
+    const tokenData = generateTokens(data.user.id);
+    const resolvedToken = await tokenData;
+    console.log("tokenData", tokenData);
+    (await cookies()).set("auth_token", resolvedToken, {
       httpOnly: true,
       secure: true,
     });
@@ -176,24 +177,24 @@ export const signOutAction = async () => {
 };
 
 export const isAdministrator = async () => {
-	let isAdministrator = false;
-	const supabase = await createClient();
-	const {
-		data: { user },
-	} = await (await createClient()).auth.getUser();
-	if (user) {
-		try {
-			let { data, error } = await supabase
-				.rpc('is_admin_uid', {
-					user_id: user.id,
-				})
-			if (error) console.error(error)
-			else isAdministrator = data;
-		} catch (error) {
-			console.error("Error verifying admin status:", (error as Error).message);
-		}
-	}
-	return isAdministrator;
+  let isAdministrator = false;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await (await createClient()).auth.getUser();
+  if (user) {
+    try {
+      let { data, error } = await supabase
+        .rpc('is_admin_uid', {
+          user_id: user.id,
+        })
+      if (error) console.error(error)
+      else isAdministrator = data;
+    } catch (error) {
+      console.error("Error verifying admin status:", (error as Error).message);
+    }
+  }
+  return isAdministrator;
 }
 
 export const getUserInfo = async () => {
@@ -229,6 +230,17 @@ export const getAdmins = async () => {
   );
   return data.admins;
 }
+
+export const generateTokens = async (uid: string) => {
+  const { data } = await axios.post<any>(
+    `${NEXT_PUBLIC_API_URL}test`,
+    {
+      uid: uid,
+    }
+  );
+  return data.token;
+}
+
 
 export const addAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
@@ -301,7 +313,7 @@ export async function updateMontantForUser(userId: string, amountToAdd: number) 
   try {
     const supabase = await createClient();
     const { data, error } = await supabase.rpc('increment_credits', {
-      new_credits: amountToAdd, 
+      new_credits: amountToAdd,
       user_id: userId
     });
     if (error) {
