@@ -11,7 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 
 export default async function Register(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams
+  const searchParams = await props.searchParams;
+  const errorMessage = searchParams || "";
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -85,6 +86,12 @@ export default async function Register(props: { searchParams: Promise<Message> }
                   </div>
                   <p className="text-xs text-muted-foreground">Le mot de passe doit contenir au moins 8 caractères</p>
                 </div>
+                
+                {errorMessage && (
+                  <div className="text-red-500 text-sm">
+                    <p>{'error' in errorMessage ? errorMessage.error : ''}</p>
+                  </div>
+                )}
 
                 <div className="flex items-center space-x-2">
                   <Checkbox id="terms" />
@@ -139,5 +146,5 @@ export default async function Register(props: { searchParams: Promise<Message> }
         </div>
       </div>
     </div>
-  )
+  );
 }
