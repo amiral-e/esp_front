@@ -92,3 +92,16 @@ docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 ```sh
   bun run cy:open
 ```
+# Folder structure
+
+- actions : supabase actions
+- app : nextjs app
+  - protected : protected routes
+    - chat : chat routes
+    - chat/[id] : chat routes
+    - collections : collections routes
+    - dashboard : dashboard routes
+    - settings : settings routes
+- components : shadcn components
+- lib : supabase client
+- utils : utils functions
