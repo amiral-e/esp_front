@@ -95,7 +95,7 @@ export const signInAction = async (formData: FormData) => {
       secure: true,
     });
 
-    return redirect("/protected/chat");
+    return redirect("/");
   }
   return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };

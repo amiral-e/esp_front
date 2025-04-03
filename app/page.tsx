@@ -4,11 +4,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, MessageSquareText, FileText, PieChart, Shield, Zap, ArrowRight, ChevronRight, LibraryBig, BotMessageSquare, SquareTerminal, UserRoundCog } from "lucide-react"
 import FeatureCard from "./components/feature-card"
-import FaqAccordion from "./components/faq-accordion"
 import ChatDemo from "./components/chat-demo"
 import { cookies } from "next/headers"
-import { isAdministrator } from "./actions"
+import { isAdministrator, signOutAction } from "./actions"
 import { ThemeToggle } from "./components/theme-toggle"
+import { Sign } from "crypto"
 
 export default async function LandingPage() {
   const cookieStore = cookies()
@@ -56,7 +56,7 @@ export default async function LandingPage() {
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Button variant="outline" asChild>
-                <Link href="/api/auth/logout">Déconnexion</Link>
+                <Link onClick={signOutAction} href={""}>Déconnexion</Link>
               </Button>
             </div>
           </div>
