@@ -1,50 +1,29 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
-import { GeistSans } from "geist/font/sans";
-import { ThemeProvider } from "next-themes";
-import Link from "next/link";
-import "./globals.css";
-import NavigationMenuWrapper from "@/components/navigationMenuWrapper";
-import { Logo } from "@/components/logo";
-import { Toaster } from "@/components/ui/toaster";
+import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import "./globals.css"
+import { ThemeProvider } from "./components/theme-provider"
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+const inter = Inter({ subsets: ["latin"] })
 
-export const metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "ComptaCompanion",
-  description: "The fastest way to build apps with Next.js and Supabase",
-};
+export const metadata: Metadata = {
+  title: "FinanceChat IA - Simplifiez vos documents financiers avec l'IA",
+  description:
+    "Téléchargez vos documents financiers et obtenez des réponses instantanées, des analyses et de l'aide grâce à notre chat intelligent.",
+}
 
 export default function RootLayout({
   children,
-}: {
-  readonly children: React.ReactNode;
-}) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="fr" className={GeistSans.className} suppressHydrationWarning>
-      <body className="bg-background text-foreground">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="flex flex-col min-h-screen">
-            {/* Header */}
-
-            {/* Contenu principal centré */}
-            <main className="flex-grow flex flex-col w-full">
-              {children}
-              <Toaster />
-            </main>
-          </div>
+    <html lang="fr" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+          {children}
         </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }

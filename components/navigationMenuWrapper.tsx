@@ -1,13 +1,7 @@
-"use client";
-
+import { isAdministrator } from "@/app/actions";
 import NavigationMenuBar from "@/components/navigationMenuBar";
-import { usePathname } from "next/navigation";
 
-export default function NavigationMenuWrapper() {
-  // const pathname = usePathname();
-  // if (pathname !== "/protected/chat") {
-  //   return null;
-  // }
-
-  return <NavigationMenuBar />;
+export default async function NavigationMenuWrapper() {
+  const isAdmin = await isAdministrator()
+  return <NavigationMenuBar isAdmin={isAdmin} />
 }

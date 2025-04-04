@@ -3,10 +3,7 @@ import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const updateSession = async (request: NextRequest) => {
-  // This `try/catch` block is only here for the interactive tutorial.
-  // Feel free to remove once you have Supabase connected.
   try {
-    // Create an unmodified response
     let response = NextResponse.next({
       request: {
         headers: request.headers,
@@ -25,45 +22,40 @@ export const updateSession = async (request: NextRequest) => {
             cookiesToSet.forEach(({ name, value }) =>
               request.cookies.set(name, value),
             );
-            response = NextResponse.next({
-              request,
-            });
+            response = NextResponse.next({ request });
             cookiesToSet.forEach(({ name, value, options }) =>
               response.cookies.set(name, value, options),
             );
           },
         },
-      },
+      }
     );
 
-    // This will refresh session if expired - required for Server Components
-    // https://supabase.com/docs/guides/auth/server-side/nextjs
-    const user = await supabase.auth.getUser();
-    const cookieStore = await cookies();
-		let auth_token = cookieStore.get('auth_token')?.value ?? null;
-    // protected routes
-    if (!request.nextUrl.pathname.startsWith("/sign-in") && auth_token == null) {
-      console.log("redirecting to /sign-in");
-      return NextResponse.redirect(new URL("/sign-in", request.url));
-    }
-    if (request.nextUrl.pathname.startsWith("/protected/chat") && auth_token == null) {
-      console.log("redirecting to /sign-in");
+    const { data: user } = await supabase.auth.getUser();
+    const cookieStore = cookies();
+    const auth_token = (await cookieStore).get("auth_token")?.value ?? null;
+
+    const publicPaths = ["/", "/sign-in", "/sign-up"];
+    const isPublicPath = publicPaths.some((path) =>
+      request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/")
+    );
+
+    const isAuth = auth_token !== null;
+
+    // Redirect to sign-in if not authenticated and trying to access protected route
+    if (!isAuth && !isPublicPath) {
+      console.log("Unauthenticated access to protected route. Redirecting to /sign-in");
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
 
-    if (request.nextUrl.pathname === "/" && !user.error && auth_token) {
-      return NextResponse.redirect(new URL("/protected/chat", request.url));
-    }
-
-    if(request.nextUrl.pathname.startsWith("/sign-in") && auth_token) {
+    // Redirect to /protected/chat if already authenticated and trying to access sign-in
+    if (isAuth && request.nextUrl.pathname === "/sign-in") {
       return NextResponse.redirect(new URL("/protected/chat", request.url));
     }
 
     return response;
   } catch (e) {
-    // If you are here, a Supabase client could not be created!
-    // This is likely because you have not set up environment variables.
-    // Check out http://localhost:3000 for Next Steps.
+    console.error("Error in updateSession middleware:", e);
     return NextResponse.next({
       request: {
         headers: request.headers,
