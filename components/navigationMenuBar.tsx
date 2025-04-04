@@ -1,33 +1,41 @@
-import Link from "next/link";
-import { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuLink, navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+"use client"
 
-export default function NavigationMenuBar() {
+import Link from "next/link"
+import {
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu"
+
+export default function NavigationMenuBar({ isAdmin }: { isAdmin: boolean }) {
   return (
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
           <Link href="/protected/collections" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Collections
-            </NavigationMenuLink>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>Collections</NavigationMenuLink>
           </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
           <Link href="/protected/chat" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Chat
-            </NavigationMenuLink>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>Chat</NavigationMenuLink>
           </Link>
-          <Link href="/protected/admin" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Admin
-            </NavigationMenuLink>
-          </Link>
-          <Link href="/protected/payment" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Paiement
-            </NavigationMenuLink>
+        </NavigationMenuItem>
+        {isAdmin && (
+          <NavigationMenuItem>
+            <Link href="/protected/admin" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>Admin</NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+        )}
+        <NavigationMenuItem>
+          <Link href="/protected/pricing" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>Payment</NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
       </NavigationMenuList>
     </NavigationMenu>
-  );
+  )
 }

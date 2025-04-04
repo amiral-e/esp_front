@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronsUpDown, Layout, LibraryBig, MessageSquare } from 'lucide-react';
+import { ChevronsUpDown, Layout, LibraryBig, MessageSquare, SquareTerminal, UserRoundCog } from 'lucide-react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 const routes = [
   {
     icon: <Layout size={16} />,
-    name: "Dashboard",
-    href: "/protected/dashboard/",
+    name: "Accueil",
+    href: "/",
   },
   {
     icon: <MessageSquare size={16} />,
@@ -28,6 +28,17 @@ const routes = [
     name: "Collections",
     href: "/protected/collections/",
   },
+  {
+    icon: <UserRoundCog className="size-4" />,
+    name: "Profile",
+    href: "/protected/profile/",
+  },
+  {
+    icon: <SquareTerminal className="size-4" />,
+    name: "Admin",
+    href: "/protected/admin/",
+    adminOnly: true,
+  }
 ];
 
 const PageSwitcher = () => {
