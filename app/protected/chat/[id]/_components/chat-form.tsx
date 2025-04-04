@@ -55,13 +55,13 @@ export default function ChatForm() {
       if (selectedCollections.length > 0) {
         for (const collection of selectedCollections) {
           await sendMessageWithCollection(
-            id?.toString() || "",
+            Number(id),
             values.message,
             [collection]
           );
         }
       } else {
-        await sendMessage(id?.toString() || "", values.message);
+        await sendMessage(Number(id), values.message);
       }
       form.reset();
       router.refresh();

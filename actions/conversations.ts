@@ -129,7 +129,7 @@ export const deleteConversation = async (id: string) => {
 };
 
 export const sendMessage = async (
-  convId: string,
+  convId: number,
   message: string,
   collection?: string
 ) => {
@@ -166,7 +166,7 @@ export const sendMessage = async (
 };
 
 export const sendMessageWithCollection = async (
-  convId: string,
+  convId: number,
   message: string,
   collections: string[]
 ) => {
@@ -174,7 +174,7 @@ export const sendMessageWithCollection = async (
     if (collections.length > 0) {
       const auth_token = await getAuthToken();
       const { data } = await axios.post<any>(
-        `${NEXT_PUBLIC_API_URL}/conversations/${convId}/collections`,
+        `${NEXT_PUBLIC_API_URL}conversations/${convId}/collections`,
         {
           message: message,
           collections: collections,

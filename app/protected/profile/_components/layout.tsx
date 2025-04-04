@@ -35,6 +35,7 @@ export default function ProfileLayout() {
     const fetchKnowledgeLevels = async () => {
       const levels = await getKnowledges();
       if (levels.length > 0) {
+        console.log('levelsssssss',levels);
         setKnowledgeLevels(levels);
       }
     };
