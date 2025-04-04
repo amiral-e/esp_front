@@ -94,7 +94,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
                 )}
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" />
+                  <Checkbox id="terms" required />
                   <Label htmlFor="terms" className="text-sm text-muted-foreground">
                     J'accepte les{" "}
                     <Link href="/terms" className="text-primary hover:underline">
@@ -110,6 +110,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
                 <SubmitButton
                   pendingText="Inscription en cours..."
                   className="w-full h-12 bg-primary hover:bg-primary/90"
+                  id="sign-up-button"
                 >
                   Créer un compte <ArrowRight className="ml-2 h-4 w-4" />
                 </SubmitButton>
@@ -128,7 +129,7 @@ export default async function Register(props: { searchParams: Promise<Message> }
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Déjà inscrit ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/login" id="sign-in-link">
+                    <Link className="text-primary font-medium hover:underline" href="/sign-in" id="sign-in-link">
                       Se connecter
                     </Link>
                   </p>

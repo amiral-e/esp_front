@@ -22,7 +22,7 @@ describe('Collection Creation', () => {
 
 
     cy.fixture(collectionContent, null).as('projectDescription')
-    cy.get('#ingest-documents-button').click()
+    cy.get('#add-collection-button').click()
     cy.get('#new-collection-title').type(collectionName)
     cy.get('#new-collection-files').selectFile('@projectDescription')
     cy.get('#create-collection').click()

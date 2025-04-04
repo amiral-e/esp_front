@@ -31,9 +31,9 @@ export default async function CollectionsPage() {
         <h1 className="text-2xl font-bold p-4">Collections</h1>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
           <ModalCollection userId={user?.id || ""}>
-            <Button variant="outline" className="w-fit flex items-center gap-2">
+            <Button variant="outline" className="w-fit flex items-center gap-2" id="add-collection-button">
               <PlusIcon className="h-4 w-4" />
-              Ajouter une collection
+              Ajouter deux collection
             </Button>
           </ModalCollection>
           <DataTable columns={columns} data={collections || []} />

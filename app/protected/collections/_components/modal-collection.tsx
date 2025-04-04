@@ -94,6 +94,7 @@ const ModalCollection = ({
               type="text"
               placeholder="Nom de la collection"
               disabled={isLoading}
+              id="new-collection-title"
             />
               <Input
                 type="file"
@@ -105,6 +106,7 @@ const ModalCollection = ({
                   }
                 }}
                 disabled={isLoading}
+                id="new-collection-files"
               />
               {files.length > 0 && (
                   <b>{files.length} fichier(s) sélectionné(s)</b>
@@ -124,6 +126,7 @@ const ModalCollection = ({
           <AlertDialogAction
             onClick={handleSubmit}
             disabled={isLoading || !name.trim() || files.length === 0}
+            id="create-collection"
           >
             {isLoading ? "Création en cours..." : "Créer"}
           </AlertDialogAction>
