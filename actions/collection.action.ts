@@ -62,12 +62,15 @@ export const getCollections = async () => {
 // Récupérer une collection par son nom
 export const getCollectionByName = async (collectionName: string) => {
   const auth_token = await getAuthToken();
-  const response = await axios.get(`${API_URL}/collections/${collectionName}`, {
-    headers: {
-      Authorization: `Bearer ${auth_token}`,
-      "Content-Type": "application/json",
-    },
-  });
+  const response = await axios.get(
+    `${API_URL}/collections/${collectionName}/documents`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
   return response.data;
 };
 

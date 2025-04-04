@@ -1,16 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import UserChat from "../../_components/user-chat";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check, Copy } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader } from "./loader";
 import { formatMarkdown } from "@/lib/formatMarkdown";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useChatContext } from "./chat-context";
+import { ChatContainer } from "@/components/ui/chat-container";
+import { Markdown } from "@/components/ui/markdown";
+import {
+  Message as MessageComponent,
+  MessageAvatar,
+  MessageContent,
+} from "@/components/ui/message";
+import { Button } from "@/components/ui/button";
+import { Check, Copy } from "lucide-react";
 
 export interface Message {
   role: string;
@@ -29,18 +32,12 @@ interface ChatAreaProps {
 }
 
 const ChatArea = ({ conversation }: ChatAreaProps) => {
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const { isLoading } = useChatContext();
   const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
 
   const messages = conversation.history;
-
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const handleCopy = (content: string, messageId: number) => {
     navigator.clipboard.writeText(content);
@@ -48,73 +45,80 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
     setTimeout(() => setCopiedId(null), 3000);
   };
 
-  // Scroll when messages change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [messages]);
-
-  // Scroll when loading state changes
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        scrollToBottom();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
   return (
-    <Card className="flex-1 p-4">
-      <ScrollArea className="h-[calc(100vh-200px)]">
-        <div className="pr-4">
-          {messages?.map((message, i) => (
-            <div key={i} className={"flex justify-start mx-32 mt-8"}>
-              {message.role === "user" ? (
-                <UserChat
-                  message={message.content}
-                  userAvatar={"https://github.com/shadcn.png"}
+    <div className="flex  w-full flex-col overflow-hidden">
+      <ChatContainer
+        className="flex-1 space-y-4 p-4"
+        autoScroll={autoScroll}
+        ref={chatContainerRef}
+      >
+        {messages?.map((message, i) => {
+          const isAssistant = message.role === "assistant";
+
+          return (
+            <MessageComponent
+              key={i}
+              className={
+                message.role === "user" ? "justify-end" : "justify-start"
+              }
+            >
+              {isAssistant && (
+                <MessageAvatar
+                  src="/avatars/ai.png"
+                  alt="Assistant IA"
+                  fallback="AI"
                 />
-              ) : (
-                <div className="w-full">
-                  <h1 className="text-sm font-semibold">Assistant</h1>
-                  <div
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: formatMarkdown(message.content),
-                    }}
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleCopy(message.content, i)}
-                  >
-                    {copiedId === i ? (
-                      <Check color="green" />
-                    ) : (
-                      <Copy color="gray" />
-                    )}
-                  </Button>
-                </div>
               )}
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex items-center space-x-4 mb-8 mx-32 mt-8">
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-[400px]" />
-                <Skeleton className="h-4 w-[300px]" />
-                <Skeleton className="h-4 w-[200px]" />
+              <div className="max-w-[85%] flex-1 sm:max-w-[75%]">
+                {isAssistant ? (
+                  <div className="bg-secondary text-foreground prose relative rounded-lg p-3">
+                    <Markdown>{message.content}</Markdown>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1"
+                      onClick={() => handleCopy(message.content, i)}
+                    >
+                      {copiedId === i ? (
+                        <Check className="h-4 w-4" color="green" />
+                      ) : (
+                        <Copy className="h-4 w-4" color="gray" />
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <MessageContent className="bg-primary text-primary-foreground w-auto">
+                    {message.content}
+                  </MessageContent>
+                )}
+              </div>
+              {!isAssistant && (
+                <MessageAvatar
+                  src="https://github.com/shadcn.png"
+                  alt="Utilisateur"
+                  fallback="User"
+                />
+              )}
+            </MessageComponent>
+          );
+        })}
+
+        {isLoading && (
+          <MessageComponent className="justify-start">
+            <MessageAvatar
+              src="/avatars/ai.png"
+              alt="Assistant IA"
+              fallback="AI"
+            />
+            <div className="max-w-[85%] flex-1 sm:max-w-[75%]">
+              <div className="bg-secondary text-foreground prose rounded-lg p-3">
+                <Loader />
               </div>
             </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
-    </Card>
+          </MessageComponent>
+        )}
+      </ChatContainer>
+    </div>
   );
 };
 

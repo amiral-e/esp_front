@@ -17,14 +17,16 @@ import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import ModalCollection from "./_components/modal-collection";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon } from "lucide-react";
 import { getUserInfo } from "@/app/actions";
-import { getCollectionByUserId } from "@/actions/collections";
-
+import {
+  getCollectionByName,
+  getCollections,
+} from "@/actions/collection.action";
 export default async function CollectionsPage() {
   const user = await getUserInfo();
-  const collections = await getCollectionByUserId(user?.id || "");
-  
+  const collections = await getCollections();
+  const documents = await getCollectionByName("collection_test");
   return (
     <SidebarProvider>
       <SidebarInset>
