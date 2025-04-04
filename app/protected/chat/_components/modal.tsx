@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
-import { createConversation } from "@/actions/conversations";
+import { createConversation } from "@/actions/conversation.action";
 import { useRouter } from "next/navigation";
 
 const Modal = ({
@@ -33,6 +33,7 @@ const Modal = ({
 
     try {
       const conversation = await createConversation(name);
+      console.log(conversation);
       router.refresh();
       setName("");
     } catch (error) {
