@@ -1,17 +1,6 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
@@ -33,7 +22,7 @@ export default async function CollectionsPage() {
           <ModalCollection userId={user?.id || ""}>
             <Button variant="outline" className="w-fit flex items-center gap-2" id="add-collection-button">
               <PlusIcon className="h-4 w-4" />
-              Ajouter deux collection
+              Ajouter une collection
             </Button>
           </ModalCollection>
           <DataTable columns={columns} data={collections || []} />
