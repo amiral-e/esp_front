@@ -292,13 +292,12 @@ export const getPlatformPrices = async () => {
   return data.prices;
 }
 
-
-export const updateCreditsAdmin = async (credits: number) => {
+export const updatePlatformPrice = async (price_name: string, price: number) => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.post<any>(
-    `${NEXT_PUBLIC_API_URL}update-credits`,
+  const { data } = await axios.put<any>(
+    `${NEXT_PUBLIC_API_URL}admins/config/${price_name}`,
     {
-      credits: credits,
+      value: price,
     },
     {
       headers: {
@@ -306,7 +305,7 @@ export const updateCreditsAdmin = async (credits: number) => {
       },
     }
   );
-  return data;
+  return data.message;
 }
 
 export async function updateMontantForUser(userId: string, amountToAdd: number) {
@@ -326,3 +325,68 @@ export async function updateMontantForUser(userId: string, amountToAdd: number) 
     console.error("Erreur lors de l'incrémentation des crédits :", error);
   }
 }
+
+
+export const createPredifinedQuestion = async (question: string, level: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.post<any>(
+    `${NEXT_PUBLIC_API_URL}admins/questions`,
+    {
+      question: question,
+      level: level,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.message;
+}
+
+
+export const deletePredifinedQuestion = async (questionId: number) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.delete<any>(
+    `${NEXT_PUBLIC_API_URL}admins/questions/${questionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.message;
+}
+
+export const modifyPredifinedQuestions = async (question: string, level: string, questionId: number) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.put<any>(
+    `${NEXT_PUBLIC_API_URL}admins/questions/${questionId}`,
+    {
+      question: question,
+      level: level,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data;
+}
+
+export const getPredifinedQuestions = async () => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<any>(
+    `${NEXT_PUBLIC_API_URL}questions`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.questions;
+}
+
+
+

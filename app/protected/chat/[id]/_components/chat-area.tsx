@@ -11,21 +11,15 @@ import { Loader } from "./loader";
 import { formatMarkdown } from "@/lib/formatMarkdown";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useChatContext } from "./chat-context";
+import { Conv } from "@/actions/conversations";
 
 export interface Message {
   role: string;
   content: string;
 }
 
-export interface Conversation {
-  id: string;
-  name: string;
-  history: Message[];
-  createdAt: string;
-}
-
 interface ChatAreaProps {
-  conversation: Conversation;
+  conversation: Conv;
 }
 
 const ChatArea = ({ conversation }: ChatAreaProps) => {
@@ -33,8 +27,10 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isLoading } = useChatContext();
   const [copiedId, setCopiedId] = useState<number | null>(null);
-
-  const messages = conversation.history;
+  let messages: Message[] = [];
+  if (conversation.history.length !== 0) {
+    messages = conversation.history;
+  }
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {

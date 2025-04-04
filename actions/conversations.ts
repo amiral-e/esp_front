@@ -35,97 +35,96 @@ export interface Message {
   content: string;
 }
 
-export interface Conversation {
-  id: string;
-  name: string;
-  history: Message[];
-  createdAt: string;
-}
-
 export interface Message {
   role: string;
   content: string;
 }
+
+export interface Conversations {
+  conversations: Conversation[];
+}
 export interface Conversation {
-  id: string;
+  id: number;
   name: string;
+  created_at: string;
   history: Message[];
   user_id: string;
-  created_at: string;
 }
 
-export const fetchConversations = async () => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) {
-    throw error;
-  }
+export interface Conv {
+  name: string;
+  history: [];
+  id: number;
+}
+
+export const getConversationById = async (conv_id: number) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Conv>(
+    `${NEXT_PUBLIC_API_URL}conversations/${conv_id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
-export const getConversationById = async (id: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .eq("id", id);
-  if (error) {
-    console.error("Error fetching conversation:", error);
-    throw error;
-  }
+export const getConversationByUser = async (): Promise<Conversation[]> => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.conversations;
+};
+
+export const createConversation = async (title: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.post<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations`,
+    {
+      name: title
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
-export const getConversationByUser = async (
-  userId: string
-): Promise<Conversation[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching conversations:", error);
-    throw error;
-  }
-  return data || [];
-};
-
-export const createConversation = async (title: string, userId: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("conversations").insert({
-    user_id: userId,
-    name: title,
-    history: [],
-  });
-
-  if (error) {
-    console.error("Error creating conversation:", error);
-    throw error;
-  }
-  return data;
-};
-
-export const updateConversation = async (id: string, name: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .update({ name: name })
-    .eq("id", id);
+export const updateConversation = async (id: number, name: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.put<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations/${id}`,
+    {
+      name: name
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
 export const deleteConversation = async (id: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .delete()
-    .eq("id", id);
+  const auth_token = await getAuthToken();
+  const { data } = await axios.delete<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 

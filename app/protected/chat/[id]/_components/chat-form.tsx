@@ -76,7 +76,6 @@ export default function ChatForm() {
     const fetchData = async () => {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
-      console.log(collections);
       const uniqueCollections = collections.reduce((acc: Collection[], current) => {
         if (!acc.find((item) => item.collection === current.collection)) {
           acc.push(current);
