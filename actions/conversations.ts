@@ -57,6 +57,10 @@ export interface Conv {
   id: number;
 }
 
+export interface Question {
+  questions: string[];
+}
+
 export const getConversationById = async (conv_id: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.get<Conv>(
@@ -202,3 +206,16 @@ export const sendMessageWithCollection = async (
     return { error: err.message || "An unexpected error occurred" };
   }
 };
+
+export const getPredifinedQuestions = async () => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.get<Question>(
+    `${NEXT_PUBLIC_API_URL}questions`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
+  return data.questions;
+}

@@ -327,7 +327,7 @@ export async function updateMontantForUser(userId: string, amountToAdd: number) 
 }
 
 
-export const createPredefinedQuestion = async (question: string, level: string) => {
+export const createPredifinedQuestion = async (question: string, level: string) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.post<any>(
     `${NEXT_PUBLIC_API_URL}admins/questions`,
@@ -373,19 +373,6 @@ export const modifyPredifinedQuestions = async (question: string, level: string,
     }
   );
   return data;
-}
-
-export const getPredifinedQuestions = async () => {
-  const auth_token = await getAuthToken();
-  const { data } = await axios.get<any>(
-    `${NEXT_PUBLIC_API_URL}questions`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-    }
-  );
-  return data.questions;
 }
 
 
