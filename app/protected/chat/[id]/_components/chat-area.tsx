@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader } from "./loader";
-import { formatMarkdown } from "@/lib/formatMarkdown";
+import { Button } from "@/components/ui/button";
+import { Check, Copy } from "lucide-react";
 import { useChatContext } from "./chat-context";
 import { ChatContainer } from "@/components/ui/chat-container";
 import { Markdown } from "@/components/ui/markdown";
@@ -12,8 +11,6 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ui/message";
-import { Button } from "@/components/ui/button";
-import { Check, Copy } from "lucide-react";
 
 export interface Message {
   role: string;
@@ -46,7 +43,11 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
   };
 
   return (
-    <div className="flex  w-full flex-col overflow-hidden">
+    <div className="flex w-full flex-col overflow-hidden max-h-[80vh]">
+      <div className="flex items-center justify-between border-b p-3">
+        <div className="text-sm font-medium">{conversation.name}</div>
+      </div>
+
       <ChatContainer
         className="flex-1 space-y-4 p-4"
         autoScroll={autoScroll}
@@ -87,7 +88,7 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
                     </Button>
                   </div>
                 ) : (
-                  <MessageContent className="bg-primary text-primary-foreground w-auto">
+                  <MessageContent className="bg-primary text-primary-foreground">
                     {message.content}
                   </MessageContent>
                 )}
@@ -112,7 +113,11 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
             />
             <div className="max-w-[85%] flex-1 sm:max-w-[75%]">
               <div className="bg-secondary text-foreground prose rounded-lg p-3">
-                <Loader />
+                <div className="flex space-x-2">
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"></div>
+                </div>
               </div>
             </div>
           </MessageComponent>

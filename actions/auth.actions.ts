@@ -30,37 +30,88 @@ export interface Price {
   value: number;
 }
 
-const NEXT_PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
+const decodeAuthToken = async (): Promise<string | null> => {
+  try {
+    const token = await getAuthToken();
+    if (!token) return null;
+
+    // Try to decode without verification first to extract payload
+    const decoded = jwt.decode(token) as { uid: string } | null;
+    if (!decoded || !decoded.uid) {
+      console.log("Could not decode token or no uid in payload");
+      return null;
+    }
+
+    return decoded.uid;
+  } catch (error) {
+    console.error("Error decoding auth token:", error);
+    return null;
+  }
+};
+
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const name = formData.get("name")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
+  const cookieStore = await cookies();
 
   if (!email || !password) {
     return { error: "Email et mot de passe sont requis" };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
+      data: {
+        name: name || "",
+      },
     },
   });
 
+  if (data.user?.id) {
+    try {
+      const response = await axios.post(`${apiUrl}/test`, {
+        uid: data.user.id,
+      });
+      if (response.status === 200) {
+        cookieStore.set("auth_token", response.data.token);
+        return {
+          success:
+            "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de validation.",
+          data: data,
+          redirect: "/protected/chat",
+        };
+      } else {
+        return {
+          error:
+            "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
+        };
+      }
+    } catch (error) {
+      console.error("API authentication error:", error);
+    }
+  }
   if (error) {
     console.error(error.code + " " + error.message);
     return { error: error.message };
   } else {
-    return { success: "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de validation." };
+    return {
+      success:
+        "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de validation.",
+      data: data,
+      redirect: "/protected/chat",
+    };
   }
 };
 
@@ -79,7 +130,6 @@ export const signInAction = async (formData: FormData) => {
     email,
     password,
   });
-
   if (error) {
     return encodedRedirect("error", "/sign-in", error.message);
   }
@@ -88,7 +138,7 @@ export const signInAction = async (formData: FormData) => {
     try {
       // Appel à votre API avec l'ID utilisateur de Supabase
       const response = await axios.post(
-        "https://cc-back-dev.fly.dev/test",
+        `${apiUrl}/test`,
         { uid: authData.user.id },
         {
           headers: {
@@ -227,25 +277,23 @@ export const getUserInfo = async () => {
   const {
     data: { user },
   } = await (await createClient()).auth.getUser();
+  console.log("USER INFO", user);
   return user;
 };
 
 export const getAllUsers = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Users>(
-    `${NEXT_PUBLIC_API_URL}admins/users`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-    }
-  );
+  const { data } = await axios.get<Users>(`${apiUrl}admins/users`, {
+    headers: {
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
   return data.users;
 };
 
 export const getAdmins = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Admins>(`${NEXT_PUBLIC_API_URL}admins`, {
+  const { data } = await axios.get<Admins>(`${apiUrl}admins`, {
     headers: {
       Authorization: `Bearer ${auth_token}`,
     },
@@ -257,7 +305,7 @@ export const addAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
   try {
     const { data } = await axios.post<any>(
-      `${NEXT_PUBLIC_API_URL}admins`,
+      `${apiUrl}admins`,
       {
         user_id: user_id,
       },
@@ -275,7 +323,7 @@ export const addAdmin = async (user_id: string) => {
 
 export const removeAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.delete<any>(`${NEXT_PUBLIC_API_URL}admins`, {
+  const { data } = await axios.delete<any>(`${apiUrl}admins`, {
     headers: {
       Authorization: `Bearer ${auth_token}`,
     },
@@ -288,21 +336,18 @@ export const removeAdmin = async (user_id: string) => {
 
 export const getPlatformPrices = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Prices>(
-    `${NEXT_PUBLIC_API_URL}admins/config`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-    }
-  );
+  const { data } = await axios.get<Prices>(`${apiUrl}admins/config`, {
+    headers: {
+      Authorization: `Bearer ${auth_token}`,
+    },
+  });
   return data.prices;
 };
 
 export const updateCreditsAdmin = async (credits: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.post<any>(
-    `${NEXT_PUBLIC_API_URL}update-credits`,
+    `${apiUrl}update-credits`,
     {
       credits: credits,
     },
@@ -337,3 +382,59 @@ export async function updateMontantForUser(
     console.error("Erreur lors de l'incrémentation des crédits :", error);
   }
 }
+
+export const getCurrentUser = async () => {
+  try {
+    const supabase = await createClient();
+
+    // First try to get user from auth token
+    const userId = await decodeAuthToken();
+    // Fallback to session-based auth if token doesn't work
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error("Error fetching current user:", error.message);
+      return null;
+    }
+
+    if (!user) {
+      return null;
+    }
+
+    // Get additional user data from your database if needed
+    const { data: userData, error: profileError } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+    console.log("USER DATA", userData);
+
+    if (profileError && profileError.code !== "PGRST116") {
+      console.error("Error fetching user profile:", profileError.message);
+    }
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.user_metadata?.name || userData?.name || "Utilisateur",
+      avatar: userData?.avatar_url || null,
+      created_at: user.created_at,
+      last_sign_in_at: user.last_sign_in_at,
+      role: userData?.role || "user",
+    };
+  } catch (error) {
+    // Handle the "Auth session missing" error specifically
+    if (
+      error instanceof Error &&
+      error.message.includes("Auth session missing")
+    ) {
+      console.log("No active session found");
+    } else {
+      console.error("Unexpected error fetching current user:", error);
+    }
+    return null;
+  }
+};

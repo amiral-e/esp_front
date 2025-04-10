@@ -1,20 +1,33 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle, MessageSquareText, FileText, PieChart, Shield, Zap, ArrowRight, ChevronRight, LibraryBig, BotMessageSquare, SquareTerminal, UserRoundCog } from "lucide-react"
-import FeatureCard from "./components/feature-card"
-import ChatDemo from "./components/chat-demo"
-import { cookies } from "next/headers"
-import { isAdministrator, signOutAction } from "./actions"
-import { ThemeToggle } from "./components/theme-toggle"
-import { Sign } from "crypto"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckCircle,
+  MessageSquareText,
+  FileText,
+  PieChart,
+  Shield,
+  Zap,
+  ArrowRight,
+  ChevronRight,
+  LibraryBig,
+  BotMessageSquare,
+  SquareTerminal,
+  UserRoundCog,
+} from "lucide-react";
+import FeatureCard from "./components/feature-card";
+import ChatDemo from "./components/chat-demo";
+import { cookies } from "next/headers";
+import { isAdministrator, signOutAction } from "../actions/auth.actions";
+import { ThemeToggle } from "./components/theme-toggle";
+import { Sign } from "crypto";
 
 export default async function LandingPage() {
-  const cookieStore = cookies()
-  const token = (await cookieStore).get("auth_token")?.value ?? null
-  const isAuthenticated = !!token
-  const isAdmin = isAuthenticated ? await isAdministrator() : false
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("auth_token")?.value ?? null;
+  const isAuthenticated = !!token;
+  const isAdmin = isAuthenticated ? await isAdministrator() : false;
 
   // Navigation items for authenticated users
   const navItems = [
@@ -39,10 +52,12 @@ export default async function LandingPage() {
       name: "Profile",
       href: "/protected/profile/",
     },
-  ]
+  ];
 
   // Filter out admin routes if user is not an admin
-  const filteredNavItems = navItems.filter((item) => !item.adminOnly || isAdmin)
+  const filteredNavItems = navItems.filter(
+    (item) => !item.adminOnly || isAdmin
+  );
 
   if (isAuthenticated) {
     return (
@@ -56,30 +71,47 @@ export default async function LandingPage() {
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <Button variant="outline" asChild>
-                <Link onClick={signOutAction} href={""}>Déconnexion</Link>
+                <Link onClick={signOutAction} href={""}>
+                  Déconnexion
+                </Link>
               </Button>
             </div>
           </div>
         </header>
 
         <div className="flex flex-1">
-
           <main className="flex-1 p-6 md:p-10">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6">Bienvenue sur ComptaCompanion IA</h1>
+              <h1 className="text-3xl font-bold mb-6">
+                Bienvenue sur ComptaCompanion IA
+              </h1>
 
-              <div className={`grid ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-6 mb-10`}>
+              <div
+                className={`grid ${isAdmin ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-6 mb-10`}
+              >
                 {filteredNavItems.map((item, index) => (
-                  <Card key={index} className="hover:shadow-md transition-shadow">
+                  <Card
+                    key={index}
+                    className="hover:shadow-md transition-shadow"
+                  >
                     <CardContent className="p-6">
-                      <Link href={item.href} className="flex flex-col items-center text-center gap-4">
-                        <div className="bg-secondary p-3 rounded-full">{item.icon}</div>
+                      <Link
+                        href={item.href}
+                        className="flex flex-col items-center text-center gap-4"
+                      >
+                        <div className="bg-secondary p-3 rounded-full">
+                          {item.icon}
+                        </div>
                         <h2 className="text-xl font-semibold">{item.name}</h2>
                         <p className="text-muted-foreground text-sm">
-                          {item.name === "Collections" && "Gérez et organisez vos documents financiers"}
-                          {item.name === "Chat" && "Discutez avec notre IA pour analyser vos finances"}
-                          {item.name === "Admin" && "Accédez aux fonctionnalités d'administration"}
-                          {item.name === "Profile" && "Gérez vos informations personnelles"}
+                          {item.name === "Collections" &&
+                            "Gérez et organisez vos documents financiers"}
+                          {item.name === "Chat" &&
+                            "Discutez avec notre IA pour analyser vos finances"}
+                          {item.name === "Admin" &&
+                            "Accédez aux fonctionnalités d'administration"}
+                          {item.name === "Profile" &&
+                            "Gérez vos informations personnelles"}
                         </p>
                         <Button variant="outline" className="mt-2">
                           Accéder <ArrowRight className="ml-2 h-4 w-4" />
@@ -93,16 +125,16 @@ export default async function LandingPage() {
               <div className="bg-secondary/50 rounded-lg p-6 mb-10">
                 <h2 className="text-xl font-semibold mb-4">Activité récente</h2>
                 <p className="text-muted-foreground">
-                  Vous n'avez pas encore d'activité récente. Commencez par explorer les différentes sections de
-                  l'application.
+                  Vous n'avez pas encore d'activité récente. Commencez par
+                  explorer les différentes sections de l'application.
                 </p>
               </div>
 
               <div className="bg-secondary/50 rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Besoin d'aide ?</h2>
                 <p className="text-muted-foreground mb-4">
-                  Notre équipe de support est disponible pour vous aider à tirer le meilleur parti de ComptaCompanion
-                  IA.
+                  Notre équipe de support est disponible pour vous aider à tirer
+                  le meilleur parti de ComptaCompanion IA.
                 </p>
                 <Button variant="outline" asChild>
                   <Link href="/protected/support">Contacter le support</Link>
@@ -110,18 +142,25 @@ export default async function LandingPage() {
               </div>
             </div>
             <br />
-            <section id="how-it-works" className="w-full py-6 md:py-6 bg-muted/30">
+            <section
+              id="how-it-works"
+              className="w-full py-6 md:py-6 bg-muted/30"
+            >
               <div className="container px-4 md:px-6">
                 <div className="flex flex-col items-center justify-center space-y-4 text-center">
                   <div className="space-y-2">
-                    <Badge variant="outline" className="w-fit mx-auto bg-primary/10 text-primary border-primary/20">
+                    <Badge
+                      variant="outline"
+                      className="w-fit mx-auto bg-primary/10 text-primary border-primary/20"
+                    >
                       Processus Simple
                     </Badge>
                     <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                       Comment fonctionne ComptaCompanion
                     </h2>
                     <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
-                      Commencez en quelques minutes avec notre plateforme facile à utiliser
+                      Commencez en quelques minutes avec notre plateforme facile
+                      à utiliser
                     </p>
                   </div>
                 </div>
@@ -129,35 +168,46 @@ export default async function LandingPage() {
                   <Card className="border-none shadow-md bg-background">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                       <div className="bg-primary/10 p-3 rounded-full">
-                        <span className="text-2xl font-bold text-primary">1</span>
+                        <span className="text-2xl font-bold text-primary">
+                          1
+                        </span>
                       </div>
-                      <h3 className="text-xl font-bold">Téléchargez vos documents</h3>
+                      <h3 className="text-xl font-bold">
+                        Téléchargez vos documents
+                      </h3>
                       <p className="text-muted-foreground">
-                        Glissez-déposez vos documents financiers ou connectez-vous à votre logiciel comptable.
+                        Glissez-déposez vos documents financiers ou
+                        connectez-vous à votre logiciel comptable.
                       </p>
                     </CardContent>
                   </Card>
                   <Card className="border-none shadow-md bg-background">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                       <div className="bg-primary/10 p-3 rounded-full">
-                        <span className="text-2xl font-bold text-primary">2</span>
+                        <span className="text-2xl font-bold text-primary">
+                          2
+                        </span>
                       </div>
                       <h3 className="text-xl font-bold">L'IA traite tout</h3>
                       <p className="text-muted-foreground">
-                        Notre IA analyse vos documents, extrait les informations clés et se prépare à répondre à vos
-                        questions.
+                        Notre IA analyse vos documents, extrait les informations
+                        clés et se prépare à répondre à vos questions.
                       </p>
                     </CardContent>
                   </Card>
                   <Card className="border-none shadow-md bg-background">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                       <div className="bg-primary/10 p-3 rounded-full">
-                        <span className="text-2xl font-bold text-primary">3</span>
+                        <span className="text-2xl font-bold text-primary">
+                          3
+                        </span>
                       </div>
-                      <h3 className="text-xl font-bold">Chattez et obtenez des réponses</h3>
+                      <h3 className="text-xl font-bold">
+                        Chattez et obtenez des réponses
+                      </h3>
                       <p className="text-muted-foreground">
-                        Posez des questions en langage naturel et recevez des réponses instantanées et précises sur vos
-                        finances.
+                        Posez des questions en langage naturel et recevez des
+                        réponses instantanées et précises sur vos finances.
                       </p>
                     </CardContent>
                   </Card>
@@ -165,7 +215,8 @@ export default async function LandingPage() {
                 <div className="mt-12 text-center">
                   <Button size="lg" asChild>
                     <Link href="/protected/chat">
-                      Essayez maintenant <ChevronRight className="ml-2 h-4 w-4" />
+                      Essayez maintenant{" "}
+                      <ChevronRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
@@ -179,32 +230,54 @@ export default async function LandingPage() {
                     <span className="text-xl font-bold">ComptaCompanion</span>
                   </div>
                   <nav className="flex gap-4 md:gap-6 flex-wrap">
-                    <Link href="#features" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="#features"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       Fonctionnalités
                     </Link>
-                    <Link href="#how-it-works" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="#how-it-works"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       Comment ça marche
                     </Link>
-                    <Link href="#pricing" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="#pricing"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       Tarifs
                     </Link>
-                    <Link href="#faq" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="#faq"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       FAQ
                     </Link>
-                    <Link href="/privacy" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="/privacy"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       Confidentialité
                     </Link>
-                    <Link href="/terms" className="text-sm hover:underline underline-offset-4">
+                    <Link
+                      href="/terms"
+                      className="text-sm hover:underline underline-offset-4"
+                    >
                       Conditions
                     </Link>
                   </nav>
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                   <p className="text-sm text-muted-foreground">
-                    © {new Date().getFullYear()} ComptaCompanion. Tous droits réservés.
+                    © {new Date().getFullYear()} ComptaCompanion. Tous droits
+                    réservés.
                   </p>
                   <div className="flex gap-4">
-                    <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="#"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -221,7 +294,10 @@ export default async function LandingPage() {
                       </svg>
                       <span className="sr-only">Facebook</span>
                     </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="#"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -238,7 +314,10 @@ export default async function LandingPage() {
                       </svg>
                       <span className="sr-only">Twitter</span>
                     </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="#"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -251,13 +330,23 @@ export default async function LandingPage() {
                         strokeLinejoin="round"
                         className="h-5 w-5"
                       >
-                        <rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect>
+                        <rect
+                          width="20"
+                          height="20"
+                          x="2"
+                          y="2"
+                          rx="5"
+                          ry="5"
+                        ></rect>
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
                         <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line>
                       </svg>
                       <span className="sr-only">Instagram</span>
                     </Link>
-                    <Link href="#" className="text-muted-foreground hover:text-foreground">
+                    <Link
+                      href="#"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="24"
@@ -283,7 +372,7 @@ export default async function LandingPage() {
           </main>
         </div>
       </div>
-    )
+    );
   }
   return (
     <div className="flex flex-col min-h-screen">
@@ -295,16 +384,28 @@ export default async function LandingPage() {
             <span className="text-xl font-bold">ComptaCompanion</span>
           </div>
           <nav className="hidden md:flex gap-6">
-            <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="#features"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Fonctionnalités
             </Link>
-            <Link href="#how-it-works" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="#how-it-works"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Comment ça marche
             </Link>
-            <Link href="#pricing" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="#pricing"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               Tarifs
             </Link>
-            <Link href="#faq" className="text-sm font-medium hover:underline underline-offset-4">
+            <Link
+              href="#faq"
+              className="text-sm font-medium hover:underline underline-offset-4"
+            >
               FAQ
             </Link>
           </nav>
@@ -326,21 +427,26 @@ export default async function LandingPage() {
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 items-center">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <Badge variant="outline" className="w-fit bg-primary/10 text-primary border-primary/20">
+                  <Badge
+                    variant="outline"
+                    className="w-fit bg-primary/10 text-primary border-primary/20"
+                  >
                     Assistant Financier Propulsé par l'IA
                   </Badge>
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                     Simplifiez vos documents financiers avec l'IA
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Téléchargez vos documents financiers et obtenez des réponses instantanées, des analyses et de l'aide
-                    grâce à notre chat intelligent.
+                    Téléchargez vos documents financiers et obtenez des réponses
+                    instantanées, des analyses et de l'aide grâce à notre chat
+                    intelligent.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Button size="lg" asChild>
                     <Link href="/sign-up">
-                      Commencer gratuitement <ArrowRight className="ml-2 h-4 w-4" />
+                      Commencer gratuitement{" "}
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
@@ -370,15 +476,19 @@ export default async function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <Badge variant="outline" className="w-fit mx-auto bg-primary/10 text-primary border-primary/20">
+                <Badge
+                  variant="outline"
+                  className="w-fit mx-auto bg-primary/10 text-primary border-primary/20"
+                >
                   Fonctionnalités Puissantes
                 </Badge>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Tout ce dont vous avez besoin pour gérer vos documents financiers
+                  Tout ce dont vous avez besoin pour gérer vos documents
+                  financiers
                 </h2>
                 <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
-                  Notre assistant IA vous aide à comprendre, organiser et extraire des informations de vos documents
-                  financiers.
+                  Notre assistant IA vous aide à comprendre, organiser et
+                  extraire des informations de vos documents financiers.
                 </p>
               </div>
             </div>
@@ -418,18 +528,25 @@ export default async function LandingPage() {
         </section>
 
         {/* How It Works Section */}
-        <section id="how-it-works" className="w-full py-12 md:py-24 bg-muted/30">
+        <section
+          id="how-it-works"
+          className="w-full py-12 md:py-24 bg-muted/30"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <Badge variant="outline" className="w-fit mx-auto bg-primary/10 text-primary border-primary/20">
+                <Badge
+                  variant="outline"
+                  className="w-fit mx-auto bg-primary/10 text-primary border-primary/20"
+                >
                   Processus Simple
                 </Badge>
                 <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   Comment fonctionne ComptaCompanion
                 </h2>
                 <p className="max-w-[700px] mx-auto text-muted-foreground md:text-xl">
-                  Commencez en quelques minutes avec notre plateforme facile à utiliser
+                  Commencez en quelques minutes avec notre plateforme facile à
+                  utiliser
                 </p>
               </div>
             </div>
@@ -439,9 +556,12 @@ export default async function LandingPage() {
                   <div className="bg-primary/10 p-3 rounded-full">
                     <span className="text-2xl font-bold text-primary">1</span>
                   </div>
-                  <h3 className="text-xl font-bold">Téléchargez vos documents</h3>
+                  <h3 className="text-xl font-bold">
+                    Téléchargez vos documents
+                  </h3>
                   <p className="text-muted-foreground">
-                    Glissez-déposez vos documents financiers ou connectez-vous à votre logiciel comptable.
+                    Glissez-déposez vos documents financiers ou connectez-vous à
+                    votre logiciel comptable.
                   </p>
                 </CardContent>
               </Card>
@@ -452,8 +572,8 @@ export default async function LandingPage() {
                   </div>
                   <h3 className="text-xl font-bold">L'IA traite tout</h3>
                   <p className="text-muted-foreground">
-                    Notre IA analyse vos documents, extrait les informations clés et se prépare à répondre à vos
-                    questions.
+                    Notre IA analyse vos documents, extrait les informations
+                    clés et se prépare à répondre à vos questions.
                   </p>
                 </CardContent>
               </Card>
@@ -462,10 +582,12 @@ export default async function LandingPage() {
                   <div className="bg-primary/10 p-3 rounded-full">
                     <span className="text-2xl font-bold text-primary">3</span>
                   </div>
-                  <h3 className="text-xl font-bold">Chattez et obtenez des réponses</h3>
+                  <h3 className="text-xl font-bold">
+                    Chattez et obtenez des réponses
+                  </h3>
                   <p className="text-muted-foreground">
-                    Posez des questions en langage naturel et recevez des réponses instantanées et précises sur vos
-                    finances.
+                    Posez des questions en langage naturel et recevez des
+                    réponses instantanées et précises sur vos finances.
                   </p>
                 </CardContent>
               </Card>
@@ -490,32 +612,54 @@ export default async function LandingPage() {
               <span className="text-xl font-bold">ComptaCompanion</span>
             </div>
             <nav className="flex gap-4 md:gap-6 flex-wrap">
-              <Link href="#features" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="#features"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 Fonctionnalités
               </Link>
-              <Link href="#how-it-works" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="#how-it-works"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 Comment ça marche
               </Link>
-              <Link href="#pricing" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="#pricing"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 Tarifs
               </Link>
-              <Link href="#faq" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="#faq"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 FAQ
               </Link>
-              <Link href="/privacy" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="/privacy"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 Confidentialité
               </Link>
-              <Link href="/terms" className="text-sm hover:underline underline-offset-4">
+              <Link
+                href="/terms"
+                className="text-sm hover:underline underline-offset-4"
+              >
                 Conditions
               </Link>
             </nav>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ComptaCompanion. Tous droits réservés.
+              © {new Date().getFullYear()} ComptaCompanion. Tous droits
+              réservés.
             </p>
             <div className="flex gap-4">
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -532,7 +676,10 @@ export default async function LandingPage() {
                 </svg>
                 <span className="sr-only">Facebook</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -549,7 +696,10 @@ export default async function LandingPage() {
                 </svg>
                 <span className="sr-only">Twitter</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -568,7 +718,10 @@ export default async function LandingPage() {
                 </svg>
                 <span className="sr-only">Instagram</span>
               </Link>
-              <Link href="#" className="text-muted-foreground hover:text-foreground">
+              <Link
+                href="#"
+                className="text-muted-foreground hover:text-foreground"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -592,6 +745,5 @@ export default async function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
-

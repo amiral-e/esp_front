@@ -19,8 +19,8 @@ const ChatPage = async ({ params }: { params: { id: string } }) => {
 
     return (
       <ChatProvider>
-        <div className="flex flex-col w-full h-screen">
-          <div className="flex flex-col h-screen m-4 gap-4">
+        <div className="flex flex-col w-full">
+          <div className="flex flex-col m-4 gap-4">
             <ChatArea conversation={conversation[0] || []} />
             <ChatForm />
           </div>

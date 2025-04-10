@@ -70,12 +70,17 @@ export const sendMessageWithCollections = async (
 
 // Récupérer toutes les conversations
 export const getConversations = async () => {
+  const auth_token = await getAuthToken();
   try {
-    const response = await apiClient.get("/conversations");
+    const response = await axios.get(`${API_URL}/conversations`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching conversations:", error);
-    throw error;
   }
 };
 

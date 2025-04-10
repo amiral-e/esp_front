@@ -1,15 +1,15 @@
-import Link from "next/link"
-import { signInAction } from "@/app/actions"
-import { FormMessage, type Message } from "@/components/form-message"
-import { SubmitButton } from "@/components/submit-button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { GithubSSO } from "@/components/github-sso"
-import { ArrowRight, CheckCircle, LockKeyhole, Mail } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from "next/link";
+import { signInAction } from "@/actions/auth.actions";
+import { FormMessage, type Message } from "@/components/form-message";
+import { SubmitButton } from "@/components/submit-button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { GithubSSO } from "@/components/github-sso";
+import { ArrowRight, CheckCircle, LockKeyhole, Mail } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams
+  const searchParams = await props.searchParams;
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -19,10 +19,13 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           <div className="bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full w-fit mb-6">
             ComptaCompanion IA
           </div>
-          <h1 className="text-4xl font-bold mb-6">Simplifiez votre comptabilité avec l'intelligence artificielle</h1>
+          <h1 className="text-4xl font-bold mb-6">
+            Simplifiez votre comptabilité avec l'intelligence artificielle
+          </h1>
           <p className="text-muted-foreground mb-8">
-            Téléchargez vos documents financiers et obtenez des réponses instantanées, des analyses et de l'aide grâce à
-            notre chat intelligent.
+            Téléchargez vos documents financiers et obtenez des réponses
+            instantanées, des analyses et de l'aide grâce à notre chat
+            intelligent.
           </p>
 
           <div className="space-y-4">
@@ -31,7 +34,8 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
               <div>
                 <h3 className="font-medium">Analyse intelligente</h3>
                 <p className="text-sm text-muted-foreground">
-                  Notre IA analyse vos documents et extrait les informations clés automatiquement
+                  Notre IA analyse vos documents et extrait les informations
+                  clés automatiquement
                 </p>
               </div>
             </div>
@@ -40,7 +44,8 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
               <div>
                 <h3 className="font-medium">Réponses instantanées</h3>
                 <p className="text-sm text-muted-foreground">
-                  Posez des questions en langage naturel et obtenez des réponses précises
+                  Posez des questions en langage naturel et obtenez des réponses
+                  précises
                 </p>
               </div>
             </div>
@@ -49,7 +54,8 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
               <div>
                 <h3 className="font-medium">Sécurité garantie</h3>
                 <p className="text-sm text-muted-foreground">
-                  Vos données sont protégées par un chiffrement de niveau bancaire
+                  Vos données sont protégées par un chiffrement de niveau
+                  bancaire
                 </p>
               </div>
             </div>
@@ -61,7 +67,9 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
         <div className="w-full max-w-md">
           <div className="mb-8">
             <h2 className="text-3xl font-bold">Connexion</h2>
-            <p className="text-muted-foreground mt-2">Bienvenue ! Connectez-vous pour accéder à votre compte.</p>
+            <p className="text-muted-foreground mt-2">
+              Bienvenue ! Connectez-vous pour accéder à votre compte.
+            </p>
           </div>
 
           <Card className="border-none shadow-md">
@@ -70,17 +78,31 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
                 <div className="space-y-2">
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input name="email" placeholder="Adresse email" className="pl-10 h-12" required />
+                    <Input
+                      name="email"
+                      placeholder="Adresse email"
+                      className="pl-10 h-12"
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="relative">
                     <LockKeyhole className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input type="password" name="password" placeholder="Mot de passe" className="pl-10 h-12" required />
+                    <Input
+                      type="password"
+                      name="password"
+                      placeholder="Mot de passe"
+                      className="pl-10 h-12"
+                      required
+                    />
                   </div>
                   <div className="flex justify-end">
-                    <Link className="text-xs text-primary hover:underline" href="/forgot-password">
+                    <Link
+                      className="text-xs text-primary hover:underline"
+                      href="/forgot-password"
+                    >
                       Mot de passe oublié ?
                     </Link>
                   </div>
@@ -107,7 +129,10 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Pas encore de compte ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/sign-up">
+                    <Link
+                      className="text-primary font-medium hover:underline"
+                      href="/sign-up"
+                    >
                       S'inscrire
                     </Link>
                   </p>
@@ -132,5 +157,5 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
         </div>
       </div>
     </div>
-  )
+  );
 }

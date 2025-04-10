@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
 import { PlusIcon } from "lucide-react";
-import { getUserInfo } from "@/app/actions";
+import { getUserInfo } from "@/actions/auth.actions";
 import { Conversation, createConversation } from "@/actions/conversations";
 import Modal from "./modal";
 import { CellAction } from "@/components/cell-action";

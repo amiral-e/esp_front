@@ -11,7 +11,7 @@ import {
 } from "@/actions/conversations";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getUserInfo } from "@/app/actions";
+import { getUserInfo } from "@/actions/auth.actions";
 import { getCollectionByUserId } from "@/actions/collections";
 import {
   getKnowledges,

@@ -33,7 +33,6 @@ const Modal = ({
 
     try {
       const conversation = await createConversation(name);
-      console.log(conversation);
       router.refresh();
       setName("");
     } catch (error) {

@@ -1,9 +1,12 @@
 "use client";
 
 import {
+  BadgeCheck,
+  Bell,
   ChevronsUpDown,
+  CreditCard,
   LogOut,
-  UserRoundCog,
+  Sparkles,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,10 +25,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { signOutAction } from "@/app/actions";
-import { Button } from "./ui/button";
-
-import Link from "next/link";
 
 export function NavUser({
   user,
@@ -77,17 +76,32 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="p-0 font-normal">
-              <Link href="/protected/profile" className="flex items-center gap-2 px-1 py-1.5 text-left text-sm hover:bg-gray-100 rounded-md">
-                <UserRoundCog className="h-6 w-6 text-gray-600" />
-                <span className="truncate font-semibold">Profile</span>
-              </Link>
-            </DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <Sparkles />
+                Upgrade to Pro
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <Button variant="ghost" onClick={signOutAction}>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                <BadgeCheck />
+                Account
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <CreditCard />
+                Billing
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Bell />
+                Notifications
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
               <LogOut />
-              Se déconnecter
-            </Button>
+              Log out
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

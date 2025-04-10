@@ -1,18 +1,55 @@
-import Link from "next/link"
-import { signUpAction } from "@/app/actions"
-import { FormMessage, type Message } from "@/components/form-message"
-import { SubmitButton } from "@/components/submit-button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { GithubSSO } from "@/components/github-sso"
-import { ArrowRight, CheckCircle, LockKeyhole, Mail, User } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
+"use client";
 
-export default async function Register(props: { searchParams: Promise<Message> }) {
-  const searchParams = await props.searchParams;
-  const errorMessage = searchParams || "";
+import Link from "next/link";
+import { signUpAction } from "@/actions/auth.actions";
+import { FormMessage, type Message } from "@/components/form-message";
+import { SubmitButton } from "@/components/submit-button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { GithubSSO } from "@/components/github-sso";
+import { ArrowRight, CheckCircle, LockKeyhole, Mail, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+export default function Register() {
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSignUp = async (formData: FormData) => {
+    setIsSubmitting(true);
+    try {
+      const result = await signUpAction(formData);
+      if (result.error) {
+        toast({
+          title: "Erreur",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else if (result.success) {
+        toast({
+          title: "Succès",
+          description: result.success,
+        });
+        router.push(result.redirect);
+      } else if (result.redirect) {
+        router.push(result.redirect);
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description:
+          "Une erreur s'est produite lors de l'inscription. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-background to-muted/30">
@@ -22,9 +59,12 @@ export default async function Register(props: { searchParams: Promise<Message> }
           <div className="bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full w-fit mb-6">
             ComptaCompanion IA
           </div>
-          <h1 className="text-4xl font-bold mb-6">Votre assistant comptable intelligent</h1>
+          <h1 className="text-4xl font-bold mb-6">
+            Votre assistant comptable intelligent
+          </h1>
           <p className="text-muted-foreground mb-8">
-            Rejoignez des milliers de professionnels qui simplifient leur comptabilité grâce à notre plateforme IA.
+            Rejoignez des milliers de professionnels qui simplifient leur
+            comptabilité grâce à notre plateforme IA.
           </p>
 
           <div className="space-y-4">
@@ -32,7 +72,9 @@ export default async function Register(props: { searchParams: Promise<Message> }
               <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <h3 className="font-medium">Gain de temps considérable</h3>
-                <p className="text-sm text-muted-foreground">Automatisez l'analyse de vos documents financiers</p>
+                <p className="text-sm text-muted-foreground">
+                  Automatisez l'analyse de vos documents financiers
+                </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -48,7 +90,9 @@ export default async function Register(props: { searchParams: Promise<Message> }
               <CheckCircle className="h-5 w-5 text-primary mt-0.5" />
               <div>
                 <h3 className="font-medium">Essai gratuit</h3>
-                <p className="text-sm text-muted-foreground">Commencez sans engagement avec notre forfait gratuit</p>
+                <p className="text-sm text-muted-foreground">
+                  Commencez sans engagement avec notre forfait gratuit
+                </p>
               </div>
             </div>
           </div>
@@ -59,49 +103,74 @@ export default async function Register(props: { searchParams: Promise<Message> }
         <div className="w-full max-w-md">
           <div className="mb-8">
             <h2 className="text-3xl font-bold">Créer un compte</h2>
-            <p className="text-muted-foreground mt-2">Commencez votre expérience avec ComptaCompanion IA</p>
+            <p className="text-muted-foreground mt-2">
+              Commencez votre expérience avec ComptaCompanion IA
+            </p>
           </div>
 
           <Card className="border-none shadow-md">
             <CardContent className="pt-6">
-              <form className="space-y-5" action={signUpAction}>
+              <form className="space-y-5" action={handleSignUp}>
                 <div className="space-y-2">
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input name="name" placeholder="Nom complet" className="pl-10 h-12" required />
+                    <Input
+                      name="name"
+                      placeholder="Nom complet"
+                      className="pl-10 h-12"
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input name="email" placeholder="Adresse email" className="pl-10 h-12" required />
+                    <Input
+                      name="email"
+                      type="email"
+                      placeholder="Adresse email"
+                      className="pl-10 h-12"
+                      required
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <div className="relative">
                     <LockKeyhole className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
-                    <Input type="password" name="password" placeholder="Mot de passe" className="pl-10 h-12" required />
+                    <Input
+                      type="password"
+                      name="password"
+                      placeholder="Mot de passe"
+                      className="pl-10 h-12"
+                      minLength={8}
+                      required
+                    />
                   </div>
-                  <p className="text-xs text-muted-foreground">Le mot de passe doit contenir au moins 8 caractères</p>
+                  <p className="text-xs text-muted-foreground">
+                    Le mot de passe doit contenir au moins 8 caractères
+                  </p>
                 </div>
-                
-                {errorMessage && (
-                  <div className="text-red-500 text-sm">
-                    <p>{'error' in errorMessage ? errorMessage.error : ''}</p>
-                  </div>
-                )}
 
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" />
-                  <Label htmlFor="terms" className="text-sm text-muted-foreground">
+                  <Checkbox id="terms" name="terms" required />
+                  <Label
+                    htmlFor="terms"
+                    className="text-sm text-muted-foreground"
+                  >
                     J'accepte les{" "}
-                    <Link href="/terms" className="text-primary hover:underline">
+                    <Link
+                      href="/terms"
+                      className="text-primary hover:underline"
+                    >
                       conditions d'utilisation
                     </Link>{" "}
                     et la{" "}
-                    <Link href="/privacy" className="text-primary hover:underline">
+                    <Link
+                      href="/privacy"
+                      className="text-primary hover:underline"
+                    >
                       politique de confidentialité
                     </Link>
                   </Label>
@@ -110,11 +179,10 @@ export default async function Register(props: { searchParams: Promise<Message> }
                 <SubmitButton
                   pendingText="Inscription en cours..."
                   className="w-full h-12 bg-primary hover:bg-primary/90"
+                  disabled={isSubmitting}
                 >
                   Créer un compte <ArrowRight className="ml-2 h-4 w-4" />
                 </SubmitButton>
-
-                <FormMessage message={searchParams} />
 
                 <div className="relative my-6">
                   <Separator />
@@ -128,7 +196,10 @@ export default async function Register(props: { searchParams: Promise<Message> }
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Déjà inscrit ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/login">
+                    <Link
+                      className="text-primary font-medium hover:underline"
+                      href="/login"
+                    >
                       Se connecter
                     </Link>
                   </p>
@@ -139,8 +210,8 @@ export default async function Register(props: { searchParams: Promise<Message> }
 
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground">
-              En créant un compte, vous acceptez de recevoir des emails de notre part concernant votre compte et nos
-              services.
+              En créant un compte, vous acceptez de recevoir des emails de notre
+              part concernant votre compte et nos services.
             </p>
           </div>
         </div>

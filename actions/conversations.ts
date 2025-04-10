@@ -1,6 +1,6 @@
 "use server";
 
-import { getUserInfo } from "@/app/actions";
+import { getUserInfo } from "@/actions/auth.actions";
 import { createClient } from "@/utils/supabase/server";
 
 import axios from "axios";
