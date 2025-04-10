@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronsUpDown, Layout, LibraryBig, MessageSquare, SquareTerminal, UserRoundCog } from 'lucide-react';
+import { ChevronsUpDown, Layout, LibraryBig, MessageSquare, SquareTerminal, UserRoundCog, File } from 'lucide-react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,11 @@ const routes = [
     icon: <UserRoundCog className="size-4" />,
     name: "Profile",
     href: "/protected/profile/",
+  },
+  {
+    icon: <File className="size-4" />,
+    name: "Rapport",
+    href: "/protected/report/",
   },
   {
     icon: <SquareTerminal className="size-4" />,

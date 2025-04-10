@@ -63,28 +63,46 @@ export interface Question {
 
 export const getConversationById = async (conv_id: number) => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Conv>(
-    `${NEXT_PUBLIC_API_URL}conversations/${conv_id}`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
+  try {
+    const { data } = await axios.get<Conv>(
+      `${NEXT_PUBLIC_API_URL}conversations/${conv_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
     }
-  );
-  return data;
+
+    console.error("Erreur lors de la récupération de la conversation :", error);
+    throw error;
+  }
 };
 
 export const getConversationByUser = async (): Promise<Conversation[]> => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Conversations>(
-    `${NEXT_PUBLIC_API_URL}conversations`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
+  try {
+    const { data } = await axios.get<Conversations>(
+      `${NEXT_PUBLIC_API_URL}conversations`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.conversations || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
     }
-  );
-  return data.conversations;
+
+    console.error("Erreur lors de la récupération des conversations :", error);
+    throw error;
+  }
 };
 
 export const createConversation = async (title: string) => {
@@ -209,13 +227,23 @@ export const sendMessageWithCollection = async (
 
 export const getPredifinedQuestions = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Question>(
-    `${NEXT_PUBLIC_API_URL}questions`,
-    {
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
       headers: {
         Authorization: `Bearer ${auth_token}`,
       },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.warn("Aucune question trouvée.");
+      return [];
     }
-  );
-  return data.questions;
-}
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
+

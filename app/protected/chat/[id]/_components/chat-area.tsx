@@ -11,7 +11,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useChatContext } from "./chat-context"
 import type { Conv } from "@/actions/conversations"
 import PredefinedQuestions from "./predifined-questions"
-import { isAdministrator } from "@/app/actions"
 
 export interface Message {
   role: string
@@ -26,8 +25,6 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { isLoading } = useChatContext()
   const [copiedId, setCopiedId] = useState<number | null>(null)
-  const [isAdmin, setIsAdmin] = useState(false)
-
   let messages: Message[] = []
   if (conversation.history.length !== 0) {
     messages = conversation.history
@@ -63,25 +60,14 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
     }
   }, [isLoading])
 
-  useEffect(() => {
-    const checkAdminStatus = async () => {
-      const result = await isAdministrator()
-      setIsAdmin(result)
-    }
-
-    checkAdminStatus()
-  }, [])
-
   return (
     <Card className="flex-1 p-4">
       <ScrollArea className="h-[calc(100vh-200px)]">
         <div className="pr-4">
-          {/* ✅ Affichage conditionnel ici uniquement */}
-          {!isAdmin && (
-            <div className="mx-32">
-              <PredefinedQuestions />
-            </div>
-          )}
+          {/* Predefined Questions at the top */}
+          <div className="mx-32">
+            <PredefinedQuestions />
+          </div>
 
           {messages?.map((message, i) => (
             <div key={i} className={"flex justify-start mx-32 mt-8"}>

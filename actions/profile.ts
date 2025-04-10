@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { cookies } from "next/headers";
-import { number } from "zod";
+import { getConversationByUser } from "./conversations";
 
 
 const NEXT_PUBLIC_API_URL =
@@ -42,6 +42,7 @@ export interface ProfileUsage {
     total_messages: number;
     total_reports: number;
     used_credits: number;
+    total_conversations: number;
 }
 
 export interface Message {
@@ -112,6 +113,7 @@ export const updateProfile = async (level: string): Promise<Message> => {
                 },
             }
         );
+        console.log("Profile updated successfully:", response.data);
         return response.data;
     } catch (error) {
         return { message: "An error occurred while updating the profile." };
@@ -130,9 +132,30 @@ export const getProfileUsageData = async (): Promise<UsageData | null> => {
                 },
             }
         );
-        return response.data;
+        const conversations = await getConversationByUser();
+        // Group conversations by month
+        const conversationsByMonth: Record<string, number> = conversations.reduce((acc: Record<string,number>, conversation) => {
+            const month = new Date(conversation.created_at).toISOString().slice(0, 7);
+            if (acc[month]) {
+                acc[month] += 1;
+            } else {
+                acc[month] = 1;
+            }
+            return acc;
+        }, {});
+        
+        // Add total_conversations by month to each profile usage
+        const usageWithConversations = response.data.usage.map((usage: ProfileUsage) => {
+            const month = new Date(usage.month).toISOString().slice(0, 7);
+            return {
+                ...usage,
+                total_conversations: conversationsByMonth[month] || 0,
+            };
+        });
+
+        return { usage: usageWithConversations };
     } catch (error) {
         console.error("Error fetching usage data:", error);
         return null;
     }
-}
+};

@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Search,
   Home,
+  File,
 } from "lucide-react"
 import { getUserInfo, isAdministrator } from "@/app/actions"
 import {
@@ -59,6 +60,11 @@ const routes = [
     icon: <UserRoundCog className="size-4" />,
     name: "Profile",
     href: "/protected/profile/",
+  },
+  {
+    icon: <File className="size-4" />,
+    name: "Rapport",
+    href: "/protected/report/",
   },
 ]
 

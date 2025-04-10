@@ -8,6 +8,7 @@
     "cy:open": "cypress open"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -47,6 +48,7 @@
     "micro": "^10.0.1",
     "next": "15.0.1",
     "next-themes": "^0.3.0",
+    "pdfjs-dist": "^2.5.207",
     "prettier": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -59,6 +61,7 @@
     "@biomejs/biome": "1.8.3",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "20.10.6",
+    "@types/pdfjs-dist": "^2.10.378",
     "@types/react": "npm:types-react@19.0.0-rc.1",
     "@types/react-dom": "npm:types-react-dom@19.0.0-rc.1",
     "cypress": "^13.17.0",
