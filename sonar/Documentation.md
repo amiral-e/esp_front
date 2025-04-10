@@ -68,7 +68,7 @@ sonar.projectName=frontend
 sonar.projectVersion=1.0
 
 # Chemin vers le code source
-sonar.sources=./src
+sonar.sources=.
 
 # Configuration du serveur SonarQube
 sonar.host.url=http://sonarqube:9000
