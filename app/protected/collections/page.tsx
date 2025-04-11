@@ -18,21 +18,21 @@ import { columns } from "./_components/columns";
 import ModalCollection from "./_components/modal-collection";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
-import { getUserInfo } from "@/actions/auth.actions";
+import { getUserProfileByUid, getUserUid } from "@/actions/auth.actions";
 import {
-  getCollectionByName,
+  getCollectionByUserId,
   getCollections,
 } from "@/actions/collection.action";
 export default async function CollectionsPage() {
-  const user = await getUserInfo();
-  const collections = await getCollections();
-  const documents = await getCollectionByName("collection_test");
+  const uid = await getUserUid();
+  const collections = await getCollectionByUserId(uid || "");
+  console.log("COLLECTIONS", collections);
   return (
     <SidebarProvider>
       <SidebarInset>
         <h1 className="text-2xl font-bold p-4">Collections</h1>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <ModalCollection userId={user?.id || ""}>
+          <ModalCollection userId={uid || ""}>
             <Button variant="outline" className="w-fit flex items-center gap-2">
               <PlusIcon className="h-4 w-4" />
               Ajouter une collection

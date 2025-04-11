@@ -29,7 +29,13 @@ import { EyeIcon, XIcon } from "lucide-react";
 import { deleteCollection } from "@/actions/collections";
 import { formatMarkdown } from "@/lib/formatMarkdown";
 import { useRouter } from "next/navigation";
-
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -196,7 +202,21 @@ export function DataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                <Card className="border-dashed border-2 border-muted-foreground">
+                  <CardHeader>
+                    <CardTitle>Aucune collection trouvée</CardTitle>
+                    <CardDescription>
+                      Vous n'avez pas de collections. Veuillez en créer une
+                      nouvelle.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p>
+                      Vous n'avez pas de collections. Veuillez en créer une
+                      nouvelle.
+                    </p>
+                  </CardContent>
+                </Card>
               </TableCell>
             </TableRow>
           )}

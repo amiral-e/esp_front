@@ -11,6 +11,15 @@ import {
   SquareTerminal,
   UserRoundCog,
 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 import {
   Sidebar,
@@ -103,6 +112,15 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <Card className="bg-transparent">
+          <CardHeader>
+            <CardTitle className="text-md">Crédits</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Progress value={33} />
+          </CardContent>
+        </Card>
+
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

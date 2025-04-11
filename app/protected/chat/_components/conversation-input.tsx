@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowUp, Paperclip, Square, X } from "lucide-react";
 import { sendMessage, createConversation } from "@/actions/conversations";
 import { toast } from "@/hooks/use-toast";
+import { getUserInfo } from "@/actions/auth.actions";
+import { sendDocuments } from "@/actions/collection.action";
 
 export function ConversationInput() {
   const router = useRouter();
@@ -33,8 +35,44 @@ export function ConversationInput() {
           throw new Error("Impossible de créer une nouvelle conversation");
         }
 
-        // Send the message to the new conversation
-        await sendMessage(conversation.id.toString(), input);
+        // If there are files, process them
+        if (files.length > 0) {
+          const user = await getUserInfo();
+
+          if (!user) {
+            throw new Error("Utilisateur non authentifié");
+          }
+
+          // Convert files to text content
+          const fileContents = await Promise.all(
+            files.map(async (file) => {
+              return new Promise<string>((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  resolve(e.target?.result as string);
+                };
+                reader.readAsText(file);
+              });
+            })
+          );
+
+          // Add documents to a temporary collection for this conversation
+          const collectionName = `conversation_${conversation.id}`;
+
+          // Process each file individually
+          for (const file of files) {
+            const response = await sendDocuments(collectionName, file);
+            console.log("SEND", response);
+          }
+
+          // Add a note about the uploaded files to the message
+          const fileNames = files.map((f) => f.name).join(", ");
+          const fileMessage = `J'ai joint les fichiers suivants: ${fileNames}.\n\n${input}`;
+          await sendMessage(conversation.id.toString(), fileMessage);
+        } else {
+          // Send the regular message
+          await sendMessage(conversation.id.toString(), input);
+        }
 
         // Redirect to the new conversation
         router.push(`/protected/chat/${conversation.id}`);
@@ -122,6 +160,7 @@ export function ConversationInput() {
                 className="hidden"
                 id="file-upload"
                 ref={uploadInputRef}
+                accept=".txt,.pdf,.doc,.docx"
               />
               <Paperclip className="text-primary size-5" />
             </label>

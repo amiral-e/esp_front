@@ -273,6 +273,27 @@ export const isAdministrator = async () => {
   return isAdministrator;
 };
 
+export async function getUserUid() {
+  try {
+    const uid = await decodeAuthToken();
+    return uid;
+  } catch (error) {
+    console.error("Erreur lors de la récupération du uid:", error);
+  }
+}
+
+export async function getUserProfileByUid() {
+  const supabase = await createClient();
+  const uid = await decodeAuthToken();
+  console.log("UID", uid);
+  const { data, error } = await supabase.auth.admin.getUserById(uid as string);
+  if (error) {
+    console.error("Erreur lors de la récupération du profil:", error);
+    return null;
+  }
+
+  return data;
+}
 export const getUserInfo = async () => {
   const {
     data: { user },
