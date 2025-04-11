@@ -203,3 +203,20 @@ export const addDocumentsToCollection = async (
   }
   return data;
 };
+
+export async function getCollection() {
+  const auth_token = await getAuthToken();
+  try {
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/collections`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur lors de la récupération de la collection:", error);
+  }
+}

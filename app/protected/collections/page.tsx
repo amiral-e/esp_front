@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
 import { getUserProfileByUid, getUserUid } from "@/actions/auth.actions";
 import {
+  getCollection,
   getCollectionByUserId,
   getCollections,
 } from "@/actions/collection.action";
@@ -27,6 +28,9 @@ export default async function CollectionsPage() {
   const uid = await getUserUid();
   const collections = await getCollectionByUserId(uid || "");
   console.log("COLLECTIONS", collections);
+
+  const collectionsApi = await getCollection();
+  console.log("COLLECTIONS API", collectionsApi);
   return (
     <SidebarProvider>
       <SidebarInset>
