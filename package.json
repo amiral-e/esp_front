@@ -5,7 +5,9 @@
     "build": "next build",
     "start": "next start -p 8080",
     "format": "bunx biome format --write **/*.ts",
-    "cy:open": "cypress open"
+    "cy:open": "cypress open",
+    "deploy-dev": "fly deploy --app cc-front-dev --config fly-dev.toml",
+    "deploy-prod": "fly deploy --app cc-front-prod --config fly-prod.toml"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.1",
