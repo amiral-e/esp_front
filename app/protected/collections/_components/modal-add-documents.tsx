@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addDocumentsToCollection } from "@/actions/collections";
+import { addDocumentsToCollection } from "@/actions/collection.action";
 import { Collection } from "./columns";
 import { PlusIcon } from "lucide-react";
 
@@ -71,19 +71,23 @@ const ModalAddDocuments = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Ajouter des documents</AlertDialogTitle>
           <AlertDialogDescription className="space-y-4">
-              <Input
-                type="file"
-                multiple
-                accept=".pdf,.doc,.docx,.txt"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    setFiles(Array.from(e.target.files));
-                  }
-                }}
-              />
-              {files.length > 0 && (
-                  <><b>{files.length} fichier(s) sélectionné(s)</b><br /><b>{files.map((file) => file.name).join(", ")}</b></>
-              )}
+            <Input
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setFiles(Array.from(e.target.files));
+                }
+              }}
+            />
+            {files.length > 0 && (
+              <>
+                <b>{files.length} fichier(s) sélectionné(s)</b>
+                <br />
+                <b>{files.map((file) => file.name).join(", ")}</b>
+              </>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

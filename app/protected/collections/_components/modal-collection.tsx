@@ -12,7 +12,7 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { PlusIcon, PaperclipIcon } from 'lucide-react';
+import { PlusIcon, PaperclipIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { createConversation } from "@/actions/conversations";
@@ -21,7 +21,7 @@ import {
   createCollection,
   addDocumentsToCollection,
   sendDocuments,
-} from "@/actions/collections";
+} from "@/actions/collection.action";
 
 const ModalCollection = ({
   children,
@@ -95,20 +95,20 @@ const ModalCollection = ({
               placeholder="Nom de la collection"
               disabled={isLoading}
             />
-              <Input
-                type="file"
-                multiple
-                accept=".txt,.md"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    setFiles(Array.from(e.target.files));
-                  }
-                }}
-                disabled={isLoading}
-              />
-              {files.length > 0 && (
-                  <b>{files.length} fichier(s) sélectionné(s)</b>
-              )}
+            <Input
+              type="file"
+              multiple
+              accept=".txt,.md"
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  setFiles(Array.from(e.target.files));
+                }
+              }}
+              disabled={isLoading}
+            />
+            {files.length > 0 && (
+              <b>{files.length} fichier(s) sélectionné(s)</b>
+            )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

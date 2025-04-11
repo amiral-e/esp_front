@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { EyeIcon, XIcon } from "lucide-react";
-import { deleteCollection } from "@/actions/collections";
+import { deleteCollection } from "@/actions/collection.action";
 import { formatMarkdown } from "@/lib/formatMarkdown";
 import { useRouter } from "next/navigation";
 import {

@@ -12,7 +12,7 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { getUserInfo } from "@/actions/auth.actions";
-import { getCollectionByUserId } from "@/actions/collections";
+import { getCollectionByUserId } from "@/actions/collection.action";
 import {
   getKnowledges,
   KnowledgeLevel,
