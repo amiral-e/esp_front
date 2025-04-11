@@ -35,102 +35,123 @@ export interface Message {
   content: string;
 }
 
-export interface Conversation {
-  id: string;
-  name: string;
-  history: Message[];
-  createdAt: string;
-}
-
 export interface Message {
   role: string;
   content: string;
 }
+
+export interface Conversations {
+  conversations: Conversation[];
+}
 export interface Conversation {
-  id: string;
+  id: number;
   name: string;
+  created_at: string;
   history: Message[];
   user_id: string;
-  created_at: string;
 }
 
-export const fetchConversations = async () => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .order("created_at", { ascending: false });
-  if (error) {
+export interface Conv {
+  name: string;
+  history: [];
+  id: number;
+}
+
+export interface Question {
+  questions: string[];
+}
+
+export const getConversationById = async (conv_id: number) => {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.get<Conv>(
+      `${NEXT_PUBLIC_API_URL}conversations/${conv_id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data;
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return null;
+    }
+
+    console.error("Erreur lors de la récupération de la conversation :", error);
     throw error;
   }
+};
+
+export const getConversationByUser = async (): Promise<Conversation[]> => {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.get<Conversations>(
+      `${NEXT_PUBLIC_API_URL}conversations`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.conversations || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
+    }
+
+    console.error("Erreur lors de la récupération des conversations :", error);
+    throw error;
+  }
+};
+
+export const createConversation = async (title: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.post<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations`,
+    {
+      name: title
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
-export const getConversationById = async (id: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .eq("id", id);
-  if (error) {
-    console.error("Error fetching conversation:", error);
-    throw error;
-  }
-  return data;
-};
-
-export const getConversationByUser = async (
-  userId: string
-): Promise<Conversation[]> => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error("Error fetching conversations:", error);
-    throw error;
-  }
-  return data || [];
-};
-
-export const createConversation = async (title: string, userId: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from("conversations").insert({
-    user_id: userId,
-    name: title,
-    history: [],
-  });
-
-  if (error) {
-    console.error("Error creating conversation:", error);
-    throw error;
-  }
-  return data;
-};
-
-export const updateConversation = async (id: string, name: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .update({ name: name })
-    .eq("id", id);
+export const updateConversation = async (id: number, name: string) => {
+  const auth_token = await getAuthToken();
+  const { data } = await axios.put<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations/${id}`,
+    {
+      name: name
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
 export const deleteConversation = async (id: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("conversations")
-    .delete()
-    .eq("id", id);
+  const auth_token = await getAuthToken();
+  const { data } = await axios.delete<Conversations>(
+    `${NEXT_PUBLIC_API_URL}conversations/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    }
+  );
   return data;
 };
 
 export const sendMessage = async (
-  convId: string,
+  convId: number,
   message: string,
   collection?: string
 ) => {
@@ -167,7 +188,7 @@ export const sendMessage = async (
 };
 
 export const sendMessageWithCollection = async (
-  convId: string,
+  convId: number,
   message: string,
   collections: string[]
 ) => {
@@ -175,7 +196,7 @@ export const sendMessageWithCollection = async (
     if (collections.length > 0) {
       const auth_token = await getAuthToken();
       const { data } = await axios.post<any>(
-        `${NEXT_PUBLIC_API_URL}/conversations/${convId}/collections`,
+        `${NEXT_PUBLIC_API_URL}conversations/${convId}/collections`,
         {
           message: message,
           collections: collections,
@@ -203,3 +224,26 @@ export const sendMessageWithCollection = async (
     return { error: err.message || "An unexpected error occurred" };
   }
 };
+
+export const getPredifinedQuestions = async () => {
+  const auth_token = await getAuthToken();
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      console.warn("Aucune question trouvée.");
+      return [];
+    }
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
+

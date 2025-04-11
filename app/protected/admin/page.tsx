@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, MoreHorizontal, UserPlus, UserMinus } from "lucide-react"
+import { Search, MoreHorizontal, UserPlus, UserMinus } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -152,7 +152,16 @@ export default function AdminDashboard() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold tracking-tight">Tableau de bord Administrateur</h1>
+        <div className="flex space-x-2">
+          <Button variant="outline" asChild>
+            <a href="admin/prices">Gérer les Prix</a>
+          </Button>
+          <Button variant="outline" asChild>
+            <a href="admin/questions">Gérer les Questions</a>
+          </Button>
+        </div>
       </div>
+
 
       <div className="flex items-center gap-2">
         <Search className="h-4 w-4 text-muted-foreground" />

@@ -11,7 +11,6 @@ import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";

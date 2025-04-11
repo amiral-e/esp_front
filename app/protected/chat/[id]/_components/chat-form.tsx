@@ -55,13 +55,13 @@ export default function ChatForm() {
       if (selectedCollections.length > 0) {
         for (const collection of selectedCollections) {
           await sendMessageWithCollection(
-            id?.toString() || "",
+            Number(id),
             values.message,
             [collection]
           );
         }
       } else {
-        await sendMessage(id?.toString() || "", values.message);
+        await sendMessage(Number(id), values.message);
       }
       form.reset();
       router.refresh();
@@ -76,7 +76,6 @@ export default function ChatForm() {
     const fetchData = async () => {
       const user = await getUserInfo();
       const collections = await getCollectionByUserId(user?.id || "");
-      console.log(collections);
       const uniqueCollections = collections.reduce((acc: Collection[], current) => {
         if (!acc.find((item) => item.collection === current.collection)) {
           acc.push(current);

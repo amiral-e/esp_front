@@ -8,7 +8,6 @@ import ChatDemo from "./components/chat-demo"
 import { cookies } from "next/headers"
 import { isAdministrator, signOutAction } from "./actions"
 import { ThemeToggle } from "./components/theme-toggle"
-import { Sign } from "crypto"
 
 export default async function LandingPage() {
   const cookieStore = cookies()
@@ -309,6 +308,7 @@ export default async function LandingPage() {
             </Link>
           </nav>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <Button variant="outline" asChild>
               <Link href="/sign-in">Connexion</Link>
             </Button>

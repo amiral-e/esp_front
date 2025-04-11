@@ -16,7 +16,7 @@ export const GithubSSO = () => (
     >
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-3">
-          <h5 className="text-base text-foreground m-0">GitHub</h5>
+          <h5 className="text-base text-foreground m-0 dark:text-black">GitHub</h5>
         </div>
       </div>
     </div>

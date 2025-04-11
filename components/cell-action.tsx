@@ -53,7 +53,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onRename = async () => {
     try {
-      await updateConversation(data?.id.toString(), newName);
+      await updateConversation(Number(data?.id), newName);
       router.refresh();
       setShowEditDialog(false);
     } catch (error) {

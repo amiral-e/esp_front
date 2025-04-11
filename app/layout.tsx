@@ -7,7 +7,7 @@ import { ThemeProvider } from "./components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "FinanceChat IA - Simplifiez vos documents financiers avec l'IA",
+  title: "ComptaCompanion - Simplifiez vos documents financiers avec l'IA",
   description:
     "Téléchargez vos documents financiers et obtenez des réponses instantanées, des analyses et de l'aide grâce à notre chat intelligent.",
 }
