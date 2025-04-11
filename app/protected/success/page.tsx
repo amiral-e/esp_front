@@ -36,7 +36,6 @@ const SuccessPageContent = () => {
 
         const data = await response.json();
         setSessionDetails(data.session);
-        console.log(`[success] Session details:`, data.session);
 
         // Check if payment was successful
         if (data.session.payment_status === "paid") {
