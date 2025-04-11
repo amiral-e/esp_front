@@ -7,7 +7,7 @@ import { MessageSquare } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { sendMessage } from "@/actions/conversations"
 import { useChatContext } from "./chat-context"
-import { getPredifinedQuestions } from "@/actions/conversations"
+import { getPredifinedQuestions } from "@/actions/predifined_questions"
 
 export default function PredefinedQuestions() {
   const [questions, setQuestions] = useState<string[]>([])

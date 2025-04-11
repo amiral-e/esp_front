@@ -18,10 +18,9 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import { getUserInfo } from "@/app/actions";
-import { getCollectionByUserId } from "@/actions/collections";
+import { getCollections } from "@/actions/collections";
 import { getKnowledges, KnowledgeLevel, Profile, getProfile, User, updateProfile } from "@/actions/profile";
-import type { Collection } from "@/app/protected/collections/_components/columns";
+import type { Collection } from "@/actions/collections";
 import { useChatContext } from "./chat-context";
 import { toast } from "@/hooks/use-toast";
 
@@ -74,8 +73,7 @@ export default function ChatForm() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = await getUserInfo();
-      const collections = await getCollectionByUserId(user?.id || "");
+      const collections = await getCollections();
       const uniqueCollections = collections.reduce((acc: Collection[], current) => {
         if (!acc.find((item) => item.collection === current.collection)) {
           acc.push(current);
