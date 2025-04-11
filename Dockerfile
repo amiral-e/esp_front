@@ -8,8 +8,6 @@ RUN npm install --legacy-peer-deps --production
 
 COPY . .
 
-COPY .env .env
-
 FROM node:18-alpine
 
 WORKDIR /app
