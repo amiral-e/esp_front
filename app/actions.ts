@@ -31,6 +31,32 @@ export interface Price {
   value: number
 }
 
+const defaultPrices: Prices = {
+  prices: [
+    {
+      price: "search",
+      description: "defined price of 0.05$ / retrieve search",
+      value: 2.05
+    },
+    {
+      price: "groq_input",
+      description: "original price of 0.59$ / 1M tokens; new price for 10k chars",
+      value: 0.9
+    },
+    {
+      price: "groq_output",
+      description: "original price of 0.79$ / 1M tokens; new price for 10k chars",
+      value: 1.1
+    },
+    {
+      price: "openai_embedding",
+      description: "original price of 0.1$ / 1M tokens; new price for 10k chars",
+      value: 0.3
+    }
+  ]
+};
+
+
 const NEXT_PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
@@ -49,7 +75,7 @@ export const signUpAction = async (formData: FormData) => {
     return { error: "Email et mot de passe sont requis" };
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error: signUpError } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -57,13 +83,32 @@ export const signUpAction = async (formData: FormData) => {
     },
   });
 
-  if (error) {
-    console.error(error.code + " " + error.message);
-    return { error: error.message };
-  } else {
-
-    return { success: "Merci pour votre inscription ! Veuillez vérifier votre email pour un lien de validation." };
+  if (signUpError) {
+    console.error(signUpError.message);
+    return { error: signUpError.message };
   }
+
+  const { data, error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInError) {
+    return { error: signInError.message };
+  }
+
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined");
+  }
+
+  const token = jwt.sign({ uid: data.user.id }, secret, { expiresIn: "7d" });
+  (await cookies()).set("auth_token", token, {
+    httpOnly: true,
+    secure: true,
+  });
+
+  return redirect("/");
 };
 
 export const signInAction = async (formData: FormData) => {
@@ -84,10 +129,12 @@ export const signInAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-in", error.message);
   }
   if (data) {
-    const tokenData = generateTokens(data.user.id);
-    const resolvedToken = await tokenData;
-    console.log("tokenData", tokenData);
-    (await cookies()).set("auth_token", resolvedToken, {
+    const payload = {
+      uid: data.user.id,
+    };
+    console.log("payload", payload.uid, "secret", secret);
+    const token = jwt.sign({uid: payload.uid}, secret);
+    (await cookies()).set("auth_token", token, {
       httpOnly: true,
       secure: true,
     });
@@ -231,17 +278,6 @@ export const getAdmins = async () => {
   return data.admins;
 }
 
-export const generateTokens = async (uid: string) => {
-  const { data } = await axios.post<any>(
-    `${NEXT_PUBLIC_API_URL}test`,
-    {
-      uid: uid,
-    }
-  );
-  return data.token;
-}
-
-
 export const addAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
   try {
@@ -281,6 +317,10 @@ export const removeAdmin = async (user_id: string) => {
 
 export const getPlatformPrices = async () => {
   const auth_token = await getAuthToken();
+  const isAdmin = await isAdministrator();
+  if (!isAdmin) {
+    return defaultPrices.prices;
+  }
   const { data } = await axios.get<Prices>(
     `${NEXT_PUBLIC_API_URL}admins/config`,
     {

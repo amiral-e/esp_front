@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar } from "@/components/ui/avatar"
-import { SendIcon, Bot } from "lucide-react"
+import { SendIcon, Bot, User2Icon } from "lucide-react"
 
 export default function ChatDemo() {
   const [messages, setMessages] = useState<{ role: string; content: string }[]>([
@@ -77,11 +77,11 @@ export default function ChatDemo() {
         {messages.map((message, index) => (
           <div key={index} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
             <div className={`flex gap-2 max-w-[80%] ${message.role === "user" ? "flex-row-reverse" : ""}`}>
-              <Avatar className={`h-8 w-8 ${message.role === "user" ? "bg-primary" : "bg-muted"}`}>
+              <Avatar className={`h-8 w-8 bg-muted`}>
                 {message.role === "user" ? (
-                  <span className="text-xs text-primary-foreground">Vous</span>
+                  <User2Icon className="h-6 w-8 text-primary" />
                 ) : (
-                  <Bot className="h-4 w-4 text-primary" />
+                  <Bot className="h-6 w-8 text-primary" />
                 )}
               </Avatar>
               <div
