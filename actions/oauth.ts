@@ -73,7 +73,6 @@ export const signInAction = async (formData: FormData) => {
     const payload = {
       uid: data.user.id,
     };
-    console.log("payload", payload.uid, "secret", secret);
     const token = jwt.sign({uid: payload.uid}, secret);
     (await cookies()).set("auth_token", token, {
       httpOnly: true,

@@ -59,8 +59,6 @@ export async function POST(request: Request) {
       ]
     }
 
-    console.log("Creating Stripe session with line items:", lineItems)
-
     // Create Checkout Sessions from body params.
     const stripeSession = await stripe.checkout.sessions.create({
       line_items: lineItems,
@@ -75,7 +73,6 @@ export async function POST(request: Request) {
       cancel_url: `${origin}/?canceled=true`,
     })
 
-    console.log("Stripe session created:", stripeSession.id)
 
     // Retourner l'URL de la session au lieu de rediriger directement
     return NextResponse.json({ url: stripeSession.url, session: stripeSession })

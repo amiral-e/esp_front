@@ -4,7 +4,7 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 const NEXT_PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();

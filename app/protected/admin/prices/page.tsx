@@ -57,7 +57,6 @@ export default function PriceDashboard() {
     const handleSavePrice = async (priceName: string) => {
         try {
             const message = await updatePlatformPrice(priceName, editValue)
-            console.log("Price updated successfully:", message)
             // Update local state
             setPrices(prices.map((p) => (p.price === priceName ? { ...p, value: editValue } : p)))
 

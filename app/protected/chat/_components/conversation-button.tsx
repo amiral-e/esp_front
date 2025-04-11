@@ -39,7 +39,6 @@ const ConversationButton = ({
 
   const handleEdit = () => {
     if (onUpdate && editedTitle.trim() !== "") {
-      console.log("editedTitle", editedTitle);
       onUpdate(editedTitle);
       setIsEditing(false);
     }

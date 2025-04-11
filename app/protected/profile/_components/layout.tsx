@@ -68,7 +68,6 @@ export default function ProfileLayout() {
 
   const handleSaveKnowledgeLevel = async () => {
     const response = await updateProfile(selectedKnowledgeLevel)
-    console.log("response", response)
     if (response) {
       alert(response.message)
     }

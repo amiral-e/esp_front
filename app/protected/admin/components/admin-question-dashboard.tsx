@@ -63,7 +63,6 @@ export default function QuestionsDashboard() {
     setIsLoading(true)
     try {
       const questionData = await getPredifinedQuestions()
-      console.log("Fetched questions:", questionData)
       setQuestions(questionData)
     } catch (error) {
       toast({
