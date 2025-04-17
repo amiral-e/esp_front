@@ -24,8 +24,25 @@ api.interceptors.request.use(async (config) => {
 
 // Appel générique
 const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
-  const response = await api.request<T>(config);
-  return response.data;
+  try {
+    const response = await api.request<T>(config);
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 404) {
+      return [] as T;
+    }
+    if (error.response) {
+      console.error("Details:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
+      error.response?.data?.error ||
+      error.message ||
+      "Request error"
+    );
+  }
 };
 
 // === TYPES ===

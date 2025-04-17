@@ -1,6 +1,5 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
 import axios, { AxiosRequestConfig } from "axios";
 import { cookies } from "next/headers";
 import { isAdministrator } from "./admin";
@@ -45,7 +44,9 @@ const authRequest = async <T>(
     });
     return response.data;
   } catch (error: any) {
-    console.error("Erreur Axios:", error);
+    if (error.response?.status === 404) {
+      return [] as T;
+    }
     if (error.response) {
       console.error("Détails:", {
         status: error.response.status,
@@ -62,11 +63,22 @@ const authRequest = async <T>(
 
 // === COLLECTIONS UTILISATEUR ===
 export const getCollections = async () => {
-  const data = await authRequest<Collections>({
-    method: "GET",
-    url: `${API_URL}collections`,
-  });
-  return data.collections || [];
+  try {
+    const data = await authRequest<Collections>({
+      method: "GET",
+      url: `${API_URL}collections`,
+    });
+
+    // Check if collections exist in the response
+    if (data && data.collections) {
+      return data.collections;
+    } else {
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching collections:", error);
+    return [];
+  }
 };
 
 export const deleteCollection = async (collection_name: string) => {

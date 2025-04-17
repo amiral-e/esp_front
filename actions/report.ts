@@ -1,6 +1,7 @@
 "use server";
 
 import axios, { AxiosRequestConfig } from "axios";
+import { error } from "console";
 import { cookies } from "next/headers";
 
 // === CONFIG ===
@@ -42,26 +43,36 @@ api.interceptors.request.use(async (config) => {
 });
 
 const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
-  try {
+  try{
     const response = await api.request<T>(config);
     return response.data;
-  } catch (error: any) {
-    console.error("Erreur Axios :", error);
-    throw new Error(error.response?.data?.error || "Erreur lors de la requête");
+  }
+  catch (error: any) {
+    if (error.response?.status === 404) {
+      return [] as T;
+    }
+    if (error.response) {
+      console.error("Détails:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
+      error.response?.data?.error ||
+      error.message ||
+      "Erreur de requête"
+    );
   }
 };
 
 // === SERVICES ===
 
 export const getReports = async (): Promise<Report[]> => {
-  try {
-    return await authRequest<Report[]>({
+    const data =  await authRequest<Report[]>({
       method: "GET",
       url: "reports",
     });
-  } catch {
-    return [];
-  }
+    return data || [];
 };
 
 export const getReportById = async (id: number): Promise<Response | null> => {

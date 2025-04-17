@@ -42,7 +42,9 @@ const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
     const response = await api.request<T>(config);
     return response.data;
   } catch (error: any) {
-    console.error("Erreur Axios :", error);
+    if(error.response?.status === 404) {
+      return [] as T;
+    }
     if (error.response) {
       console.error("Détails de l'erreur :", {
         status: error.response.status,

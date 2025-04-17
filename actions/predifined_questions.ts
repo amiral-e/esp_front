@@ -12,6 +12,15 @@ export interface User {
   email: string;
   uid: string;
 }
+export interface Question {
+  id: number;
+  question: string;
+  level: string;
+}
+
+export interface QuestionsResponse {
+  questions: Question[];
+}
 
 // === CONSTANTES ===
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
@@ -38,9 +47,19 @@ const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
     const response = await api.request<T>(config);
     return response.data;
   } catch (error: any) {
-    console.error("Erreur Axios :", error);
+    if (error.response?.status === 404) {
+      return [] as T;
+    }
+    if (error.response) {
+      console.error("Détails:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
     throw new Error(
-      error.response?.data?.error || error.message || "Erreur lors de la requête"
+      error.response?.data?.error ||
+        error.message ||
+        "Erreur de requête"
     );
   }
 };
@@ -60,6 +79,21 @@ export const getPredifinedQuestions = async () => {
       return [];
     }
     throw error;
+  }
+};
+
+export const getAllPredifinedQuestions = async (): Promise<Question[]> => {
+  try {
+    const data = await authRequest<QuestionsResponse>({
+      method: "GET",
+      url: "admins/questions",
+    });
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
+    }
+    return [];
   }
 };
 
@@ -85,9 +119,10 @@ export const modifyPredifinedQuestions = async (
   level: string,
   questionId: number
 ) => {
-  return await authRequest<any>({
+  const data = await authRequest<any>({
     method: "PUT",
     url: `admins/questions/${questionId}`,
     data: { question, level },
   });
+  return data;
 };

@@ -66,9 +66,19 @@ const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
     const response = await api.request<T>(config);
     return response.data;
   } catch (error: any) {
-    console.error("Erreur Axios :", error);
+    if (error.response?.status === 404) {
+      return [] as T;
+    }
+    if (error.response) {
+      console.error("Détails:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
     throw new Error(
-      error.response?.data?.error || error.message || "Erreur lors de la requête"
+      error.response?.data?.error ||
+        error.message ||
+        "Erreur de requête"
     );
   }
 };

@@ -32,9 +32,7 @@ export default function CreateReportForm() {
   // Use effect to show toast after state update
   useEffect(() => {
     if (isSuccess) {
-      toast.success("Le rapport a été créé avec succès")
       setIsSuccess(false)
-
       setTimeout(() => {
           router.push("/protected/report")
       }, 1000)

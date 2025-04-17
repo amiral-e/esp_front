@@ -34,7 +34,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { getPredifinedQuestions } from "@/actions/predifined_questions"
+import { getAllPredifinedQuestions } from "@/actions/predifined_questions"
 
 interface Question {
   id: number
@@ -60,14 +60,12 @@ export default function QuestionsDashboard() {
 
   const fetchQuestions = async () => {
     setIsLoading(true)
-    try {
-      const questionData = await getPredifinedQuestions()
+      const questionData = await getAllPredifinedQuestions()
+      if (questionData.length === 0) {
+        setQuestions([])
+      }
       setQuestions(questionData)
-    } catch (error) {
-      toast.error("Erreur lors de la récupération des questions")
-    } finally {
       setIsLoading(false)
-    }
   }
 
   const handleAddQuestion = async () => {
@@ -95,14 +93,15 @@ export default function QuestionsDashboard() {
 
   const handleEditQuestion = async () => {
     if (!selectedQuestion) return
-
+    
     if (!newQuestion.trim()) {
       toast.error("Le texte de la question ne peut pas être vide.")
       return
     }
-
     try {
-      await modifyPredifinedQuestions(newQuestion, newLevel, selectedQuestion.id)
+      
+    await modifyPredifinedQuestions(newQuestion, newLevel, selectedQuestion.id)
+    console.log(newQuestion, newLevel, selectedQuestion.id)
 
       // Update local state
       setQuestions(
@@ -258,7 +257,7 @@ export default function QuestionsDashboard() {
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          question.level === "facile"
+                          question.level === "beginner"
                             ? "bg-green-100 text-green-800"
                             : question.level === "moyen"
                               ? "bg-yellow-100 text-yellow-800"
@@ -313,9 +312,9 @@ export default function QuestionsDashboard() {
                   <SelectValue placeholder="Sélectionnez un niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="facile">Facile</SelectItem>
-                  <SelectItem value="moyen">Moyen</SelectItem>
-                  <SelectItem value="difficile">Difficile</SelectItem>
+                  <SelectItem value="beginner">Facile</SelectItem>
+                  <SelectItem value="intermediate">Moyen</SelectItem>
+                  <SelectItem value="pro">Difficile</SelectItem>
                 </SelectContent>
               </Select>
             </div>
