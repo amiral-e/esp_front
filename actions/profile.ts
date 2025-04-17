@@ -1,159 +1,143 @@
 "use server";
 
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { cookies } from "next/headers";
 import { getConversationByUser } from "./conversations";
 
+// === CONSTANTES ===
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
-const NEXT_PUBLIC_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
-
-const getAuthToken = async (): Promise<string | null> => {
-    const cookieStore = await cookies();
-    return cookieStore.get("auth_token")?.value ?? null;
-};
-
+// === TYPES ===
 export interface Knowledges {
-    levels: string[];
+  levels: string[];
 }
+
 export interface KnowledgeLevel {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 }
 
 export interface Profile {
-    id: string;
-    credits: number;
-    level: string;
-    created_at: string | Date;
+  id: string;
+  credits: number;
+  level: string;
+  created_at: string | Date;
 }
 
 export interface User {
-    profile: Profile;
+  profile: Profile;
 }
 
 export interface UsageData {
-    usage: ProfileUsage[];
+  usage: ProfileUsage[];
 }
 
 export interface ProfileUsage {
-    month: string;
-    total_docs: number;
-    total_messages: number;
-    total_reports: number;
-    used_credits: number;
-    total_conversations: number;
+  month: string;
+  total_docs: number;
+  total_messages: number;
+  total_reports: number;
+  used_credits: number;
+  total_conversations: number;
 }
 
 export interface Message {
-    message: string;
+  message: string;
 }
 
+// === UTILS ===
+const getAuthToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? null;
+};
+
+const api = axios.create({ baseURL: API_URL });
+
+api.interceptors.request.use(async (config) => {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Jeton d'authentification manquant");
+  config.headers.Authorization = `Bearer ${token}`;
+  config.headers["Content-Type"] = config.headers["Content-Type"] || "application/json";
+  return config;
+});
+
+const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
+  try {
+    const response = await api.request<T>(config);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur Axios :", error);
+    throw new Error(
+      error.response?.data?.error || error.message || "Erreur lors de la requête"
+    );
+  }
+};
+
+// === SERVICES ===
+
 export const getKnowledges = async (): Promise<KnowledgeLevel[]> => {
-    const auth_token = await getAuthToken();
-    try {
-        const { data } = await axios.get<Knowledges>(
-            `${NEXT_PUBLIC_API_URL}config/levels`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        return data.levels.map((level, index) => ({
-            id: index + 1,
-            name: level,
-        }));
-    } catch (error) {
-        return [];
-    }
+  try {
+    const data = await authRequest<Knowledges>({
+      method: "GET",
+      url: "config/levels",
+    });
+
+    return data.levels.map((level, index) => ({
+      id: index + 1,
+      name: level,
+    }));
+  } catch (error) {
+    return [];
+  }
 };
 
 export const getProfile = async (): Promise<User | null> => {
-    const auth_token = await getAuthToken();
-    if (!auth_token) {
-        console.warn("No authentication token found.");
-        return null;
-    }
-
-    try {
-        const { data } = await axios.get<User>(
-            `${NEXT_PUBLIC_API_URL}profile`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        return {
-            ...data,
-        };
-    } catch (error) {
-        console.error("Error fetching profile:", error);
-        return null;
-    }
+  try {
+    return await authRequest<User>({
+      method: "GET",
+      url: "profile",
+    });
+  } catch (error) {
+    console.error("Erreur lors de la récupération du profil :", error);
+    return null;
+  }
 };
 
-
 export const updateProfile = async (level: string): Promise<Message> => {
-    const auth_token = await getAuthToken();
-    try {
-        const response = await axios.put<Message>(
-            `${NEXT_PUBLIC_API_URL}profile/level`,
-            {
-                level: level
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        return response.data;
-    } catch (error) {
-        return { message: "An error occurred while updating the profile." };
-    }
-}
+  try {
+    return await authRequest<Message>({
+      method: "PUT",
+      url: "profile/level",
+      data: { level },
+    });
+  } catch (error) {
+    return { message: "Une erreur est survenue lors de la mise à jour du profil." };
+  }
+};
 
 export const getProfileUsageData = async (): Promise<UsageData | null> => {
-    const auth_token = await getAuthToken();
-    try {
-        const response = await axios.get(
-            `${NEXT_PUBLIC_API_URL}profile/usage`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-        const conversations = await getConversationByUser();
-        // Group conversations by month
-        const conversationsByMonth: Record<string, number> = conversations.reduce((acc: Record<string,number>, conversation) => {
-            const month = new Date(conversation.created_at).toISOString().slice(0, 7);
-            if (acc[month]) {
-                acc[month] += 1;
-            } else {
-                acc[month] = 1;
-            }
-            return acc;
-        }, {});
-        
-        // Add total_conversations by month to each profile usage
-        const usageWithConversations = response.data.usage.map((usage: ProfileUsage) => {
-            const month = new Date(usage.month).toISOString().slice(0, 7);
-            return {
-                ...usage,
-                total_conversations: conversationsByMonth[month] || 0,
-            };
-        });
+  try {
+    const usageData = await authRequest<{ usage: ProfileUsage[] }>({
+      method: "GET",
+      url: "profile/usage",
+    });
 
-        return { usage: usageWithConversations };
-    } catch (error) {
-        console.error("Error fetching usage data:", error);
-        return null;
-    }
+    const conversations = await getConversationByUser();
+
+    const conversationsByMonth = conversations.reduce((acc: Record<string, number>, conv) => {
+      const month = new Date(conv.created_at).toISOString().slice(0, 7);
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    }, {});
+
+    const usageWithConversations = usageData.usage.map((usage) => ({
+      ...usage,
+      total_conversations: conversationsByMonth[usage.month.slice(0, 7)] || 0,
+    }));
+
+    return { usage: usageWithConversations };
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données d'usage :", error);
+    return null;
+  }
 };

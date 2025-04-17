@@ -18,7 +18,6 @@ export default function SignUpUserSteps() {
             <span className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-xs font-medium text-secondary-foreground border">
               https://{process.env.VERCEL_URL}
             </span>
-            .
           </p>
           <p className="mt-4">
             You will need to{" "}

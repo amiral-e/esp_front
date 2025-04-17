@@ -106,7 +106,8 @@ export default function ModalCollection({ children, userId, isAdmin = false }: M
               <div className="col-span-3">
                 <div
                   className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50"
-                  onClick={() => fileInputRef.current?.click()}
+                  onMouseOver={() => fileInputRef.current?.click()}
+                  role="button"
                 >
                   <Upload className="h-6 w-6 mb-2 text-muted-foreground" />
                   <p className="text-sm text-muted-foreground">Cliquez pour téléverser ou glissez-déposez</p>

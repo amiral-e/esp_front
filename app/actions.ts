@@ -6,7 +6,6 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import axios from "axios";
-import { data } from "cypress/types/jquery";
 
 export interface Users {
   users: User[];
@@ -75,7 +74,7 @@ export const signUpAction = async (formData: FormData) => {
     return { error: "Email et mot de passe sont requis" };
   }
   try{
-    const { error: signUpError } = await supabase.auth.signUp({
+    await supabase.auth.signUp({
       email,
       password,
       options: {

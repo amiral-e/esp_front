@@ -1,142 +1,100 @@
 "use server";
 
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { cookies } from "next/headers";
 
+// === INTERFACES ===
 export interface Doc {
-    documents: Document[];
+  documents: Document[];
 }
 
 export interface Document {
-    doc_id: string;
-    doc_file: string;
+  doc_id: string;
+  doc_file: string;
 }
 
 export interface Response {
-    message: string;
+  message: string;
 }
 
-const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
+// === CONSTANTES ===
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
+// === UTILS ===
 const getAuthToken = async (): Promise<string | null> => {
-    const cookieStore = await cookies();
-    return cookieStore.get("auth_token")?.value ?? null;
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? null;
 };
 
+const api = axios.create({ baseURL: API_URL });
 
-export const getDocumentsByCollectionName = async (collection_name: string) => {
-    const auth_token = await getAuthToken();
-    try {
-        const { data }  = await axios.get<Doc>(
-            `${API_URL}collections/${collection_name}/documents`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                },
-            }
-        );
-        return data.documents || [];
-    } catch (error: any) {
-        console.error("Error fetching documents:", error);
-        if (error.response) {
-            console.error("Détails de l'erreur:", {
-                status: error.response.status,
-                data: error.response.data,
-            });
-        }
-        throw new Error(
-            error.response?.data?.error ||
-            error.message ||
-            "Erreur lors de la récupération des documents"
-        );
-    }
-}
+api.interceptors.request.use(async (config) => {
+  const token = await getAuthToken();
+  if (!token) throw new Error("Jeton d'authentification manquant");
 
+  config.headers.Authorization = `Bearer ${token}`;
+  config.headers["Content-Type"] = config.headers["Content-Type"] || "application/json";
+  return config;
+});
 
-export const getDocumentsByCollectionGlobal = async (collection_name: string) => {
-    const auth_token = await getAuthToken();
-    try {
-        const { data }  = await axios.get<Doc>(
-            `${API_URL}admins/collections/${collection_name}/documents`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                },
-            }
-        );
-        return data.documents || [];
-    } catch (error: any) {
-        console.error("Error fetching documents:", error);
-        if (error.response) {
-            console.error("Détails de l'erreur:", {
-                status: error.response.status,
-                data: error.response.data,
-            });
-        }
-        throw new Error(
-            error.response?.data?.error ||
-            error.message ||
-            "Erreur lors de la récupération des documents"
-        );
+const authRequest = async <T>(config: AxiosRequestConfig): Promise<T> => {
+  try {
+    const response = await api.request<T>(config);
+    return response.data;
+  } catch (error: any) {
+    console.error("Erreur Axios :", error);
+    if (error.response) {
+      console.error("Détails de l'erreur :", {
+        status: error.response.status,
+        data: error.response.data,
+      });
     }
-}
+    throw new Error(
+      error.response?.data?.error || error.message || "Erreur lors de la requête"
+    );
+  }
+};
 
-export const deleteDocumentByDocId = async (collection_name: string, doc_id: string) => {
-    const auth_token = await getAuthToken();
-    try {
-        const { data } = await axios.delete<Response>(
-            `${API_URL}collections/${collection_name}/documents/${doc_id}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                },
-            }
-        );
-        return data.message;
-    }
-    catch (error: any) {
-        console.error("Error deleting document:", error);
-        if (error.response) {
-            console.error("Détails de l'erreur:", {
-                status: error.response.status,
-                data: error.response.data,
-            });
-        }
-        throw new Error(
-            error.response?.data?.error ||
-            error.message ||
-            "Erreur lors de la suppression du document"
-        );
-    }
-}
+// === FONCTIONS ===
 
+export const getDocumentsByCollectionName = async (
+  collection_name: string
+): Promise<Document[]> => {
+  const data = await authRequest<Doc>({
+    method: "GET",
+    url: `collections/${collection_name}/documents`,
+  });
+  return data.documents || [];
+};
 
-export const deleteDocumenGlobaltByDocId = async (collection_name: string, doc_id: string) => {
-    const auth_token = await getAuthToken();
-    try {
-        const { data } = await axios.delete<Response>(
-            `${API_URL}admins/collections/${collection_name}/documents/${doc_id}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${auth_token}`,
-                },
-            }
-        );
-        return data.message;
-    }
-    catch (error: any) {
-        console.error("Error deleting document:", error);
-        if (error.response) {
-            console.error("Détails de l'erreur:", {
-                status: error.response.status,
-                data: error.response.data,
-            });
-        }
-        throw new Error(
-            error.response?.data?.error ||
-            error.message ||
-            "Erreur lors de la suppression du document"
-        );
-    }
-}
+export const getDocumentsByCollectionGlobal = async (
+  collection_name: string
+): Promise<Document[]> => {
+  const data = await authRequest<Doc>({
+    method: "GET",
+    url: `admins/collections/${collection_name}/documents`,
+  });
+  return data.documents || [];
+};
+
+export const deleteDocumentByDocId = async (
+  collection_name: string,
+  doc_id: string
+): Promise<string> => {
+  const data = await authRequest<Response>({
+    method: "DELETE",
+    url: `collections/${collection_name}/documents/${doc_id}`,
+  });
+  return data.message;
+};
+
+export const deleteDocumentGlobalByDocId = async (
+  collection_name: string,
+  doc_id: string
+): Promise<string> => {
+  const data = await authRequest<Response>({
+    method: "DELETE",
+    url: `admins/collections/${collection_name}/documents/${doc_id}`,
+  });
+  return data.message;
+};

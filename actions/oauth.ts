@@ -6,11 +6,29 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 
+// === UTILS ===
+const getOrigin = async () => (await headers()).get("origin") || "";
+const getJWTSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET is not defined");
+  return secret;
+};
+
+const setAuthCookie = async (uid: string) => {
+  const token = jwt.sign({ uid }, getJWTSecret(), { expiresIn: "7d" });
+  (await cookies()).set("auth_token", token, {
+    httpOnly: true,
+    secure: true,
+  });
+};
+
+// === ACTIONS ===
+
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const origin = await getOrigin();
   const supabase = await createClient();
-  const origin = (await headers()).get("origin");
 
   if (!email || !password) {
     return { error: "Email et mot de passe sont requis" };
@@ -34,31 +52,21 @@ export const signUpAction = async (formData: FormData) => {
     password,
   });
 
-  if (signInError) {
-    return { error: signInError.message };
+  if (signInError || !data?.user) {
+    return { error: signInError?.message || "Échec de la connexion" };
   }
 
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET is not defined");
-  }
-
-  const token = jwt.sign({ uid: data.user.id }, secret, { expiresIn: "7d" });
-  (await cookies()).set("auth_token", token, {
-    httpOnly: true,
-    secure: true,
-  });
-
+  await setAuthCookie(data.user.id);
   return redirect("/");
 };
 
 export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
   const supabase = await createClient();
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET is not defined");
+
+  if (!email || !password) {
+    return encodedRedirect("error", "/sign-in", "Email et mot de passe requis");
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -66,32 +74,22 @@ export const signInAction = async (formData: FormData) => {
     password,
   });
 
-  if (error) {
-    return encodedRedirect("error", "/sign-in", error.message);
+  if (error || !data?.user) {
+    return encodedRedirect("error", "/sign-in", error?.message || "Erreur inconnue");
   }
-  if (data) {
-    const payload = {
-      uid: data.user.id,
-    };
-    const token = jwt.sign({uid: payload.uid}, secret);
-    (await cookies()).set("auth_token", token, {
-      httpOnly: true,
-      secure: true,
-    });
 
-    return redirect("/");
-  }
-  return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
+  await setAuthCookie(data.user.id);
+  return redirect("/");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
-  const supabase = await createClient();
-  const origin = (await headers()).get("origin");
   const callbackUrl = formData.get("callbackUrl")?.toString();
+  const origin = await getOrigin();
+  const supabase = await createClient();
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email is required");
+    return encodedRedirect("error", "/forgot-password", "Email requis");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -100,59 +98,54 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.message);
-    return encodedRedirect(
-      "error",
-      "/forgot-password",
-      "Could not reset password"
-    );
+    return encodedRedirect("error", "/forgot-password", "Impossible d'envoyer le lien");
   }
 
-  if (callbackUrl) {
-    return redirect(callbackUrl);
-  }
+  if (callbackUrl) return redirect(callbackUrl);
 
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Check your email for a link to reset your password."
+    "Un lien de réinitialisation a été envoyé par email"
   );
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
+  const password = formData.get("password")?.toString();
+  const confirmPassword = formData.get("confirmPassword")?.toString();
   const supabase = await createClient();
 
-  const password = formData.get("password") as string;
-  const confirmPassword = formData.get("confirmPassword") as string;
-
   if (!password || !confirmPassword) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password and confirm password are required"
+      "Les deux champs sont requis"
     );
   }
 
   if (password !== confirmPassword) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Passwords do not match"
+      "Les mots de passe ne correspondent pas"
     );
   }
 
-  const { error } = await supabase.auth.updateUser({
-    password: password,
-  });
+  const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    encodedRedirect(
+    return encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Password update failed"
+      "La mise à jour a échoué"
     );
   }
 
-  encodedRedirect("success", "/protected/reset-password", "Password updated");
+  return encodedRedirect(
+    "success",
+    "/protected/reset-password",
+    "Mot de passe mis à jour"
+  );
 };
 
 export const signOutAction = async () => {

@@ -69,6 +69,7 @@ const ConversationButton = ({
           <div
             className="flex-1 truncate w-52"
             onDoubleClick={() => setIsEditing(true)}
+            role="button"
           >
             {title}
           </div>

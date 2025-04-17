@@ -154,7 +154,7 @@ export default function SignUpComponent() {
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Déjà inscrit ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/login">
+                    <Link className="text-primary font-medium hover:underline" href="/sign-in">
                       Se connecter
                     </Link>
                   </p>
