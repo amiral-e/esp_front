@@ -3,7 +3,7 @@
 import { type Report, deleteReport } from "@/actions/report"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import { Eye, FileText, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -14,26 +14,20 @@ interface ReportsListProps {
 }
 
 export default function ReportsList({ reports }: ReportsListProps) {
-  const { toast } = useToast()
   const router = useRouter()
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this report?")) {
-      try {
-        const response = await deleteReport(id)
-        toast({
-          title: "Success",
-          description: response.message,
-        })
-        router.refresh()
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete report",
-          variant: "destructive",
-        })
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce rapport ?")) {
+      {
+        try {
+          const response = await deleteReport(id)
+          toast.success(response.message)
+          router.refresh()
+        } catch (error) {
+          toast.error("Erreur lors de la suppression du rapport")
+        }
       }
     }
   }

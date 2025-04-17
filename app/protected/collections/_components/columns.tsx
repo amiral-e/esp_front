@@ -53,7 +53,6 @@ function Actions({ collection }: { collection: Collection }) {
   const handleDelete = async (isAdmin: boolean) => {
     try {
       setIsDeleting(true)
-      console.log(isAdmin)
       if (isAdmin) {
         await deleteGlobalCollection(collection.name)
       } if(!isAdmin) {

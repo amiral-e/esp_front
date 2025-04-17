@@ -66,7 +66,6 @@ export const getKnowledges = async (): Promise<KnowledgeLevel[]> => {
             name: level,
         }));
     } catch (error) {
-        console.log("error", error);
         return [];
     }
 };

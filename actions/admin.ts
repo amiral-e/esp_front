@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import axios from "axios";
+import { Response } from "./collections";
 
 export interface Users {
   users: User[];
@@ -145,4 +146,22 @@ export const removeAdmin = async (user_id: string) => {
 }
 
 
-
+export async function grantCreditsToUser(userId: string, amount: number): Promise<string> {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.post<Response>(
+      `${NEXT_PUBLIC_API_URL}admins/users/${userId}/grant`,
+      {
+        credits: amount,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        }
+      }
+    );
+    return data.message;
+  }catch (error) {
+    return "Une erreur s'est produite lors de l'octroi de crédits.";
+  }
+}

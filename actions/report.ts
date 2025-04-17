@@ -40,9 +40,8 @@ export const getReports = async (): Promise<Report[]> => {
                 },
             }
         );
-        return data;
+        return data || [];
     } catch (error) {
-        console.error("Error fetching reports:", error);
         return [];
     }
 }

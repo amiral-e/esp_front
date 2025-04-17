@@ -3,7 +3,7 @@
 import { getReportById } from "@/actions/report"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -16,7 +16,6 @@ interface ReportViewModalProps {
 export default function ReportViewModal({ reportId, isOpen, onClose }: ReportViewModalProps) {
     const [report, setReport] = useState<any>(null)
     const [loading, setLoading] = useState(false)
-    const { toast } = useToast()
 
     useEffect(() => {
         async function loadReport() {
@@ -26,12 +25,7 @@ export default function ReportViewModal({ reportId, isOpen, onClose }: ReportVie
                     const reportData = await getReportById(reportId)
                     setReport(reportData)
                 } catch (error) {
-                    console.error("Error loading report:", error)
-                    toast({
-                        title: "Error",
-                        description: "Failed to load report details",
-                        variant: "destructive",
-                    })
+                    toast.error("Erreur lors du chargement du rapport")
                     onClose()
                 } finally {
                     setLoading(false)

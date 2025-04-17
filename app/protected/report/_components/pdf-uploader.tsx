@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 import { FileUp, Loader2, X } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -12,7 +12,6 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -28,11 +27,7 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
     );
 
     if (newFiles.length === 0) {
-      toast({
-        title: "Type de fichier invalide",
-        description: "Seuls les fichiers PDF sont acceptés",
-        variant: "destructive",
-      });
+      toast.error("Type de fichier invalide");
       return;
     }
 
@@ -87,12 +82,7 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
       // Mettre à jour les documents extraits
       onDocumentsUpdate(extractedTexts, fileNames);
     } catch (error) {
-      console.error("Erreur lors du traitement du PDF:", error);
-      toast({
-        title: "Erreur de traitement PDF",
-        description: "Il y a eu une erreur lors de l'extraction du texte du PDF",
-        variant: "destructive",
-      });
+      toast.error("Erreur lors du traitement des fichiers PDF");
     } finally {
       setIsLoading(false);
     }

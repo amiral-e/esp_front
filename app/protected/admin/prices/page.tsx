@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import { getPlatformPrices, updatePlatformPrice } from "@/app/actions"
 import Link from "next/link"
 
@@ -22,7 +22,6 @@ export default function PriceDashboard() {
     const [isLoading, setIsLoading] = useState(true)
     const [editingPrice, setEditingPrice] = useState<string | null>(null)
     const [editValue, setEditValue] = useState<number>(0)
-    const { toast } = useToast()
 
     // Fetch prices on component mount
     useEffect(() => {
@@ -35,11 +34,7 @@ export default function PriceDashboard() {
             const priceData = await getPlatformPrices()
             setPrices(priceData)
         } catch (error) {
-            toast({
-                title: "Erreur lors de la récupération des prix",
-                description: "Il y a eu un problème lors du chargement des prix de la plateforme.",
-                variant: "destructive",
-            })
+            toast.error("Erreur lors de la récupération des prix")
         } finally {
             setIsLoading(false)
         }
@@ -59,19 +54,11 @@ export default function PriceDashboard() {
             const message = await updatePlatformPrice(priceName, editValue)
             // Update local state
             setPrices(prices.map((p) => (p.price === priceName ? { ...p, value: editValue } : p)))
-
-            toast({
-                title: "Prix mis à jour",
-                description: message || "Le prix a été mis à jour avec succès.",
-            })
+            toast.success(message || "Le prix a été mis à jour avec succès.")
 
             setEditingPrice(null)
         } catch (error) {
-            toast({
-                title: "Erreur lors de la mise à jour du prix",
-                description: "Il y a eu un problème lors de la mise à jour du prix.",
-                variant: "destructive",
-            })
+            toast.error("Erreur lors de la mise à jour du prix")
         }
     }
 

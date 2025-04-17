@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import { FileUp, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
@@ -27,16 +27,12 @@ export default function CreateReportForm() {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const { toast } = useToast()
   const router = useRouter()
 
   // Use effect to show toast after state update
   useEffect(() => {
     if (isSuccess) {
-      toast({
-        title: "Succès",
-        description: "Le rapport a été créé avec succès",
-      })
+      toast.success("Le rapport a été créé avec succès")
       setIsSuccess(false)
 
       setTimeout(() => {
@@ -49,11 +45,7 @@ export default function CreateReportForm() {
     e.preventDefault()
 
     if (title === "" || prompt === "" || documents.length === 0) {
-      toast({
-        title: "Champs manquants",
-        description: "Veuillez remplir tous les champs et télécharger au moins un document",
-        variant: "destructive",
-      })
+      toast.error("Veuillez remplir tous les champs et télécharger au moins un document")
       return
     }
 
@@ -61,10 +53,7 @@ export default function CreateReportForm() {
 
     try {
       const result = await createReport(title, documents, prompt, collectionName)
-      toast({
-        title: "Succès",
-        description: result,
-      })
+      toast.success(result)
       // Set success state to trigger the useEffect
       setIsSuccess(true)
 
@@ -75,12 +64,7 @@ export default function CreateReportForm() {
       setDocuments([])
       setUploadedFiles([])
     } catch (error) {
-      console.error("Error creating report:", error)
-      toast({
-        title: "Erreur",
-        description: "Échec de la création du rapport",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la création du rapport")
     } finally {
       setIsSubmitting(false)
     }

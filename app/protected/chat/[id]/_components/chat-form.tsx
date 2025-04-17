@@ -22,8 +22,8 @@ import { getCollections, getGlobalCollection } from "@/actions/collections";
 import { getKnowledges, KnowledgeLevel, Profile, getProfile, User, updateProfile } from "@/actions/profile";
 import type { Collection } from "@/actions/collections";
 import { useChatContext } from "./chat-context";
-import { toast } from "@/hooks/use-toast";
 import { isAdministrator } from "@/actions/admin";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
@@ -112,7 +112,7 @@ export default function ChatForm() {
     // update user level
     const response = await updateProfile(level);
     if (response) {
-      toast({ description: response.message });
+      toast.success("Le niveau de connaissance a été mis à jour avec succès !");
     }
   };
 

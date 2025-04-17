@@ -74,18 +74,16 @@ export const signUpAction = async (formData: FormData) => {
   if (!email || !password) {
     return { error: "Email et mot de passe sont requis" };
   }
-
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
-  });
-
-  if (signUpError) {
-    console.error(signUpError.message);
-    return { error: signUpError.message };
+  try{
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback`,
+      },
+    });
+  } catch (error) {
+    return { error: "Une erreur s'est produite lors de l'inscription" };
   }
 
   const { data, error: signInError } = await supabase.auth.signInWithPassword({
