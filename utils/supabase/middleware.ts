@@ -35,7 +35,7 @@ export const updateSession = async (request: NextRequest) => {
     const cookieStore = cookies();
     const auth_token = (await cookieStore).get("auth_token")?.value ?? null;
 
-    const publicPaths = ["/", "/sign-in", "/sign-up"];
+    const publicPaths = ["/", "/sign-in", "/sign-up", "/privacy_policy", "/privacy_policy/gcu", "/privacy_policy/confidentiality"];
     const isPublicPath = publicPaths.some((path) =>
       request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + "/")
     );

@@ -5,10 +5,13 @@ import ChatArea from "./_components/chat-area";
 
 const ChatPage = async ({ params }: any) => {
   const { id } = await params;
+  if (!id) {
+    return null;
+  }
   const conversations = await getConversationById(id);
 
   if (!conversations) {
-    return <div>Conversation non trouvée</div>;
+    return null;
   }
 
   return (

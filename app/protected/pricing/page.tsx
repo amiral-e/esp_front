@@ -6,7 +6,7 @@ import PricingToggle from "./_components/pricing-toggle"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import axios from "axios"
-import { getPlatformPrices, type Price } from "@/app/actions"
+import { getPlatformPrices, type Price } from "@/actions/prices"
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false)

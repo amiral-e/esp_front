@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import {
   createPredifinedQuestion,
   modifyPredifinedQuestions,
   deletePredifinedQuestion,
-} from "@/app/actions"
+  getPredifinedQuestions,
+} from "@/actions/predifined_questions"
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,6 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { getPredifinedQuestions } from "@/actions/conversations"
 
 interface Question {
   id: number
@@ -51,8 +51,7 @@ export default function QuestionsDashboard() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null)
   const [newQuestion, setNewQuestion] = useState("")
-  const [newLevel, setNewLevel] = useState("facile")
-  const { toast } = useToast()
+  const [newLevel, setNewLevel] = useState("beginner")
 
   // Fetch questions on component mount
   useEffect(() => {
@@ -61,91 +60,63 @@ export default function QuestionsDashboard() {
 
   const fetchQuestions = async () => {
     setIsLoading(true)
-    try {
       const questionData = await getPredifinedQuestions()
-      console.log("Fetched questions:", questionData)
+      if (questionData.length === 0) {
+        setQuestions([])
+      }
       setQuestions(questionData)
-    } catch (error) {
-      toast({
-        title: "Erreur lors de la récupération des questions",
-        description: "Il y a eu un problème lors du chargement des questions prédéfinies.",
-        variant: "destructive",
-      })
-    } finally {
       setIsLoading(false)
-    }
   }
 
   const handleAddQuestion = async () => {
     if (!newQuestion.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le texte de la question ne peut pas être vide.",
-        variant: "destructive",
-      })
+      toast.error("Le texte de la question ne peut pas être vide.")
       return
     }
 
     try {
       const message = await createPredifinedQuestion(newQuestion, newLevel)
+      console.log(message)
 
       // Refresh the questions list
       await fetchQuestions()
-
-      toast({
-        title: "Question ajoutée",
-        description: message || "La question a été ajoutée avec succès.",
-      })
+      toast.success(message || "La question a été ajoutée avec succès.")
 
       // Reset form and close dialog
       setNewQuestion("")
-      setNewLevel("facile")
+      setNewLevel("beginner")
       setIsAddDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Erreur lors de l'ajout de la question",
-        description: "Il y a eu un problème lors de l'ajout de la question.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de l'ajout de la question")
     }
   }
 
   const handleEditQuestion = async () => {
     if (!selectedQuestion) return
-
+    
     if (!newQuestion.trim()) {
-      toast({
-        title: "Erreur",
-        description: "Le texte de la question ne peut pas être vide.",
-        variant: "destructive",
-      })
+      toast.error("Le texte de la question ne peut pas être vide.")
       return
     }
-
     try {
-      await modifyPredifinedQuestions(newQuestion, newLevel, selectedQuestion.id)
+      
+    await modifyPredifinedQuestions(newQuestion, newLevel, selectedQuestion.id)
+    console.log(newQuestion, newLevel, selectedQuestion.id)
 
       // Update local state
       setQuestions(
         questions.map((q) => (q.id === selectedQuestion.id ? { ...q, question: newQuestion, level: newLevel } : q)),
       )
-
-      toast({
-        title: "Question modifiée",
-        description: "La question a été modifiée avec succès.",
-      })
+      toast.success("La question a été modifiée avec succès.")
 
       // Reset form and close dialog
       setSelectedQuestion(null)
       setNewQuestion("")
-      setNewLevel("facile")
+      setNewLevel("beginner")
       setIsEditDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la modification de la question",
-        description: "Il y a eu un problème lors de la modification de la question.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la modification de la question")
+      
     }
   }
 
@@ -157,21 +128,14 @@ export default function QuestionsDashboard() {
 
       // Update local state
       setQuestions(questions.filter((q) => q.id !== selectedQuestion.id))
-
-      toast({
-        title: "Question supprimée",
-        description: message || "La question a été supprimée avec succès.",
-      })
+      toast.success(message || "La question a été supprimée avec succès.")
 
       // Reset and close dialog
       setSelectedQuestion(null)
       setIsDeleteDialogOpen(false)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la suppression de la question",
-        description: "Il y a eu un problème lors de la suppression de la question.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la suppression de la question")
+      
     }
   }
 
@@ -230,9 +194,9 @@ export default function QuestionsDashboard() {
                       <SelectValue placeholder="Sélectionnez un niveau" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="facile">Facile</SelectItem>
-                      <SelectItem value="moyen">Moyen</SelectItem>
-                      <SelectItem value="difficile">Difficile</SelectItem>
+                      <SelectItem value="beginner">Facile</SelectItem>
+                      <SelectItem value="intermediate">Moyen</SelectItem>
+                      <SelectItem value="pro">Difficile</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -293,7 +257,7 @@ export default function QuestionsDashboard() {
                     <TableCell>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          question.level === "facile"
+                          question.level === "beginner"
                             ? "bg-green-100 text-green-800"
                             : question.level === "moyen"
                               ? "bg-yellow-100 text-yellow-800"
@@ -348,9 +312,9 @@ export default function QuestionsDashboard() {
                   <SelectValue placeholder="Sélectionnez un niveau" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="facile">Facile</SelectItem>
-                  <SelectItem value="moyen">Moyen</SelectItem>
-                  <SelectItem value="difficile">Difficile</SelectItem>
+                  <SelectItem value="beginner">Facile</SelectItem>
+                  <SelectItem value="intermediate">Moyen</SelectItem>
+                  <SelectItem value="pro">Difficile</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -11,7 +11,7 @@ import { ChevronsUpDown, Layout, LibraryBig, MessageSquare, SquareTerminal, User
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { isAdministrator } from "@/app/actions";
+import { isAdministrator } from "@/actions/admin";
 
 const routes = [
   {

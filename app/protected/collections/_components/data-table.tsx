@@ -1,207 +1,145 @@
-"use client";
+"use client"
 
 import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  getExpandedRowModel,
-} from "@tanstack/react-table";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Fragment, useMemo } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { EyeIcon, XIcon } from "lucide-react";
-import { deleteCollection } from "@/actions/collections";
-import { formatMarkdown } from "@/lib/formatMarkdown";
-import { useRouter } from "next/navigation";
+    type ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+    getPaginationRowModel,
+    type ColumnFiltersState,
+    getFilteredRowModel,
+    type VisibilityState,
+} from "@tanstack/react-table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useState } from "react"
+import type { Collection } from "@/actions/collections"
+import { DocumentsTable } from "./documents-table"
+import { getDocumentsByCollectionName, getDocumentsByCollectionGlobal } from "@/actions/documents"
+import React from "react"
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+    columns: ColumnDef<TData, TValue>[]
+    data: TData[]
+    isAdmin?: boolean
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-  const router = useRouter();
-  // Regrouper les données par collection
-  const uniqueCollections = useMemo(() => {
-    const collections = new Map();
+export function DataTable<TData, TValue>({ columns, data, isAdmin = false }: DataTableProps<TData, TValue>) {
+    const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+    const [expandedCollection, setExpandedCollection] = useState<string | null>(null)
+    const [documents, setDocuments] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
 
-    data.forEach((item: any) => {
-      if (!collections.has(item.collection)) {
-        collections.set(item.collection, {
-          ...item,
-          documents: [item],
-        });
-      } else {
-        collections.get(item.collection).documents.push(item);
-      }
-    });
+    const table = useReactTable({
+        data,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        onColumnFiltersChange: setColumnFilters,
+        getFilteredRowModel: getFilteredRowModel(),
+        onColumnVisibilityChange: setColumnVisibility,
+        state: {
+            columnFilters,
+            columnVisibility,
+        },
+    })
 
-    return Array.from(collections.values());
-  }, [data]);
+    const handleRowClick = async (collection: Collection) => {
+        try {
+            if (expandedCollection === collection.name) {
+                setExpandedCollection(null)
+                setDocuments([])
+                return
+            }
 
-  // const onDelete = async () => {
-  //   try {
-  //     setLoading(true);
-  //     await deleteCollection(row.original.id);
-  //     router.refresh();
-  //   } catch (error) {
-  //   } finally {
-  //     setLoading(false);
-  //     setOpen(false);
-  //   }
-  // };
+            setLoading(true)
+            setExpandedCollection(collection.name)
 
-  const onDelete = async (id: string) => {
-    try {
-      await deleteCollection(id);
-      router.refresh();
-    } catch (error) {
-      console.log(error);
+            const docs = isAdmin
+                ? await getDocumentsByCollectionGlobal(collection.name)
+                : await getDocumentsByCollectionName(collection.name)
+
+            setDocuments(docs)
+        } catch (error) {
+            console.error("Error fetching documents:", error)
+        } finally {
+            setLoading(false)
+        }
     }
-  };
 
-  const table = useReactTable({
-    data: uniqueCollections,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
-    getRowCanExpand: () => true,
-  });
-
-  return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <Fragment key={row.id}>
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="whitespace-nowrap [&:has([aria-expanded])]:w-px [&:has([aria-expanded])]:py-0 [&:has([aria-expanded])]:pr-0"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-                {row.getIsExpanded() && (
-                  <TableRow>
-                    <TableCell colSpan={row.getVisibleCells().length}>
-                      <div className="p-4">
-                        <h3 className="text-sm font-medium mb-2">
-                          Documents dans la collection{" "}
-                          {(row.original as any).collection.includes("_")
-                            ? (row.original as any).collection
-                                .split("_")
-                                .slice(1)
-                                .join("_")
-                            : (row.original as any).collection}
-                        </h3>
-                        <div className="space-y-2">
-                          {(row.original as any).documents.map(
-                            (item: any, index: number) => (
-                              <div
-                                key={index}
-                                className="flex items-center justify-between p-2 bg-muted/50 rounded-md"
-                              >
-                                <span className="font-medium">
-                                  {item.metadata.doc_file}
-                                </span>
-                                <div className="flex items-center gap-x-4">
-                                  <div className="flex items-center gap-2">
-                                    <Dialog>
-                                      <DialogTrigger asChild>
-                                        <Button variant="ghost" size="sm">
-                                          <EyeIcon className="h-4 w-4 mr-1" />{" "}
-                                          Voir
-                                        </Button>
-                                      </DialogTrigger>
-                                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
-                                        <DialogHeader>
-                                          <DialogTitle>
-                                            {item.metadata.doc_file}
-                                          </DialogTitle>
-                                        </DialogHeader>
-                                        <div
-                                          className="mt-4 space-y-2 whitespace-pre-wrap"
-                                          dangerouslySetInnerHTML={{
-                                            __html: formatMarkdown(
-                                              item.document
-                                            ),
-                                          }}
-                                        />
-                                      </DialogContent>
-                                    </Dialog>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => onDelete(item.id)}
-                                  >
-                                    <XIcon className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </Fragment>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
-  );
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center py-4">
+                <Input
+                    placeholder="Filter collections..."
+                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                    onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+                    className="max-w-sm"
+                />
+            </div>
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        {table.getHeaderGroups().map((headerGroup) => (
+                            <TableRow key={headerGroup.id}>
+                                {headerGroup.headers.map((header) => {
+                                    return (
+                                        <TableHead key={header.id}>
+                                            {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                        </TableHead>
+                                    )
+                                })}
+                            </TableRow>
+                        ))}
+                    </TableHeader>
+                    <TableBody>
+                        {table.getRowModel().rows.map((row) => (
+                            <React.Fragment key={row.id}>
+                                <TableRow
+                                    data-state={row.getIsSelected() && "selected"}
+                                    className="cursor-pointer"
+                                    onClick={() => handleRowClick(row.original as Collection)}
+                                >
+                                    {row.getVisibleCells().map((cell) => (
+                                        <TableCell key={cell.id}>
+                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                                {expandedCollection === (row.original as Collection).name && (
+                                    <TableRow key={`${row.id}-expanded`}>
+                                        <TableCell colSpan={columns.length} className="p-0">
+                                            <div className="p-4 bg-muted/20">
+                                                {loading ? (
+                                                    <div className="flex justify-center p-4">Loading documents...</div>
+                                                ) : documents.length > 0 ? (
+                                                    <DocumentsTable
+                                                        documents={documents}
+                                                        collectionName={(row.original as Collection).name}
+                                                        isAdmin={isAdmin}
+                                                    />
+                                                ) : (
+                                                    <div className="text-center p-4">Aucun document trouvé</div>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
+            <div className="flex items-center justify-end space-x-2 py-4">
+                <Button variant="outline" size="sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
+                    Previous
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                    Next
+                </Button>
+            </div>
+        </div>
+    )
 }

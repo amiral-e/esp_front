@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search, MoreHorizontal, UserPlus, UserMinus } from 'lucide-react'
+import { Search, MoreHorizontal, UserPlus, UserMinus, BadgeEuro } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -23,10 +23,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { useToast } from "@/hooks/use-toast"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { getAllUsers, getAdmins, addAdmin, removeAdmin, type User } from "@/app/actions"
+import { Label } from "@/components/ui/label"
+import { getAllUsers, getAdmins, addAdmin, removeAdmin, grantCreditsToUser, type User } from "@/actions/admin"
+import { toast } from "react-toastify"
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])
@@ -36,10 +37,12 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [actionType, setActionType] = useState<"promote" | "demote" | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
 
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(5)
+
+  const [isCreditDialogOpen, setIsCreditDialogOpen] = useState(false)
+  const [creditAmount, setCreditAmount] = useState("")
 
   // Récupération des utilisateurs et des administrateurs lors du montage du composant
   useEffect(() => {
@@ -52,11 +55,7 @@ export default function AdminDashboard() {
       const userData = await getAllUsers()
       setUsers(userData)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la récupération des utilisateurs",
-        description: "Il y a eu un problème lors du chargement de la liste des utilisateurs.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la récupération des utilisateurs")
     }
   }
 
@@ -65,11 +64,7 @@ export default function AdminDashboard() {
       const adminData = await getAdmins()
       setAdmins(adminData)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la récupération des administrateurs",
-        description: "Il y a eu un problème lors du chargement de la liste des administrateurs.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la récupération des administrateurs")
     }
   }
 
@@ -83,17 +78,9 @@ export default function AdminDashboard() {
       // Mise à jour de l'état local
       setUsers(users.filter((user) => user.uid !== selectedUser.uid))
       setAdmins([...admins, selectedUser])
-
-      toast({
-        title: "Utilisateur promu",
-        description: `${selectedUser.email} est maintenant un administrateur`,
-      })
+      toast.success(`${selectedUser.email} est maintenant un administrateur`)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la promotion de l'utilisateur",
-        description: "Il y a eu un problème pour faire de cet utilisateur un administrateur.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la promotion de l'utilisateur")
     } finally {
       setIsLoading(false)
       setIsConfirmDialogOpen(false)
@@ -112,22 +99,37 @@ export default function AdminDashboard() {
       // Mise à jour de l'état local
       setAdmins(admins.filter((admin) => admin.uid !== selectedUser.uid))
       setUsers([...users, selectedUser])
-
-      toast({
-        title: "Administrateur rétrogradé",
-        description: `${selectedUser.email} est maintenant un utilisateur classique`,
-      })
+      toast.success(`${selectedUser.email} est maintenant un utilisateur classique`)
     } catch (error) {
-      toast({
-        title: "Erreur lors de la rétrogradation de l'administrateur",
-        description: "Il y a eu un problème lors de la suppression des privilèges d'administrateur.",
-        variant: "destructive",
-      })
+      toast.error("Erreur lors de la rétrogradation de l'administrateur")
     } finally {
       setIsLoading(false)
       setIsConfirmDialogOpen(false)
       setSelectedUser(null)
       setActionType(null)
+    }
+  }
+
+  const handleGrantCredits = async () => {
+    if (!selectedUser || !creditAmount) return
+
+    setIsLoading(true)
+    try {
+      const amount = Number(creditAmount)
+      if (isNaN(amount) || amount <= 0) {
+        toast.error("Veuillez entrer un montant valide")
+        return
+      }
+
+      const message = await grantCreditsToUser(selectedUser.uid, amount)
+      toast.success(`${amount} crédits ajoutés à ${selectedUser.email}`)
+    } catch (error) {
+      toast.error("Erreur lors de l'ajout de crédits")
+    } finally {
+      setIsLoading(false)
+      setIsCreditDialogOpen(false)
+      setSelectedUser(null)
+      setCreditAmount("")
     }
   }
 
@@ -137,9 +139,13 @@ export default function AdminDashboard() {
     setIsConfirmDialogOpen(true)
   }
 
-  const filteredUsers = users.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()))
-
+  const openCreditDialog = (user: User) => {
+    setSelectedUser(user)
+    setIsCreditDialogOpen(true)
+  }
+  
   const filteredAdmins = admins.filter((admin) => admin.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredUsers = users.filter((user) => user.email.toLowerCase().includes(searchQuery.toLowerCase()) && !admins.some((admin) => admin.uid === user.uid))
 
   const paginatedUsers = filteredUsers.slice((page - 1) * pageSize, page * pageSize)
   const totalPages = Math.ceil(filteredUsers.length / pageSize)
@@ -161,7 +167,6 @@ export default function AdminDashboard() {
           </Button>
         </div>
       </div>
-
 
       <div className="flex items-center gap-2">
         <Search className="h-4 w-4 text-muted-foreground" />
@@ -221,9 +226,13 @@ export default function AdminDashboard() {
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => openConfirmDialog(user, "promote")}>
+                                <DropdownMenuItem onClick={() => openConfirmDialog(user, "promote")} disabled={admins.some((admin) => admin.uid === user.uid)}>
                                   <UserPlus className="mr-2 h-4 w-4" />
                                   Promouvoir en Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => openCreditDialog(user)}>
+                                  <BadgeEuro className="mr-2 h-4 w-4" />
+                                  Ajouter des crédits
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -347,7 +356,9 @@ export default function AdminDashboard() {
       <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{actionType === "promote" ? "Promouvoir en Admin" : "Retirer les privilèges d'Admin"}</DialogTitle>
+            <DialogTitle>
+              {actionType === "promote" ? "Promouvoir en Admin" : "Retirer les privilèges d'Admin"}
+            </DialogTitle>
             <DialogDescription>
               {actionType === "promote"
                 ? `Êtes-vous sûr de vouloir faire de ${selectedUser?.email} un administrateur ? Il aura un accès complet à l'administration.`
@@ -363,7 +374,43 @@ export default function AdminDashboard() {
               disabled={isLoading}
               variant={actionType === "promote" ? "default" : "destructive"}
             >
-              {isLoading ? "En cours..." : actionType === "promote" ? "Confirmer la promotion" : "Confirmer la suppression"}
+              {isLoading
+                ? "En cours..."
+                : actionType === "promote"
+                  ? "Confirmer la promotion"
+                  : "Confirmer la suppression"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {/* Credit Dialog */}
+      <Dialog open={isCreditDialogOpen} onOpenChange={setIsCreditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajouter des crédits</DialogTitle>
+            <DialogDescription>Ajoutez des crédits au compte de {selectedUser?.email}.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="credit-amount" className="text-right">
+                Montant
+              </Label>
+              <Input
+                id="credit-amount"
+                type="number"
+                min="1"
+                className="col-span-3"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreditDialogOpen(false)} disabled={isLoading}>
+              Annuler
+            </Button>
+            <Button onClick={handleGrantCredits} disabled={isLoading}>
+              {isLoading ? "En cours..." : "Ajouter des crédits"}
             </Button>
           </DialogFooter>
         </DialogContent>

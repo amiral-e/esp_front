@@ -16,7 +16,6 @@ const PaymentForm = () => {
         quantity: 1,
         transactionId: "",
       });
-      console.log(response);
       router.push(response.data.url);
     } catch (error) {
       console.log(error);
