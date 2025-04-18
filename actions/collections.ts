@@ -1,10 +1,10 @@
 "use server";
 
-import axios, { AxiosRequestConfig } from "axios";
+import { createClient } from "@/utils/supabase/server";
+import axios from "axios";
 import { cookies } from "next/headers";
 import { isAdministrator } from "./admin";
 
-// === INTERFACES ===
 export interface Collections {
   collections: Collection[];
 }
@@ -17,38 +17,31 @@ export interface Collection {
 
 export interface Response {
   message: string;
-}
+} 
 
-// === CONSTANTES ===
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
-// === UTILS ===
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
-const authRequest = async <T>(
-  config: AxiosRequestConfig
-): Promise<T> => {
-  const token = await getAuthToken();
-  if (!token) throw new Error("Jeton d'authentification manquant");
-
+export const getCollections = async () => {
+  const auth_token = await getAuthToken();
   try {
-    const response = await axios({
-      ...config,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(config.headers || {}),
-      },
-    });
-    return response.data;
+    const { data } = await axios.get<Collections>(
+      `${API_URL}collections`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.collections || [];
   } catch (error: any) {
-    if (error.response?.status === 404) {
-      return [] as T;
-    }
+    console.error("Error fetching collections:", error);
     if (error.response) {
-      console.error("Détails:", {
+      console.error("Détails de l'erreur:", {
         status: error.response.status,
         data: error.response.data,
       });
@@ -56,95 +49,126 @@ const authRequest = async <T>(
     throw new Error(
       error.response?.data?.error ||
       error.message ||
-      "Erreur de requête"
+      "Erreur lors de la récupération des collections"
     );
   }
-};
+}
 
-// === COLLECTIONS UTILISATEUR ===
-export const getCollections = async () => {
-  try {
-    const data = await authRequest<Collections>({
-      method: "GET",
-      url: `${API_URL}collections`,
-    });
-
-    // Check if collections exist in the response
-    if (data && data.collections) {
-      return data.collections;
-    } else {
-      return [];
-    }
-  } catch (error) {
-    console.error("Error fetching collections:", error);
-    return [];
-  }
-};
 
 export const deleteCollection = async (collection_name: string) => {
-  const data = await authRequest<Response>({
-    method: "DELETE",
-    url: `${API_URL}collections/${collection_name}`,
-  });
-  return data.message || "Collection supprimée avec succès";
-};
-
-// === COLLECTIONS ADMIN ===
-export const getGlobalCollection = async () => {
-  const data = await authRequest<Collections>({
-    method: "GET",
-    url: `${API_URL}admins/collections`,
-  });
-  return data.collections || [];
-};
-
-export const deleteGlobalCollection = async (collection_name: string) => {
-  const data = await authRequest<Response>({
-    method: "DELETE",
-    url: `${API_URL}admins/collections/${collection_name}`,
-  });
-  return data.message || "Collection supprimée avec succès";
-};
-
-// === CRÉATION COLLECTION (UPLOAD DE FICHIERS) ===
-export const createCollection = async (
-  collection_name: string,
-  files: File | File[]
-): Promise<string> => {
+  const auth_token = await getAuthToken();
   try {
-    const isAdmin = await isAdministrator();
-    const token = await getAuthToken();
-    if (!token) throw new Error("Jeton d'authentification manquant");
-
-    const formData = new FormData();
-    if (Array.isArray(files)) {
-      files.forEach((file) => formData.append("files", file));
-    } else {
-      formData.append("files", files);
-    }
-
-    const endpoint = isAdmin
-      ? `admins/collections/${collection_name}/documents`
-      : `collections/${collection_name}/documents`;
-
-    const response = await axios.post<Response>(
-      `${API_URL}${endpoint}`,
-      formData,
+    const { data } = await axios.delete<Response>(
+      `${API_URL}collections/${collection_name}`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${auth_token}`,
         },
       }
     );
-
-    return response.data.message || "Collection créée avec succès";
+    return data.message || "Collection supprimée avec succès";
   } catch (error: any) {
-    console.error("Erreur lors de la création de la collection:", error);
-    return (
+    console.error("Erreur pendant la suppression de la collection:", error);
+    if (error.response) {
+      console.error("Détails de l'erreur:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
       error.response?.data?.error ||
       error.message ||
-      "Échec de la création de la collection"
+      "Erreur lors de la suppression de la collection"
     );
   }
-};
+}
+
+export const getGlobalCollection = async () => {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.get<Collections>(
+      `${API_URL}admins/collections`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.collections || [];
+  } catch (error: any) {
+    console.error("Error fetching documents:", error);
+    if (error.response) {
+      console.error("Détails de l'erreur:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
+      error.response?.data?.error ||
+      error.message ||
+      "Erreur lors de la récupération des documents"
+    );
+  }
+}
+
+
+export const deleteGlobalCollection = async (collection_name: string) => {
+  const auth_token = await getAuthToken();
+  try {
+    const { data } = await axios.delete<Response>(
+      `${API_URL}admins/collections/${collection_name}`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.message || "Collection supprimée avec succès";
+  } catch (error: any) {
+    console.error("Erreur pendant la suppression de la collection:", error);
+    if (error.response) {
+      console.error("Détails de l'erreur:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
+      error.response?.data?.error ||
+      error.message ||
+      "Erreur lors de la suppression de la collection"
+    );
+  }
+}
+
+export const createCollection = async (collection_name: string, files: File | File[]) => {
+	try {
+		const isAdmin = await isAdministrator();
+		const auth_token = await getAuthToken();
+		if (!auth_token) {
+			throw new Error('Tokens are missing');
+		}
+		const url_api = isAdmin
+			? `${API_URL}admins/collections/${collection_name}/documents`
+			: `${API_URL}collections/${collection_name}/documents`;
+		const formData = new FormData();
+		if (Array.isArray(files)) {
+			files.forEach((file) => formData.append("files", file));
+		} else {
+			formData.append("files", files);
+		}
+
+		const data = await axios.request<Response>({
+			method: 'POST',
+			url: url_api,
+			headers: {
+				'content-Type': 'multipart/form-data',
+				Authorization: `Bearer ${auth_token}`,
+			},
+			data: formData,
+		});
+		return data.data.message || "Collection créée avec succès";
+	} catch (err: any) {
+		console.error('Erreur lors de la création de la collection:', err);
+		return err;
+	}
+}

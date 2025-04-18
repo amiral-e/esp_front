@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import type Stripe from "stripe"
 import { stripe } from "@/lib/stripe"
-import { updateMontantForUser } from "@/app/actions"
+import { updateMontantForUser } from "@/actions/prices"
 
 // This is your Stripe webhook secret for testing your endpoint locally.
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET

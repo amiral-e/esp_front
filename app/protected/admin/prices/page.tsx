@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "react-toastify"
-import { getPlatformPrices, updatePlatformPrice } from "@/app/actions"
+import { getPlatformPrices, updatePlatformPrice } from "@/actions/prices"
 import Link from "next/link"
 
 interface Price {

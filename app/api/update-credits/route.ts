@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
-import { updateMontantForUser } from "@/app/actions"
-import { getUserInfo } from "@/app/actions"
+import { updateMontantForUser } from "@/actions/prices"
+import { getUserInfo } from "@/actions/oauth"
 
 export async function POST(request: Request) {
   try {

@@ -11,7 +11,8 @@ import {
   createPredifinedQuestion,
   modifyPredifinedQuestions,
   deletePredifinedQuestion,
-} from "@/app/actions"
+  getPredifinedQuestions,
+} from "@/actions/predifined_questions"
 import {
   Dialog,
   DialogContent,
@@ -34,7 +35,6 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
-import { getAllPredifinedQuestions } from "@/actions/predifined_questions"
 
 interface Question {
   id: number
@@ -60,7 +60,7 @@ export default function QuestionsDashboard() {
 
   const fetchQuestions = async () => {
     setIsLoading(true)
-      const questionData = await getAllPredifinedQuestions()
+      const questionData = await getPredifinedQuestions()
       if (questionData.length === 0) {
         setQuestions([])
       }

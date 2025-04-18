@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { signUpAction } from "@/app/actions"
+import { signUpAction } from "@/actions/oauth"
 import { SubmitButton } from "@/components/submit-button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"

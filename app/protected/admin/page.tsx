@@ -26,9 +26,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
-import { getAllUsers, getAdmins, addAdmin, removeAdmin, type User } from "@/app/actions"
+import { getAllUsers, getAdmins, addAdmin, removeAdmin, grantCreditsToUser, type User } from "@/actions/admin"
 import { toast } from "react-toastify"
-import { grantCreditsToUser } from "@/actions/admin"
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([])

@@ -5,7 +5,7 @@ import { columns } from "./_components/columns"
 import ModalCollection from "./_components/modal-collection"
 import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
-import { getUserInfo } from "@/app/actions"
+import { getUserInfo } from "@/actions/oauth"
 import { getCollections, getGlobalCollection } from "@/actions/collections"
 import { isAdministrator } from "@/actions/admin"
 

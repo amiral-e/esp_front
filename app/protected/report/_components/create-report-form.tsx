@@ -13,6 +13,9 @@ import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import { createReport } from "@/actions/report"
 import dynamic from "next/dynamic"
+import { Collection, getCollections, getGlobalCollection } from "@/actions/collections"
+import { isAdministrator } from "@/actions/admin"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const PdfUploader = dynamic(() => import("./pdf-uploader"), {
   ssr: false,
@@ -26,6 +29,7 @@ export default function CreateReportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [isSuccess, setIsSuccess] = useState(false)
+  const [collection, setCollection] = useState<Collection[]>([])
 
   const router = useRouter()
 
@@ -34,7 +38,7 @@ export default function CreateReportForm() {
     if (isSuccess) {
       setIsSuccess(false)
       setTimeout(() => {
-          router.push("/protected/report")
+        router.push("/protected/report")
       }, 1000)
     }
   }, [isSuccess, toast, router])
@@ -50,6 +54,7 @@ export default function CreateReportForm() {
     setIsSubmitting(true)
 
     try {
+      console.log("documents", documents)
       const result = await createReport(title, documents, prompt, collectionName)
       toast.success(result)
       // Set success state to trigger the useEffect
@@ -73,6 +78,23 @@ export default function CreateReportForm() {
     setUploadedFiles(fileNames)
   }
 
+  const collections = async () => {
+    const isAdmin = await isAdministrator();
+    return isAdmin ? await getGlobalCollection() : await getCollections()
+  }
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const collectionsData = await collections()
+        setCollection(collectionsData)
+      } catch (error) {
+        console.error("Erreur lors de la récupération des collections:", error)
+      }
+    }
+    fetchCollections()
+  }, [])
+
   return (
     <Card className="max-w-2xl mx-auto">
       <CardHeader>
@@ -94,12 +116,18 @@ export default function CreateReportForm() {
 
           <div className="space-y-2">
             <Label htmlFor="collection">Nom de la collection</Label>
-            <Input
-              id="collection"
-              placeholder="rapports_financiers"
-              value={collectionName}
-              onChange={(e) => setCollectionName(e.target.value)}
-            />
+            <Select value={collectionName} onValueChange={setCollectionName}>
+              <SelectTrigger id="collection">
+                <SelectValue placeholder="Sélectionnez une collection" />
+              </SelectTrigger>
+              <SelectContent>
+                {collection.map((item) => (
+                  <SelectItem key={item.collection} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

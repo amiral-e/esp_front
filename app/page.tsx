@@ -6,8 +6,9 @@ import { CheckCircle, MessageSquareText, FileText, PieChart, Shield, Zap, ArrowR
 import FeatureCard from "./components/feature-card"
 import ChatDemo from "./components/chat-demo"
 import { cookies } from "next/headers"
-import { isAdministrator, signOutAction } from "./actions"
+import { signOutAction } from "@/actions/oauth"
 import { ThemeToggle } from "./components/theme-toggle"
+import { isAdministrator } from "@/actions/admin"
 
 export default async function LandingPage() {
   const cookieStore = cookies()

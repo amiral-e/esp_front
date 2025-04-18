@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { headers } from "next/headers"
 import { stripe } from "@/lib/stripe"
-import { getUserInfo } from "@/app/actions"
+import { getUserInfo } from "@/actions/oauth"
 
 export async function POST(request: Request) {
   try {

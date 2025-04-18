@@ -6,29 +6,11 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 
-// === UTILS ===
-const getOrigin = async () => (await headers()).get("origin") || "";
-const getJWTSecret = () => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET is not defined");
-  return secret;
-};
-
-const setAuthCookie = async (uid: string) => {
-  const token = jwt.sign({ uid }, getJWTSecret(), { expiresIn: "7d" });
-  (await cookies()).set("auth_token", token, {
-    httpOnly: true,
-    secure: true,
-  });
-};
-
-// === ACTIONS ===
-
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
-  const origin = await getOrigin();
   const supabase = await createClient();
+  const origin = (await headers()).get("origin");
 
   if (!email || !password) {
     return { error: "Email et mot de passe sont requis" };
@@ -52,21 +34,31 @@ export const signUpAction = async (formData: FormData) => {
     password,
   });
 
-  if (signInError || !data?.user) {
-    return { error: signInError?.message || "Échec de la connexion" };
+  if (signInError) {
+    return { error: signInError.message };
   }
 
-  await setAuthCookie(data.user.id);
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined");
+  }
+
+  const token = jwt.sign({ uid: data.user.id }, secret, { expiresIn: "7d" });
+  (await cookies()).set("auth_token", token, {
+    httpOnly: true,
+    secure: true,
+  });
+
   return redirect("/");
 };
 
 export const signInAction = async (formData: FormData) => {
-  const email = formData.get("email")?.toString();
-  const password = formData.get("password")?.toString();
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
   const supabase = await createClient();
-
-  if (!email || !password) {
-    return encodedRedirect("error", "/sign-in", "Email et mot de passe requis");
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined");
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({
@@ -74,22 +66,32 @@ export const signInAction = async (formData: FormData) => {
     password,
   });
 
-  if (error || !data?.user) {
-    return encodedRedirect("error", "/sign-in", error?.message || "Erreur inconnue");
+  if (error) {
+    return encodedRedirect("error", "/sign-in", error.message);
   }
+  if (data) {
+    const payload = {
+      uid: data.user.id,
+    };
+    const token = jwt.sign({ uid: payload.uid }, secret);
+    (await cookies()).set("auth_token", token, {
+      httpOnly: true,
+      secure: true,
+    });
 
-  await setAuthCookie(data.user.id);
-  return redirect("/");
+    return redirect("/");
+  }
+  return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
 
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
-  const callbackUrl = formData.get("callbackUrl")?.toString();
-  const origin = await getOrigin();
   const supabase = await createClient();
+  const origin = (await headers()).get("origin");
+  const callbackUrl = formData.get("callbackUrl")?.toString();
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email requis");
+    return encodedRedirect("error", "/forgot-password", "Email is required");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -98,54 +100,59 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error(error.message);
-    return encodedRedirect("error", "/forgot-password", "Impossible d'envoyer le lien");
+    return encodedRedirect(
+      "error",
+      "/forgot-password",
+      "Could not reset password"
+    );
   }
 
-  if (callbackUrl) return redirect(callbackUrl);
+  if (callbackUrl) {
+    return redirect(callbackUrl);
+  }
 
   return encodedRedirect(
     "success",
     "/forgot-password",
-    "Un lien de réinitialisation a été envoyé par email"
+    "Check your email for a link to reset your password."
   );
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
-  const password = formData.get("password")?.toString();
-  const confirmPassword = formData.get("confirmPassword")?.toString();
   const supabase = await createClient();
 
+  const password = formData.get("password") as string;
+  const confirmPassword = formData.get("confirmPassword") as string;
+
   if (!password || !confirmPassword) {
-    return encodedRedirect(
+    encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Les deux champs sont requis"
+      "Password and confirm password are required"
     );
   }
 
   if (password !== confirmPassword) {
-    return encodedRedirect(
+    encodedRedirect(
       "error",
       "/protected/reset-password",
-      "Les mots de passe ne correspondent pas"
+      "Passwords do not match"
     );
   }
 
-  const { error } = await supabase.auth.updateUser({ password });
+  const { error } = await supabase.auth.updateUser({
+    password: password,
+  });
 
   if (error) {
-    return encodedRedirect(
+    encodedRedirect(
       "error",
       "/protected/reset-password",
-      "La mise à jour a échoué"
+      "Password update failed"
     );
   }
 
-  return encodedRedirect(
-    "success",
-    "/protected/reset-password",
-    "Mot de passe mis à jour"
-  );
+  encodedRedirect("success", "/protected/reset-password", "Password updated");
 };
 
 export const signOutAction = async () => {
@@ -154,4 +161,16 @@ export const signOutAction = async () => {
   const cookieStore = cookies();
   (await cookieStore).delete("auth_token");
   return redirect("/sign-in");
+};
+
+export const getUserInfo = async () => {
+  const {
+    data: { user },
+  } = await (await createClient()).auth.getUser();
+  return user;
+};
+
+export const getAuthToken = async (): Promise<string | null> => {
+  const cookieStore = await cookies();
+  return cookieStore.get("auth_token")?.value ?? null;
 };

@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Trash2, FileText, Download } from "lucide-react"
 import { useState } from "react"
-import { deleteDocumentByDocId, deleteDocumentGlobalByDocId } from "@/actions/documents"
+import { deleteDocumentByDocId, deleteDocumenGlobaltByDocId } from "@/actions/documents"
 import { useRouter } from "next/navigation"
 import {
   AlertDialog,
@@ -37,7 +37,7 @@ export function DocumentsTable({ documents, collectionName, isAdmin }: Documents
     try {
       setDeletingId(docId)
       if (isAdmin) {
-        await deleteDocumentGlobalByDocId(collectionName, docId)
+        await deleteDocumenGlobaltByDocId(collectionName, docId)
       } else {
         await deleteDocumentByDocId(collectionName, docId)
       }

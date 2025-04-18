@@ -12,7 +12,8 @@ import {
   Home,
   File,
 } from "lucide-react";
-import { getUserInfo, isAdministrator } from "@/app/actions";
+import { getUserInfo} from "@/actions/oauth";
+import { isAdministrator } from "@/actions/admin";
 import {
   Sidebar,
   SidebarContent,

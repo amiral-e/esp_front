@@ -23,7 +23,7 @@ export default function ReportsList({ reports }: ReportsListProps) {
       {
         try {
           const response = await deleteReport(id)
-          toast.success(response.message)
+          await toast.success("Rapport supprimé avec succès")
           router.refresh()
         } catch (error) {
           toast.error("Erreur lors de la suppression du rapport")
@@ -60,15 +60,7 @@ export default function ReportsList({ reports }: ReportsListProps) {
           <Card key={report.id}>
             <CardHeader>
               <CardTitle className="truncate">{report.title}</CardTitle>
-              <CardDescription>
-                {report.created_at ? new Date(report.created_at).toISOString().split("T")[0] : "No date"}
-              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {typeof report.text === "string" ? report.text.substring(0, 150) + "..." : "No content available"}
-              </p>
-            </CardContent>
             <CardFooter className="flex justify-between">
               <Button variant="outline" onClick={() => openReportModal(report.id)} className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />

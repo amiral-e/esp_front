@@ -1,4 +1,3 @@
-import { EnvVarWarning } from "./env-var-warning";
 import NavigationMenuWrapper from "./navigationMenuWrapper";
 import { Logo } from "./logo";
 import NextLogo from "./next-logo";
@@ -15,7 +14,6 @@ export default function Header() {
               <NavigationMenuWrapper />
             </div>
           </div>
-          <EnvVarWarning />
         </div>
       </nav>
       <div className="flex flex-col gap-16 items-center">
