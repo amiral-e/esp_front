@@ -39,7 +39,6 @@ const ConversationButton = ({
 
   const handleEdit = () => {
     if (onUpdate && editedTitle.trim() !== "") {
-      console.log("editedTitle", editedTitle);
       onUpdate(editedTitle);
       setIsEditing(false);
     }
@@ -70,6 +69,7 @@ const ConversationButton = ({
           <div
             className="flex-1 truncate w-52"
             onDoubleClick={() => setIsEditing(true)}
+            role="button"
           >
             {title}
           </div>

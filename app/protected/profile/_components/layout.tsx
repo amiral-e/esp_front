@@ -15,6 +15,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
+import { toast } from "react-toastify"
 
 const formSchema = z.object({
   knowledgeLevel: z.string().default("intermediate"),
@@ -68,9 +69,8 @@ export default function ProfileLayout() {
 
   const handleSaveKnowledgeLevel = async () => {
     const response = await updateProfile(selectedKnowledgeLevel)
-    console.log("response", response)
     if (response) {
-      alert(response.message)
+      toast.success("Le niveau de connaissance a été mis à jour avec succès !");
     }
   }
 

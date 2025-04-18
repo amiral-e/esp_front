@@ -3,7 +3,7 @@
 import { type Report, deleteReport } from "@/actions/report"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "react-toastify"
 import { Eye, FileText, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
@@ -14,26 +14,20 @@ interface ReportsListProps {
 }
 
 export default function ReportsList({ reports }: ReportsListProps) {
-  const { toast } = useToast()
   const router = useRouter()
   const [selectedReportId, setSelectedReportId] = useState<number | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleDelete = async (id: number) => {
-    if (confirm("Are you sure you want to delete this report?")) {
-      try {
-        const response = await deleteReport(id)
-        toast({
-          title: "Success",
-          description: response.message,
-        })
-        router.refresh()
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete report",
-          variant: "destructive",
-        })
+    if (confirm("Êtes-vous sûr de vouloir supprimer ce rapport ?")) {
+      {
+        try {
+          const response = await deleteReport(id)
+          await toast.success("Rapport supprimé avec succès")
+          router.refresh()
+        } catch (error) {
+          toast.error("Erreur lors de la suppression du rapport")
+        }
       }
     }
   }
@@ -66,15 +60,7 @@ export default function ReportsList({ reports }: ReportsListProps) {
           <Card key={report.id}>
             <CardHeader>
               <CardTitle className="truncate">{report.title}</CardTitle>
-              <CardDescription>
-                {report.created_at ? new Date(report.created_at).toISOString().split("T")[0] : "No date"}
-              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {typeof report.text === "string" ? report.text.substring(0, 150) + "..." : "No content available"}
-              </p>
-            </CardContent>
             <CardFooter className="flex justify-between">
               <Button variant="outline" onClick={() => openReportModal(report.id)} className="flex items-center gap-2">
                 <Eye className="h-4 w-4" />

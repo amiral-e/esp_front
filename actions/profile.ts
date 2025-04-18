@@ -6,7 +6,7 @@ import { getConversationByUser } from "./conversations";
 
 
 const NEXT_PUBLIC_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
 const getAuthToken = async (): Promise<string | null> => {
     const cookieStore = await cookies();
@@ -66,7 +66,6 @@ export const getKnowledges = async (): Promise<KnowledgeLevel[]> => {
             name: level,
         }));
     } catch (error) {
-        console.log("error", error);
         return [];
     }
 };
@@ -113,7 +112,6 @@ export const updateProfile = async (level: string): Promise<Message> => {
                 },
             }
         );
-        console.log("Profile updated successfully:", response.data);
         return response.data;
     } catch (error) {
         return { message: "An error occurred while updating the profile." };

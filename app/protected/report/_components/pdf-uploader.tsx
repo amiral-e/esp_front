@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "react-toastify";
 import { FileUp, Loader2, X } from "lucide-react";
 import * as pdfjsLib from "pdfjs-dist";
 
@@ -12,11 +12,10 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js"; // Chemin vers le worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
     }
   }, []);
 
@@ -28,11 +27,7 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
     );
 
     if (newFiles.length === 0) {
-      toast({
-        title: "Type de fichier invalide",
-        description: "Seuls les fichiers PDF sont acceptés",
-        variant: "destructive",
-      });
+      toast.error("Type de fichier invalide");
       return;
     }
 
@@ -63,7 +58,7 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
 
       for (const file of filesToProcess) {
         const arrayBuffer = await file.arrayBuffer();
-        
+
         // Utiliser pdfjsLib.getDocument pour charger le PDF à partir du ArrayBuffer
         const pdf = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
 
@@ -80,23 +75,38 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
           fullText += textItems + " ";
         }
 
-        extractedTexts.push(fullText.trim());
+        // Séparer le texte à chaque point
+        const splitText = splitTextByPeriod(fullText);
+
+        // Ajouter les morceaux dans extractedTexts (plats)
+        extractedTexts.push(...splitText);
         fileNames.push(file.name);
       }
 
       // Mettre à jour les documents extraits
       onDocumentsUpdate(extractedTexts, fileNames);
     } catch (error) {
-      console.error("Erreur lors du traitement du PDF:", error);
-      toast({
-        title: "Erreur de traitement PDF",
-        description: "Il y a eu une erreur lors de l'extraction du texte du PDF",
-        variant: "destructive",
-      });
+      console.error("Erreur lors du traitement des fichiers PDF :", error);
+      toast.error("Erreur lors du traitement des fichiers PDF");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fonction pour diviser le texte à chaque point
+  const splitTextByPeriod = (text: string) => {
+    // Remplacer les apostrophes (') par des guillemets doubles (")
+    const formattedText = text.replace(/'/g, '"');  // Remplace toutes les apostrophes par des guillemets doubles
+  
+    // Diviser le texte à chaque point (.)
+    const splitText = formattedText.split('.')
+      .map((item) => item.trim())  // Enlever les espaces avant et après chaque segment
+      .filter((item) => item.length > 0);  // Filtrer les segments vides
+  
+    return splitText;
+  };
+  
+
 
   return (
     <div className="space-y-4">

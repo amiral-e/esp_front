@@ -1,13 +1,10 @@
 "use server";
 
-import { getUserInfo } from "@/app/actions";
-import { createClient } from "@/utils/supabase/server";
-
 import axios from "axios";
 import { cookies } from "next/headers";
 
 const NEXT_PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
@@ -224,26 +221,3 @@ export const sendMessageWithCollection = async (
     return { error: err.message || "An unexpected error occurred" };
   }
 };
-
-export const getPredifinedQuestions = async () => {
-  const auth_token = await getAuthToken();
-
-  try {
-    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
-    });
-
-    return data.questions || [];
-  } catch (error: any) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      console.warn("Aucune question trouvée.");
-      return [];
-    }
-
-    console.error("Erreur lors de la récupération des questions :", error);
-    throw error;
-  }
-};
-

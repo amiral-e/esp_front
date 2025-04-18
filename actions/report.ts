@@ -4,7 +4,7 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 const NEXT_PUBLIC_API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
 const getAuthToken = async (): Promise<string | null> => {
     const cookieStore = await cookies();
@@ -12,11 +12,8 @@ const getAuthToken = async (): Promise<string | null> => {
 };
 
 export interface Report {
-    id: number
-    created_at: string,
-    user_id: string,
+    id: number,
     title: string,
-    text: string
 }
 
 export interface Response {
@@ -40,9 +37,8 @@ export const getReports = async (): Promise<Report[]> => {
                 },
             }
         );
-        return data;
+        return data || [];
     } catch (error) {
-        console.error("Error fetching reports:", error);
         return [];
     }
 }
@@ -113,4 +109,3 @@ export const deleteReport = async (id: number): Promise<Message> => {
         return { message: "Failed to delete report" };
     }
 }
-
