@@ -8,6 +8,7 @@ import { PlusIcon } from "lucide-react"
 import { getUserInfo } from "@/actions/oauth"
 import { getCollections, getGlobalCollection } from "@/actions/collections"
 import { isAdministrator } from "@/actions/admin"
+import { ToastContainer } from "react-toastify"
 
 export default async function CollectionsPage() {
   const user = await getUserInfo()
@@ -28,6 +29,7 @@ export default async function CollectionsPage() {
             </Button>
           </ModalCollection>
         </div>
+        <ToastContainer></ToastContainer>
         <Separator />
         <div className="flex flex-1 flex-col gap-4 p-4">
           <DataTable columns={columns} data={collections || []} isAdmin={isAdmin} />

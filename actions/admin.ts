@@ -98,15 +98,32 @@ export const getAllUsers = async () => {
 
 export const getAdmins = async () => {
   const auth_token = await getAuthToken();
-  const { data } = await axios.get<Admins>(
-    `${NEXT_PUBLIC_API_URL}admins`,
-    {
-      headers: {
-        Authorization: `Bearer ${auth_token}`,
-      },
+  try {
+    const { data } = await axios.get<Admins>(
+      `${NEXT_PUBLIC_API_URL}admins`,
+      {
+        headers: {
+          Authorization: `Bearer ${auth_token}`,
+        },
+      }
+    );
+    return data.admins || [];
+  } catch (error: any) {
+    if (error.response.status === 404) {
+      return [];
     }
-  );
-  return data.admins;
+    if (error.response) {
+      console.error("Détails de l'erreur:", {
+        status: error.response.status,
+        data: error.response.data,
+      });
+    }
+    throw new Error(
+      error.response?.data?.error ||
+      error.message ||
+      "Erreur lors de la récupération des admins"
+    );
+  }
 }
 
 export const addAdmin = async (user_id: string) => {
@@ -161,7 +178,7 @@ export async function grantCreditsToUser(userId: string, amount: number): Promis
       }
     );
     return data.message;
-  }catch (error) {
+  } catch (error) {
     return "Une erreur s'est produite lors de l'octroi de crédits.";
   }
 }

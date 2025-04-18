@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label"
 import { createCollection } from "@/actions/collections"
 import { useRouter } from "next/navigation"
 import { Upload, X, FileText } from "lucide-react"
+import { toast } from "react-toastify"
 
 interface ModalCollectionProps {
   children: React.ReactNode
@@ -61,7 +62,16 @@ export default function ModalCollection({ children, userId, isAdmin = false }: M
       setIsSubmitting(true)
       setError(null)
 
-      await createCollection(collectionName, files)
+      const response = await createCollection(collectionName, files)
+      console.log(response)
+      if(response && response === "Request failed with status code 402") {
+        toast.error("Crédits insuffisants, veuillez recharger votre compte !")
+        setOpen(false)
+        setCollectionName("")
+        setFiles([])
+        setIsSubmitting(false)
+        return;
+      }
 
       setOpen(false)
       setCollectionName("")
@@ -106,7 +116,7 @@ export default function ModalCollection({ children, userId, isAdmin = false }: M
               <div className="col-span-3">
                 <div
                   className="border-2 border-dashed rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50"
-                  onMouseOver={() => fileInputRef.current?.click()}
+                  onClick={() => fileInputRef.current?.click()}
                   role="button"
                 >
                   <Upload className="h-6 w-6 mb-2 text-muted-foreground" />

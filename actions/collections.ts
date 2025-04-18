@@ -39,7 +39,9 @@ export const getCollections = async () => {
     );
     return data.collections || [];
   } catch (error: any) {
-    console.error("Error fetching collections:", error);
+    if(error.response.status === 404) {
+      return [];
+    }
     if (error.response) {
       console.error("Détails de l'erreur:", {
         status: error.response.status,
@@ -68,7 +70,6 @@ export const deleteCollection = async (collection_name: string) => {
     );
     return data.message || "Collection supprimée avec succès";
   } catch (error: any) {
-    console.error("Erreur pendant la suppression de la collection:", error);
     if (error.response) {
       console.error("Détails de l'erreur:", {
         status: error.response.status,
@@ -96,7 +97,9 @@ export const getGlobalCollection = async () => {
     );
     return data.collections || [];
   } catch (error: any) {
-    console.error("Error fetching documents:", error);
+    if(error.response.status === 404) {
+      return [];
+    }
     if (error.response) {
       console.error("Détails de l'erreur:", {
         status: error.response.status,
@@ -169,6 +172,6 @@ export const createCollection = async (collection_name: string, files: File | Fi
 		return data.data.message || "Collection créée avec succès";
 	} catch (err: any) {
 		console.error('Erreur lors de la création de la collection:', err);
-		return err;
+		return err.message || "An unexpected error occurred";
 	}
 }

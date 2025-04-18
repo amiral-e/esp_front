@@ -28,7 +28,7 @@ const getAuthToken = async (): Promise<string | null> => {
 export const getDocumentsByCollectionName = async (collection_name: string) => {
     const auth_token = await getAuthToken();
     try {
-        const { data }  = await axios.get<Doc>(
+        const { data } = await axios.get<Doc>(
             `${API_URL}collections/${collection_name}/documents`,
             {
                 headers: {
@@ -38,7 +38,9 @@ export const getDocumentsByCollectionName = async (collection_name: string) => {
         );
         return data.documents || [];
     } catch (error: any) {
-        console.error("Error fetching documents:", error);
+        if (error.response.status === 404) {
+            return [];
+        }
         if (error.response) {
             console.error("Détails de l'erreur:", {
                 status: error.response.status,
@@ -57,7 +59,7 @@ export const getDocumentsByCollectionName = async (collection_name: string) => {
 export const getDocumentsByCollectionGlobal = async (collection_name: string) => {
     const auth_token = await getAuthToken();
     try {
-        const { data }  = await axios.get<Doc>(
+        const { data } = await axios.get<Doc>(
             `${API_URL}admins/collections/${collection_name}/documents`,
             {
                 headers: {
@@ -67,7 +69,9 @@ export const getDocumentsByCollectionGlobal = async (collection_name: string) =>
         );
         return data.documents || [];
     } catch (error: any) {
-        console.error("Error fetching documents:", error);
+        if (error.response.status === 404) {
+            return [];
+        }
         if (error.response) {
             console.error("Détails de l'erreur:", {
                 status: error.response.status,

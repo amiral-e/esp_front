@@ -124,11 +124,16 @@ export default function ChatForm() {
           await sendMessageWithCollection(Number(id), values.message, [collection]);
         }
       } else {
-        await sendMessage(Number(id), values.message);
+      
+        const response = await sendMessage(Number(id), values.message);
+        console.log("Response:", response.error);
+        if(response.error && response.error === "Request failed with status code 402") {
+          toast.error("Crédits insuffisants, veuillez recharger votre compte !")
+          return;
+        }
       }
       form.reset();
       router.refresh();
-      setSelectedCollections([]);
     } catch (error) {
       console.error("Error sending message:", error);
     }

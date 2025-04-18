@@ -84,7 +84,6 @@ export const getPredifinedQuestions = async () => {
       return data.questions || [];
     } catch (error: any) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
-        console.warn("Aucune question trouvée.");
         return [];
       }
   

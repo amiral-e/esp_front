@@ -32,6 +32,11 @@ export default function SignUpComponent() {
     }
     try {
       const response = await signUpAction(formData)
+      console.log(response)
+      if(response.error) {
+        toast.error(response.error)
+        return
+      }
       toast.success("Votre compte a été créé avec succès !")
     } catch (error) {
       toast.error("Une erreur s'est produite lors de la création de votre compte. Veuillez réessayer.")
