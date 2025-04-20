@@ -174,3 +174,26 @@ export const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? null;
 };
+
+
+export const deleteUser = async (user_uid: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .rpc('delete_user', {
+      user_uid
+    })
+  signOutAction()
+  if (error) console.error(error)
+  else console.log(data)
+}
+
+export const updateUser = async (user_uid: string, email: string) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('users')
+    .update({ email })
+    .eq('user_uid', user_uid)
+  if (error) console.error(error)
+  else console.log(data)
+  return data
+}

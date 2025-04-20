@@ -73,7 +73,7 @@ export default function PredefinedQuestions() {
             onClick={() => handleQuestionClick(question)}
           >
             <MessageSquare className="mr-1 h-3 w-3" />
-            <span className="truncate max-w-[120px]">{question}</span>
+            <span>{question}</span>
           </Button>
         ))}
       </div>

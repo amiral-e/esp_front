@@ -1,12 +1,12 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import ProfileLayout from "./_components/layout";
-import { AppSidebar } from "@/components/app-sidebar";
+import { ToastContainer } from "react-toastify";
 
 export default function ProfilePage() {
   return (
     <SidebarProvider>
-      {/* <AppSidebar /> */}
       <SidebarInset>
+        <ToastContainer />
         <ProfileLayout />
       </SidebarInset>
     </SidebarProvider>
