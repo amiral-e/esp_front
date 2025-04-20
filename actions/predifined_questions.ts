@@ -74,22 +74,44 @@ export const modifyPredifinedQuestions = async (question: string, level: string,
 
 // Function to get all the predefined questions
 export const getPredifinedQuestions = async () => {
-    const auth_token = await getAuthToken();
-  
-    try {
-      const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
-        headers: {
-          Authorization: `Bearer ${auth_token}`,
-        },
-      });
-  
-      return data.questions || [];
-    } catch (error: any) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return [];
-      }
-  
-      console.error("Erreur lors de la récupération des questions :", error);
-      throw error;
+  const auth_token = await getAuthToken();
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
     }
-  };
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
+
+
+export const getAllQuestionsForAdmin = async () => {
+  const auth_token = await getAuthToken();
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}admins/questions`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
+    }
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
