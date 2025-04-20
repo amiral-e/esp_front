@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { signInAction } from "@/app/actions"
+import { signInAction } from "@/actions/oauth"
 import { FormMessage, type Message } from "@/components/form-message"
 import { SubmitButton } from "@/components/submit-button"
 import { Input } from "@/components/ui/input"
@@ -7,12 +7,16 @@ import { Separator } from "@/components/ui/separator"
 import { GithubSSO } from "@/components/github-sso"
 import { ArrowRight, CheckCircle, LockKeyhole, Mail } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { ThemeToggle } from "@/app/components/theme-toggle"
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams
 
   return (
     <div className="flex min-h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
       <div className="hidden lg:flex w-1/2 bg-primary/10 justify-center items-center p-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-primary/5 backdrop-blur-sm"></div>
         <div className="relative z-10 max-w-xl">

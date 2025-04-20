@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Loader2, PaperclipIcon, SendIcon, XIcon } from "lucide-react";
+import { Loader2, PaperclipIcon, SendIcon } from "lucide-react";
 import { sendMessage, sendMessageWithCollection } from "@/actions/conversations";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -18,12 +18,12 @@ import {
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import { getUserInfo } from "@/app/actions";
-import { getCollectionByUserId } from "@/actions/collections";
+import { getCollections, getGlobalCollection } from "@/actions/collections";
 import { getKnowledges, KnowledgeLevel, Profile, getProfile, User, updateProfile } from "@/actions/profile";
-import type { Collection } from "@/app/protected/collections/_components/columns";
+import type { Collection } from "@/actions/collections";
 import { useChatContext } from "./chat-context";
-import { toast } from "@/hooks/use-toast";
+import { isAdministrator } from "@/actions/admin";
+import { toast } from "react-toastify";
 
 const formSchema = z.object({
   message: z.string().min(2).max(50),
@@ -39,6 +39,7 @@ export default function ChatForm() {
   const [selectedCollections, setSelectedCollections] = useState<string[]>([]);
   const [knowledgeLevels, setKnowledgeLevels] = useState<KnowledgeLevel[]>([]);
   const [selectedKnowledgeLevel, setSelectedKnowledgeLevel] = useState("intermediate");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,34 +50,18 @@ export default function ChatForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      if (selectedCollections.length > 0) {
-        for (const collection of selectedCollections) {
-          await sendMessageWithCollection(
-            id?.toString() || "",
-            values.message,
-            [collection]
-          );
-        }
-      } else {
-        await sendMessage(id?.toString() || "", values.message);
-      }
-      form.reset();
-      router.refresh();
-      setSelectedCollections([]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-    setIsLoading(false);
-  }
-
   useEffect(() => {
     const fetchData = async () => {
-      const user = await getUserInfo();
-      const collections = await getCollectionByUserId(user?.id || "");
-      console.log(collections);
+      const adminStatus = await isAdministrator();
+      setIsAdmin(adminStatus);
+      let collections: Collection[] = [];
+      if (!adminStatus) {
+        collections = await getCollections();
+      } else {
+        collections = await getGlobalCollection();
+      }
+
+      // Remove duplicates
       const uniqueCollections = collections.reduce((acc: Collection[], current) => {
         if (!acc.find((item) => item.collection === current.collection)) {
           acc.push(current);
@@ -86,6 +71,7 @@ export default function ChatForm() {
 
       setCollections(uniqueCollections);
     };
+
     fetchData();
   }, []);
 
@@ -126,8 +112,32 @@ export default function ChatForm() {
     // update user level
     const response = await updateProfile(level);
     if (response) {
-      toast({ description: response.message });
+      toast.success("Le niveau de connaissance a été mis à jour avec succès !");
     }
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    try {
+      if (selectedCollections.length > 0) {
+        for (const collection of selectedCollections) {
+          await sendMessageWithCollection(Number(id), values.message, [collection]);
+        }
+      } else {
+      
+        const response = await sendMessage(Number(id), values.message);
+        console.log("Response:", response.error);
+        if(response.error && response.error === "Request failed with status code 402") {
+          toast.error("Crédits insuffisants, veuillez recharger votre compte !")
+          return;
+        }
+      }
+      form.reset();
+      router.refresh();
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+    setIsLoading(false);
   };
 
   return (

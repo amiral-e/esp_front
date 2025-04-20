@@ -7,9 +7,12 @@
     "start": "next start -p 8080",
     "format": "bunx biome format --write **/*.ts",
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run",
+    "deploy-dev": "fly deploy --app cc-front-dev --config fly-dev.toml",
+    "deploy-prod": "fly deploy --app cc-front-prod --config fly-prod.toml"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.2",
@@ -24,6 +27,7 @@
     "@radix-ui/react-progress": "^1.1.2",
     "@radix-ui/react-radio-group": "^1.2.3",
     "@radix-ui/react-scroll-area": "^1.2.1",
+    "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-separator": "^1.1.1",
     "@radix-ui/react-slot": "^1.1.1",
     "@radix-ui/react-switch": "^1.1.3",
@@ -48,10 +52,13 @@
     "micro": "^10.0.1",
     "next": "15.0.1",
     "next-themes": "^0.3.0",
+    "pdfjs-dist": "^3.11.174",
     "prettier": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.54.2",
+    "react-markdown": "^10.1.0",
+    "react-toastify": "^11.0.5",
     "recharts": "^2.15.1",
     "stripe": "^17.7.0",
     "zod": "^3.24.1"

@@ -11,8 +11,6 @@ import {
   AlertDialogHeader,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import React, { useState } from "react";
 import { createConversation } from "@/actions/conversations";
@@ -34,7 +32,7 @@ const Modal = ({
     if (!name.trim()) return;
 
     try {
-      const conversation = await createConversation(name, userId);
+      const conversation = await createConversation(name);
       router.refresh();
       setName("");
     } catch (error) {
