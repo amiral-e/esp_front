@@ -1,21 +1,22 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 interface UserChatProps {
-  message: string;
-  userAvatar: string;
+  message: string
+  userAvatar: string
 }
 
 const UserChat = ({ message, userAvatar }: UserChatProps) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-start gap-3">
+      <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3 max-w-md">
+        <p className="text-sm">{message}</p>
+      </div>
       <Avatar>
-        <AvatarImage src={userAvatar} alt="user avatar" />
-        <AvatarFallback>CC</AvatarFallback>
+        <AvatarImage src={userAvatar || "/placeholder.svg"} alt="user avatar" />
+        <AvatarFallback>U</AvatarFallback>
       </Avatar>
-      <div className="text-md">{message}</div>
     </div>
-  );
-};
+  )
+}
 
-export default UserChat;
+export default UserChat

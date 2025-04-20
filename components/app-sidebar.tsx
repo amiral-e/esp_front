@@ -101,7 +101,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     {
       icon: <UserRoundCog className="size-4" />,
-      name: "Profile",
+      name: "Profil",
       href: "/protected/profile/",
     },
     {

@@ -12,6 +12,7 @@ import { getPredifinedQuestions } from "@/actions/predifined_questions"
 export default function PredefinedQuestions() {
   const [questions, setQuestions] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
   const { id } = useParams()
   const router = useRouter()
   const { setIsLoading: setChatLoading } = useChatContext()
@@ -43,40 +44,53 @@ export default function PredefinedQuestions() {
     }
   }
 
-  if(questions.length === 0)
-  {
-    return null;
-  }
   if (isLoading) {
     return (
-      <div className="mb-4 px-2">
-        <h3 className="text-xs font-medium text-muted-foreground mb-2">Questions suggérées</h3>
+      <div className="mb-6">
+        <h3 className="text-xs font-medium text-muted-foreground mb-3">Questions suggérées</h3>
         <div className="flex flex-wrap gap-2">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-7 w-28" />
+            <Skeleton key={i} className="h-8 w-32 rounded-full" />
           ))}
         </div>
       </div>
     )
   }
 
+  if (questions.length === 0) {
+    return null
+  }
+
+  const visibleQuestions = showAll ? questions : questions.slice(0, 2)
+
   return (
-    <div className="mb-4 px-2">
-      <h3 className="text-xs font-medium text-muted-foreground mb-2">Questions suggérées</h3>
+    <div className="mt-2 mb-2">
+      <h3 className="text-xs font-medium text-muted-foreground mb-3">Questions suggérées</h3>
       <div className="flex flex-wrap gap-2">
-        {questions.map((question, index) => (
+        {visibleQuestions.map((question, index) => (
           <Button
             key={index}
             variant="outline"
             size="sm"
-            className="h-7 text-xs py-0"
+            className="h-8 text-xs rounded-full px-4 bg-background hover:bg-muted"
             onClick={() => handleQuestionClick(question)}
           >
-            <MessageSquare className="mr-1 h-3 w-3" />
-            <span className="truncate max-w-[120px]">{question}</span>
+            <MessageSquare className="mr-2 h-2 w-2" />
+            <span>{question}</span>
           </Button>
         ))}
+  
+        {questions.length > 2 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-xs px-4 underline"
+            onClick={() => setShowAll((prev) => !prev)}
+          >
+            {showAll ? "Voir moins" : "Voir plus..."}
+          </Button>
+        )}
       </div>
     </div>
-  )
+  )  
 }

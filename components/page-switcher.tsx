@@ -31,7 +31,7 @@ const routes = [
   },
   {
     icon: <UserRoundCog className="size-4" />,
-    name: "Profile",
+    name: "Profil",
     href: "/protected/profile/",
   },
   {
