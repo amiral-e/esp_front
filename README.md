@@ -61,7 +61,9 @@ Une version de production est accessible ici: [https://cc-front-prod.fly.dev/](h
   docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 ```
 
-# Structure du dépôt
+<details>
+<summary>Structure du dépôt</summary>
+
 
 ```
 ├── actions : appels vers la base de données Supabase
@@ -69,14 +71,24 @@ Une version de production est accessible ici: [https://cc-front-prod.fly.dev/](h
 │   ├── (auth-pages) : pages d'authentification
 │   ├── api : API de l'application
 │   ├── components : composants shadcn
-│   ├── payment-success : confirmation de paiement
+│   ├── payment-success : paiement réussi
+│   ├── privacy_policy : politique de confidentialité
 │   ├── protected : pages protégées par authentification
-│   │   ├── admin : pages réservées aux administrateurs
-│   │   ├── chat : page regroupant toutes les conversations
-│   │   ├── chat/[id] : page d'une conversation
+│   │   ├── admin : gestion réservée aux administrateurs
+│   │   ├── chat : regroupement de toutes les conversations
+│   │   ├── confirm-payment : confirmation de paiement
 │   │   ├── collections : page de gestion des collections de documents
-│   ├── dashboard : page de dashboard
-│   └── settings : page de préférences
+│   │   ├── profile : profil de l'utilisateur
+│   │   ├── report : génération de rapports pdf
+│   │   ├── reset-password : réinitialisation du mot de passe
+│   │   └── success : traitement de l'ajout de crédits
+│   └── styles : styles additionnels
+├── components : composants de l'application
+├── content : contenu des conditions générales et de la politique de confidentialité
+├── cypress : tests end-to-end
+├── hooks : hooks personnalisés
 ├── lib : supabase client
-└── utils : utils functions
+├── sonar : documentation pour SonarQube
+└── utils : fonctions utilitaires
 ```
+</details>
