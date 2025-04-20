@@ -1,20 +1,20 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import UserChat from "../../_components/user-chat"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Check, Copy } from "lucide-react"
-import { formatMarkdown } from "@/lib/formatMarkdown"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useRef } from "react"
 import { useChatContext } from "./chat-context"
 import type { Conv } from "@/actions/conversations"
-import PredefinedQuestions from "./predifined-questions"
+import UserChat from "../../_components/user-chat"
+import MessageBubble from "./message-bubble"
+import { Skeleton } from "@/components/ui/skeleton"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export interface Message {
   role: string
   content: string
+  sources?: {
+    collection: string
+    documents: string[]
+  }[]
 }
 
 interface ChatAreaProps {
@@ -24,9 +24,9 @@ interface ChatAreaProps {
 const ChatArea = ({ conversation }: ChatAreaProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { isLoading } = useChatContext()
-  const [copiedId, setCopiedId] = useState<number | null>(null)
+
   let messages: Message[] = []
-  if (conversation.history.length !== 0) {
+  if (conversation.history && conversation.history.length !== 0) {
     messages = conversation.history
   }
 
@@ -36,62 +36,39 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
     }
   }
 
-  const handleCopy = (content: string, messageId: number) => {
-    navigator.clipboard.writeText(content)
-    setCopiedId(messageId)
-    setTimeout(() => setCopiedId(null), 3000)
-  }
-
-  // Scroll when messages change
   useEffect(() => {
     const timer = setTimeout(() => {
       scrollToBottom()
     }, 100)
     return () => clearTimeout(timer)
-  }, [messages])
-
-  // Scroll when loading state changes
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        scrollToBottom()
-      }, 100)
-      return () => clearTimeout(timer)
-    }
-  }, [isLoading])
+  }, [messages, isLoading])
 
   return (
-    <Card className="flex-1 p-4">
-      <ScrollArea className="h-[calc(100vh-200px)]">
-        <div className="pr-4">
-          {/* Predefined Questions at the top */}
-          <div className="mx-32">
-            <PredefinedQuestions />
+    <div className="flex-1 overflow-hidden">
+      <ScrollArea className="h-full px-4">
+        <div className="w-full max-w-6xl mx-auto py-6 px-6 space-y-6">
+          {/* Conversation title */}
+          <div className="text-center">
+            <h1 className="text-xl font-semibold mb-4 text-muted-foreground">{conversation.name}</h1>
           </div>
 
-          {messages?.map((message, i) => (
-            <div key={i} className={"flex justify-start mx-32 mt-8"}>
+          {/* Messages */}
+          {messages.map((message, i) => (
+            <div key={i} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               {message.role === "user" ? (
-                <UserChat message={message.content} userAvatar={"https://github.com/shadcn.png"} />
+                <UserChat message={message.content} userAvatar="https://github.com/shadcn.png" />
               ) : (
-                <div className="w-full">
-                  <h1 className="text-sm font-semibold">Assistant</h1>
-                  <div
-                    className="text-sm leading-relaxed"
-                    dangerouslySetInnerHTML={{
-                      __html: formatMarkdown(message.content),
-                    }}
-                  />
-                  <Button variant="ghost" size="icon" onClick={() => handleCopy(message.content, i)}>
-                    {copiedId === i ? <Check color="green" /> : <Copy color="gray" />}
-                  </Button>
-                </div>
+                <MessageBubble message={message} />
               )}
             </div>
           ))}
+
+          {/* Skeleton loading bubble */}
           {isLoading && (
-            <div className="flex items-center space-x-4 mb-8 mx-32 mt-8">
-              <div className="space-y-2">
+            <div className="flex items-start space-x-4 animate-pulse">
+              <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-4 w-[100px]" />
                 <Skeleton className="h-4 w-[400px]" />
                 <Skeleton className="h-4 w-[300px]" />
                 <Skeleton className="h-4 w-[200px]" />
@@ -102,7 +79,7 @@ const ChatArea = ({ conversation }: ChatAreaProps) => {
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
-    </Card>
+    </div>
   )
 }
 
