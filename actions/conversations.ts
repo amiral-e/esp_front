@@ -58,6 +58,8 @@ export interface Question {
   questions: string[];
 }
 
+
+// Function to get the conversation by ID
 export const getConversationById = async (conv_id: number) => {
   const auth_token = await getAuthToken();
   try {
@@ -80,6 +82,7 @@ export const getConversationById = async (conv_id: number) => {
   }
 };
 
+// Function to get the list of all conversations of the user
 export const getConversationByUser = async (): Promise<Conversation[]> => {
   const auth_token = await getAuthToken();
   try {
@@ -102,6 +105,7 @@ export const getConversationByUser = async (): Promise<Conversation[]> => {
   }
 };
 
+// Function to create a new conversation
 export const createConversation = async (title: string) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.post<Conversations>(
@@ -118,6 +122,7 @@ export const createConversation = async (title: string) => {
   return data;
 };
 
+// Function to update a conversation, particularly its name
 export const updateConversation = async (id: number, name: string) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.put<Conversations>(
@@ -134,6 +139,8 @@ export const updateConversation = async (id: number, name: string) => {
   return data;
 };
 
+
+// Function to delete a conversation
 export const deleteConversation = async (id: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.delete<Conversations>(
@@ -147,6 +154,7 @@ export const deleteConversation = async (id: number) => {
   return data;
 };
 
+// Function to send a message (chat with the bot)
 export const sendMessage = async (
   convId: number,
   message: string,
@@ -184,6 +192,7 @@ export const sendMessage = async (
   }
 };
 
+// Function to send a message with collections
 export const sendMessageWithCollection = async (
   convId: number,
   message: string,

@@ -21,11 +21,14 @@ export interface Response {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/";
 
+// Function to get the auth token from cookies
 const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
+
+// List of all the collections
 export const getCollections = async () => {
   const auth_token = await getAuthToken();
   try {
@@ -56,7 +59,7 @@ export const getCollections = async () => {
   }
 }
 
-
+// To delete a collection
 export const deleteCollection = async (collection_name: string) => {
   const auth_token = await getAuthToken();
   try {
@@ -84,6 +87,7 @@ export const deleteCollection = async (collection_name: string) => {
   }
 }
 
+// Function to get the global collection, admin privileges required
 export const getGlobalCollection = async () => {
   const auth_token = await getAuthToken();
   try {
@@ -114,7 +118,7 @@ export const getGlobalCollection = async () => {
   }
 }
 
-
+// Function to delete a global collection, admin privileges required
 export const deleteGlobalCollection = async (collection_name: string) => {
   const auth_token = await getAuthToken();
   try {
@@ -143,6 +147,7 @@ export const deleteGlobalCollection = async (collection_name: string) => {
   }
 }
 
+// Function to create a collection, auth token required
 export const createCollection = async (collection_name: string, files: File | File[]) => {
 	try {
 		const isAdmin = await isAdministrator();

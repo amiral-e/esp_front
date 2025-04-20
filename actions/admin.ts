@@ -62,6 +62,7 @@ const getAuthToken = async (): Promise<string | null> => {
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
+// Function to check if the user is an administrator
 export const isAdministrator = async () => {
   let isAdministrator = false;
   const supabase = await createClient();
@@ -83,6 +84,7 @@ export const isAdministrator = async () => {
   return isAdministrator;
 }
 
+// Function to get all the users
 export const getAllUsers = async () => {
   const auth_token = await getAuthToken();
   const { data } = await axios.get<Users>(
@@ -96,6 +98,7 @@ export const getAllUsers = async () => {
   return data.users;
 }
 
+// Function to get list of all the admins
 export const getAdmins = async () => {
   const auth_token = await getAuthToken();
   try {
@@ -126,6 +129,8 @@ export const getAdmins = async () => {
   }
 }
 
+
+// Function to add user as an admin
 export const addAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
   try {
@@ -146,6 +151,7 @@ export const addAdmin = async (user_id: string) => {
   }
 }
 
+// Function to remove user as an admin
 export const removeAdmin = async (user_id: string) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.delete<any>(
@@ -163,6 +169,7 @@ export const removeAdmin = async (user_id: string) => {
 }
 
 
+// Function to grant credits to a user
 export async function grantCreditsToUser(userId: string, amount: number): Promise<string> {
   const auth_token = await getAuthToken();
   try {
