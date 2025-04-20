@@ -25,6 +25,7 @@ export interface Message {
     message: string
 }
 
+// Function to get all the reports of the user
 export const getReports = async (): Promise<Report[]> => {
     const auth_token = await getAuthToken();
     try {
@@ -43,6 +44,8 @@ export const getReports = async (): Promise<Report[]> => {
     }
 }
 
+// Function to create a report
+// title, docs, prompt and collection_name are required
 export const createReport = async (title: string, docs: string[], prompt: string, collection_name: string): Promise<string> => {
     const auth_token = await getAuthToken();
     try {
@@ -70,6 +73,7 @@ export const createReport = async (title: string, docs: string[], prompt: string
 };
 
 
+// Function to get a report by ID, it returns the report details
 export const getReportById = async (id: number): Promise<Response | null> => {
     const auth_token = await getAuthToken();
     try {
@@ -90,7 +94,7 @@ export const getReportById = async (id: number): Promise<Response | null> => {
     }
 }
 
-
+// Function to delete a report by ID
 export const deleteReport = async (id: number): Promise<Message> => {
     const auth_token = await getAuthToken();
     try {

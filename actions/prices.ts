@@ -15,6 +15,7 @@ export interface Price {
   value: number
 }
 
+// Mock data for prices
 const defaultPrices: Prices = {
   prices: [
     {
@@ -49,6 +50,7 @@ const getAuthToken = async (): Promise<string | null> => {
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
+// Function to get the prices for the platform
 export const getPlatformPrices = async () => {
   const auth_token = await getAuthToken();
   const isAdmin = await isAdministrator();
@@ -66,6 +68,7 @@ export const getPlatformPrices = async () => {
   return data.prices;
 }
 
+// Function to update the price of a specific item, price_name and price are required
 export const updatePlatformPrice = async (price_name: string, price: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.put<any>(
@@ -82,6 +85,7 @@ export const updatePlatformPrice = async (price_name: string, price: number) => 
   return data.message;
 }
 
+// Function to increment the credits for a user after a payment
 export async function updateMontantForUser(userId: string, amountToAdd: number) {
   try {
     const supabase = await createClient();
