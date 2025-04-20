@@ -134,7 +134,7 @@ export const updateConversation = async (id: number, name: string) => {
   return data;
 };
 
-export const deleteConversation = async (id: string) => {
+export const deleteConversation = async (id: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.delete<Conversations>(
     `${NEXT_PUBLIC_API_URL}conversations/${id}`,

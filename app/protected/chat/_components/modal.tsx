@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   AlertDialog,
@@ -10,38 +10,41 @@ import {
   AlertDialogAction,
   AlertDialogHeader,
   AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import React, { useState } from "react";
-import { createConversation } from "@/actions/conversations";
-import { useRouter } from "next/navigation";
+} from "@/components/ui/alert-dialog"
+import { Input } from "@/components/ui/input"
+import type React from "react"
+import { useState } from "react"
+import { createConversation } from "@/actions/conversations"
+import { useRouter } from "next/navigation"
 
 const Modal = ({
   children,
   userId,
   asChild = true,
 }: {
-  children: React.ReactNode;
-  userId: string;
-  asChild?: boolean;
+  children: React.ReactNode
+  userId: string
+  asChild?: boolean
 }) => {
-  const [name, setName] = useState("");
-  const router = useRouter();
+  const [name, setName] = useState("")
+  const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
 
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) return
 
     try {
-      const conversation = await createConversation(name);
-      router.refresh();
-      setName("");
+      const conversation = await createConversation(name)
+      router.refresh()
+      setName("")
+      setIsOpen(false)
     } catch (error) {
-      console.error("Error creating conversation:", error);
+      console.error("Error creating conversation:", error)
     }
-  };
+  }
 
   return (
-    <AlertDialog>
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild={asChild}>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -51,18 +54,21 @@ const Modal = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               type="text"
+              placeholder="Entrez un nom pour votre conversation"
+              className="mt-2"
+              autoFocus
             />
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction onClick={handleSubmit}>
+          <AlertDialogAction onClick={handleSubmit} disabled={!name.trim()}>
             Continuer
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  );
-};
+  )
+}
 
-export default Modal;
+export default Modal
