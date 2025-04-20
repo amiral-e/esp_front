@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
 import { PlusIcon, Search } from "lucide-react"
@@ -11,7 +11,8 @@ import Modal from "./modal"
 import ConversationButton from "./conversation-button"
 import { usePathname, useRouter } from "next/navigation"
 import PageSwitcher from "@/components/page-switcher"
-import { Conversation } from "@/actions/conversations"
+import { Conversation, deleteConversation, updateConversation } from "@/actions/conversations"
+import { getUserInfo } from "@/actions/oauth"
 
 interface ConversationSidebarProps {
   conversations: Conversation[]
@@ -21,6 +22,17 @@ export default function ConversationSidebar({ conversations }: ConversationSideb
   const router = useRouter()
   const pathname = usePathname()
   const [search, setSearch] = useState("")
+  const [user, setUser] = useState<{ email: string }>({ email: "" })
+
+  useEffect(() => {
+    const userInfo = async () => {
+      const user = await getUserInfo()
+      if (user && user.email) {
+        setUser({ email: user.email })
+      }
+    }
+    userInfo()
+  }, [])
 
   const filteredConversations = conversations.filter((conversation) =>
     conversation.name.toLowerCase().includes(search.toLowerCase()),
@@ -29,6 +41,16 @@ export default function ConversationSidebar({ conversations }: ConversationSideb
   const handleSelectConversation = (id: number) => {
     router.push(`/protected/chat/${id}`)
   }
+  const handleDeleteConversation = async (id: number) => {
+    await deleteConversation(id)
+    router.refresh() // ou router.push pour rediriger
+  }
+
+  const handleUpdateConversation = async (id: number, newTitle: string) => {
+    await updateConversation(id, newTitle)
+    router.refresh()
+  }
+
 
   return (
     <SidebarProvider defaultOpen className="w-auto">
@@ -70,6 +92,8 @@ export default function ConversationSidebar({ conversations }: ConversationSideb
                       isActive={isActive}
                       created_at={conversation.created_at}
                       onSelect={() => handleSelectConversation(conversation.id)}
+                      onUpdate={(newTitle) => handleUpdateConversation(conversation.id, newTitle)}
+                      onDelete={() => handleDeleteConversation(conversation.id)}
                     />
                   )
                 })
@@ -82,7 +106,7 @@ export default function ConversationSidebar({ conversations }: ConversationSideb
           <NavUser
             user={{
               name: "Utilisateur",
-              email: "user@example.com",
+              email: user?.email || "",
               avatar: "",
             }}
           />

@@ -12,7 +12,6 @@ export async function generateMetadata({
   params: Promise<{ id: number }>;
 }>) {
   const { id } = await params
-  console.log("ID:", id)
   const conversation = await getConversationById(id)
 
   return {

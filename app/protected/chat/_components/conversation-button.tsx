@@ -81,12 +81,10 @@ const ConversationButton = ({
             <FilePenIcon className="mr-2 h-4 w-4" />
             Editer
           </DropdownMenuItem>
-          {onDelete && (
             <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={onDelete}>
               <TrashIcon className="mr-2 h-4 w-4" />
               Supprimer
             </DropdownMenuItem>
-          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
