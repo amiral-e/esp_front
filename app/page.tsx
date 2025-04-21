@@ -59,7 +59,7 @@ export default async function LandingPage() {
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild id="sign-out">
                 <Link onClick={signOutAction} href={""}>Déconnexion</Link>
               </Button>
             </div>

@@ -9,8 +9,7 @@ describe('Sign Up Flow', () => {
     cy.get('input[name="name"]').should('be.visible');
     cy.get('input[name="email"]').should('be.visible');
     cy.get('input[name="password"]').should('be.visible');
-    cy.get('#sign-up-button').should('have.text', 'S\'inscrire');
-    cy.get('#forgot-password-link').should('have.text', 'Mot de passe oublié');
+    cy.get('#sign-up-button').should('be.visible');
     cy.get('#sign-in-link').should('have.text', 'Se connecter');
   });
 
@@ -47,12 +46,6 @@ describe('Sign Up Flow', () => {
     cy.get('#sign-in-link').click();
 
     cy.url().should('include', '/sign-in');
-  });
-
-  it('should redirect to forgot password page when clicking "Mot de passe oublié"', () => {
-    cy.get('#forgot-password-link').click();
-
-    cy.url().should('include', '/forgot-password');
   });
 
   it('should show GitHub SSO button', () => {

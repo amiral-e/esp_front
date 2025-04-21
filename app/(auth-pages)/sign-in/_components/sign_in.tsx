@@ -105,7 +105,7 @@ export default function SignIn({ searchParams }: any) {
                     <Input type="password" name="password" placeholder="Mot de passe" className="pl-10 h-12" required />
                   </div>
                   <div className="flex justify-end">
-                    <Link className="text-xs text-primary hover:underline" href="/forgot-password">
+                    <Link className="text-xs text-primary hover:underline" href="/forgot-password" id="forgot-password-link">
                       Mot de passe oublié ?
                     </Link>
                   </div>
@@ -114,6 +114,7 @@ export default function SignIn({ searchParams }: any) {
                 <SubmitButton
                   pendingText="Connexion en cours..."
                   className="w-full h-12 bg-primary hover:bg-primary/90"
+                  id="sign-in-button"
                 >
                   Se connecter <ArrowRight className="ml-2 h-4 w-4" />
                 </SubmitButton>
@@ -132,7 +133,7 @@ export default function SignIn({ searchParams }: any) {
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Pas encore de compte ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/sign-up">
+                    <Link className="text-primary font-medium hover:underline" href="/sign-up" id="sign-up-link">
                       S'inscrire
                     </Link>
                   </p>

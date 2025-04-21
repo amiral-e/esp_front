@@ -14,8 +14,8 @@ describe('Login', () => {
 
   it('should log in', () => {
     cy.login(Cypress.env('testUser').email, Cypress.env('testUser').password)
-    cy.visit('/protected/chat')
-    cy.get('#sign-out-button').should('be.visible')
+    cy.visit('/')
+    cy.get('#sign-out').should('be.visible')
     cy.visit('/sign-in')
   })
 
