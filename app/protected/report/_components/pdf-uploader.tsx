@@ -22,8 +22,8 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
 
-    const newFiles = Array.from(e.target.files).filter(
-      (file) => file.type === "application/pdf"
+    const newFiles = Array.from(e.target.files).filter((file) =>
+      ["application/pdf", "text/plain", "text/markdown"].includes(file.type)
     );
 
     if (newFiles.length === 0) {
@@ -33,10 +33,8 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
 
     setFiles((prev) => [...prev, ...newFiles]);
 
-    // Processer les fichiers PDF
     await processFiles([...files, ...newFiles]);
 
-    // Réinitialiser l'input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -57,56 +55,47 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
       const fileNames: string[] = [];
 
       for (const file of filesToProcess) {
-        const arrayBuffer = await file.arrayBuffer();
-
-        // Utiliser pdfjsLib.getDocument pour charger le PDF à partir du ArrayBuffer
-        const pdf = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
-
-        let fullText = "";
-
-        // Récupérer chaque page et en extraire le texte
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const textItems = textContent.items
-            .map((item: any) => (item.str ? item.str : ""))
-            .join(" ");
-
-          fullText += textItems + " ";
-        }
-
-        // Séparer le texte à chaque point
-        const splitText = splitTextByPeriod(fullText);
-
-        // Ajouter les morceaux dans extractedTexts (plats)
-        extractedTexts.push(...splitText);
         fileNames.push(file.name);
+
+        if (file.type === "application/pdf") {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument(new Uint8Array(arrayBuffer)).promise;
+
+          let fullText = "";
+          for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const textItems = textContent.items.map((item: any) => item.str || "").join(" ");
+            fullText += textItems + " ";
+          }
+
+          const splitText = splitTextByPeriod(fullText);
+          extractedTexts.push(...splitText);
+        } else if (file.type === "text/plain" || file.type === "text/markdown") {
+          const text = await file.text();
+          const splitText = splitTextByPeriod(text);
+          extractedTexts.push(...splitText);
+        } else {
+          toast.warning(`Fichier ignoré : ${file.name}`);
+        }
       }
 
-      // Mettre à jour les documents extraits
       onDocumentsUpdate(extractedTexts, fileNames);
     } catch (error) {
-      console.error("Erreur lors du traitement des fichiers PDF :", error);
-      toast.error("Erreur lors du traitement des fichiers PDF");
+      console.error("Erreur lors du traitement des fichiers :", error);
+      toast.error("Erreur lors du traitement des fichiers");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fonction pour diviser le texte à chaque point
   const splitTextByPeriod = (text: string) => {
-    // Remplacer les apostrophes (') par des guillemets doubles (")
-    const formattedText = text.replace(/'/g, '"');  // Remplace toutes les apostrophes par des guillemets doubles
-  
-    // Diviser le texte à chaque point (.)
-    const splitText = formattedText.split('.')
-      .map((item) => item.trim())  // Enlever les espaces avant et après chaque segment
-      .filter((item) => item.length > 0);  // Filtrer les segments vides
-  
-    return splitText;
+    const formattedText = text.replace(/'/g, '"');
+    return formattedText
+      .split('.')
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
   };
-  
-
 
   return (
     <div className="space-y-4">
@@ -120,13 +109,15 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
             <p className="mb-2 text-sm text-muted-foreground">
               <span className="font-semibold">Cliquez pour télécharger</span> ou faites glisser et déposez
             </p>
-            <p className="text-xs text-muted-foreground">Fichiers PDF uniquement</p>
+            <p className="text-xs text-muted-foreground">
+              Fichiers PDF, TXT ou MD acceptés
+            </p>
           </div>
           <input
             id="pdf-upload"
             type="file"
             className="hidden"
-            accept="application/pdf"
+            accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
             multiple
             onChange={handleFileChange}
             ref={fileInputRef}
@@ -138,7 +129,7 @@ export default function PdfUploader({ onDocumentsUpdate }: PdfUploaderProps) {
       {isLoading && (
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          Traitement des fichiers PDF...
+          Traitement des fichiers...
         </div>
       )}
 

@@ -67,7 +67,6 @@ export const createReport = async (title: string, docs: string[], prompt: string
         const message = "Le rapport "+ data.title + " a été créé avec succès";
         return message;
     } catch (error) {
-        console.error("Erreur lors de la création du rapport:", error);
         return "Erreur lors de la création du rapport";
     }
 };
