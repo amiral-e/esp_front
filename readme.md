@@ -46,7 +46,7 @@ Une version de production est accessible ici: [https://cc-front-prod.fly.dev/](h
 
    The starter kit should now be running on [localhost:8080](http://localhost:8080/).
 
-# Run app with docker
+## Run app with docker
 
 Build an image with the following command:
 
@@ -59,7 +59,7 @@ And run the app:
 docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 ```
 
-# Test the app with Cypress
+## Test the app with Cypress
 
 1. Run the app locally
 
@@ -72,7 +72,7 @@ docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 ```sh
   bun run cy:open
 ```
-# Folder structure
+## Folder structure
 
 - actions : supabase actions
 - app : nextjs app
@@ -86,20 +86,16 @@ docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 - lib : supabase client
 - utils : utils functions
 
-=======
-
-Le kit de démarrage devrait maintenant fonctionner sur [localhost:8080](http://localhost:8080/).
-
-
-### Lancement avec docker
+## Lancement avec docker
 
 ```bash
   docker build -t esp_front .
   docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
 ```
 
-<details>
-<summary>Structure du dépôt</summary>
+Le kit de démarrage devrait maintenant fonctionner sur [localhost:8080](http://localhost:8080/).
+
+## Structure du dépôt
 
 
 ```
@@ -128,4 +124,7 @@ Le kit de démarrage devrait maintenant fonctionner sur [localhost:8080](http://
 ├── sonar : documentation pour SonarQube
 └── utils : fonctions utilitaires
 ```
-</details>
+
+## Résultats Analyse de Qualité SonarQube
+
+![image](sonar/results.png)
