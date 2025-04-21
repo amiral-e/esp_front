@@ -19,7 +19,7 @@ const PricingCard = ({
   description,
   popular = false,
   onSelectPlan,
-  buttonText = "Choisir ce plan",
+  buttonText = "Ajouter crédit",
   disabled = false,
 }: PricingCardProps) => {
   return (
@@ -34,9 +34,9 @@ const PricingCard = ({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-        <div className="flex items-baseline mb-4">
+        <div className="flex items-baseline justify-center mb-4">
           <span className="text-3xl font-bold">{price}€</span>
-          <span className="text-muted-foreground ml-1">/mois</span>
+          {/* <span className="text-muted-foreground ml-1"></span> */}
         </div>
       </CardContent>
       <CardFooter>

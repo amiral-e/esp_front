@@ -191,10 +191,10 @@ export default async function LandingPage() {
                     <Link href="#faq" className="text-sm hover:underline underline-offset-4">
                       FAQ
                     </Link>
-                    <Link href="/privacy" className="text-sm hover:underline underline-offset-4">
+                    <Link href="/privacy_policy/confidentiality" className="text-sm hover:underline underline-offset-4">
                       Confidentialité
                     </Link>
-                    <Link href="/terms" className="text-sm hover:underline underline-offset-4">
+                    <Link href="/privacy_policy/gcu" className="text-sm hover:underline underline-offset-4">
                       Conditions
                     </Link>
                   </nav>
@@ -503,10 +503,10 @@ export default async function LandingPage() {
               <Link href="#faq" className="text-sm hover:underline underline-offset-4">
                 FAQ
               </Link>
-              <Link href="/privacy" className="text-sm hover:underline underline-offset-4">
+              <Link href="/privacy_policy/confidentiality" className="text-sm hover:underline underline-offset-4">
                 Confidentialité
               </Link>
-              <Link href="/terms" className="text-sm hover:underline underline-offset-4">
+              <Link href="/privacy_policy/gcu" className="text-sm hover:underline underline-offset-4">
                 Conditions
               </Link>
             </nav>

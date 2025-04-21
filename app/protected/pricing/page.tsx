@@ -96,7 +96,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <PricingToggle isYearly={isYearly} onToggle={setIsYearly} />
+      {/* <PricingToggle isYearly={isYearly} onToggle={setIsYearly} /> */}
 
       <div className="grid md:grid-cols-4 gap-8">
         {platformPrices.map((plan) => (
@@ -107,7 +107,7 @@ export default function PricingPage() {
             description={plan.description || ""}
             onSelectPlan={() => handleSelectPlan(plan.price)}
             popular={plan.price === "search"}
-            buttonText={loading ? "Chargement..." : "Choisir ce plan"}
+            buttonText={loading ? "Chargement..." : "Ajouter crédit"}
             disabled={loading}
           />
         ))}

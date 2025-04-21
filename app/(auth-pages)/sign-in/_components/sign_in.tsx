@@ -144,11 +144,11 @@ export default function SignIn({ searchParams }: any) {
           <div className="mt-8 text-center">
             <p className="text-xs text-muted-foreground">
               En vous connectant, vous acceptez nos{" "}
-              <Link href="/terms" className="text-primary hover:underline">
+              <Link href="/privacy_policy/gcu" className="text-primary hover:underline">
                 Conditions d'utilisation
               </Link>{" "}
               et notre{" "}
-              <Link href="/privacy" className="text-primary hover:underline">
+              <Link href="/privacy_policy/confidentiality" className="text-primary hover:underline">
                 Politique de confidentialité
               </Link>
               .

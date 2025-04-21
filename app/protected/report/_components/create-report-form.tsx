@@ -54,8 +54,13 @@ export default function CreateReportForm() {
     setIsSubmitting(true)
 
     try {
-      console.log("documents", documents)
       const result = await createReport(title, documents, prompt, collectionName)
+      if(result === "Erreur lors de la création du rapport"){
+        toast.error("Crédits insuffisants pour créer le rapport")
+        setIsSubmitting(false)
+        setIsSuccess(false)
+        return
+      }
       toast.success(result)
       // Set success state to trigger the useEffect
       setIsSuccess(true)

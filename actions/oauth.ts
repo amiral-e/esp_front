@@ -190,9 +190,9 @@ export const deleteUser = async (user_uid: string) => {
     .rpc('delete_user', {
       user_uid
     })
-  signOutAction()
-  if (error) console.error(error)
-  else console.log(data)
+  const cookieStore = cookies();
+  (await cookieStore).delete("auth_token");
+  return redirect("/sign-in");
 }
 
 // To update the user information, particularly the email
