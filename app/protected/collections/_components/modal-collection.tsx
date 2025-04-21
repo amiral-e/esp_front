@@ -102,7 +102,7 @@ export default function ModalCollection({ children, userId, isAdmin = false }: M
                 Nom
               </Label>
               <Input
-                id="name"
+                id="new-collection-title"
                 value={collectionName}
                 onChange={(e) => setCollectionName(e.target.value)}
                 className="col-span-3"
@@ -124,7 +124,7 @@ export default function ModalCollection({ children, userId, isAdmin = false }: M
                   <input
                     ref={fileInputRef}
                     type="file"
-                    id="files"
+                    id="new-collection-files"
                     multiple
                     className="hidden"
                     onChange={handleFileChange}

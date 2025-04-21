@@ -133,6 +133,7 @@ export default function SignUpComponent() {
                 <SubmitButton
                   pendingText="Inscription en cours..."
                   className="w-full h-12 bg-primary hover:bg-primary/90"
+                  id="sign-up-button"
                 >
                   Créer un compte <ArrowRight className="ml-2 h-4 w-4" />
                 </SubmitButton>
@@ -149,7 +150,7 @@ export default function SignUpComponent() {
                 <div className="text-center mt-6">
                   <p className="text-sm text-muted-foreground">
                     Déjà inscrit ?{" "}
-                    <Link className="text-primary font-medium hover:underline" href="/sign-in">
+                    <Link className="text-primary font-medium hover:underline" href="/sign-in" id="sign-in-link">
                       Se connecter
                     </Link>
                   </p>

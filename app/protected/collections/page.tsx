@@ -23,7 +23,7 @@ export default async function CollectionsPage() {
         <div className="flex items-center justify-between p-4">
           <h1 className="text-2xl font-bold">{isAdmin ? "Admin Collections" : "My Collections"}</h1>
           <ModalCollection userId={user?.id || ""} isAdmin={isAdmin}>
-            <Button className="w-fit flex items-center gap-2">
+            <Button className="w-fit flex items-center gap-2" id="add-collection-button">
               <PlusIcon className="h-4 w-4" />
               Add Collection
             </Button>

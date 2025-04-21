@@ -22,22 +22,26 @@ export default async function LandingPage() {
       icon: <LibraryBig className="size-4" />,
       name: "Collections",
       href: "/protected/collections/",
+      id: 'collections-link',
     },
     {
       icon: <BotMessageSquare className="size-4" />,
       name: "Chat",
       href: "/protected/chat/",
+      id: 'chat-link',
     },
     {
       icon: <SquareTerminal className="size-4" />,
       name: "Admin",
       href: "/protected/admin/",
       adminOnly: true,
+      id: 'admin-link',
     },
     {
       icon: <UserRoundCog className="size-4" />,
       name: "Profile",
       href: "/protected/profile/",
+      id: 'profile-link',
     },
   ]
 
@@ -55,7 +59,7 @@ export default async function LandingPage() {
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild id="sign-out">
                 <Link onClick={signOutAction} href={""}>Déconnexion</Link>
               </Button>
             </div>
@@ -72,13 +76,13 @@ export default async function LandingPage() {
                 {filteredNavItems.map((item, index) => (
                   <Card key={index} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
-                      <Link href={item.href} className="flex flex-col items-center text-center gap-4">
+                      <Link href={item.href} className="flex flex-col items-center text-center gap-4" id={item.id}>
                         <div className="bg-secondary p-3 rounded-full">{item.icon}</div>
                         <h2 className="text-xl font-semibold">{item.name}</h2>
                         <p className="text-muted-foreground text-sm">
                           {item.name === "Collections" && "Gérez et organisez vos documents financiers"}
                           {item.name === "Chat" && "Discutez avec notre IA pour analyser vos finances"}
-                          {item.name === "Admin" && "Accédez aux fonctionnalités d'administration"}
+                          {isAdmin && item.name === "Admin" && "Accédez aux fonctionnalités d'administration"}
                           {item.name === "Profile" && "Gérez vos informations personnelles"}
                         </p>
                         <Button variant="outline" className="mt-2">

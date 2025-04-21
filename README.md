@@ -43,15 +43,52 @@ Une version de production est accessible ici: [https://cc-front-prod.fly.dev/](h
    ```
 3. Utilisez `cd` pour changer dans le répertoire de l'application
    ```bash
-    cd name-of-new-app
+
+   The starter kit should now be running on [localhost:8080](http://localhost:8080/).
+
+# Run app with docker
+
+Build an image with the following command:
+
+```sh
+docker build -t esp_front .
+```
+And run the app:
+
+```sh
+docker run -p 8080:8080 --env-file .env -v $(pwd):/app esp_front
+```
+
+# Test the app with Cypress
+
+1. Run the app locally
+
+    ```sh
+      bun run dev
     ```
-4. Renommez `.env.example` en `.env` et mettez à jour les espaces réservés :
-   Les deux `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` peuvent être trouvés dans [les paramètres API de votre projet Supabase](https://app.supabase.com/project/_/settings/api)
-5. Vous pouvez maintenant exécuter le serveur de développement local Next.js :
-   ```bash
-   npm run dev
-   ```
-   Le kit de démarrage devrait maintenant fonctionner sur [localhost:8080](http://localhost:8080/).
+2. Copy and rename `cypress.env.example.json` to  `cypress.env.json` and update the test data.
+
+3. Run cypress directly in a browser:
+```sh
+  bun run cy:open
+```
+# Folder structure
+
+- actions : supabase actions
+- app : nextjs app
+  - protected : protected routes
+    - chat : chat routes
+    - chat/[id] : chat routes
+    - collections : collections routes
+    - dashboard : dashboard routes
+    - settings : settings routes
+- components : shadcn components
+- lib : supabase client
+- utils : utils functions
+
+=======
+
+Le kit de démarrage devrait maintenant fonctionner sur [localhost:8080](http://localhost:8080/).
 
 
 ### Lancement avec docker
