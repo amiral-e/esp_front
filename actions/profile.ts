@@ -49,6 +49,7 @@ export interface Message {
     message: string;
 }
 
+// To get the list of knowledge levels
 export const getKnowledges = async (): Promise<KnowledgeLevel[]> => {
     const auth_token = await getAuthToken();
     try {
@@ -70,6 +71,8 @@ export const getKnowledges = async (): Promise<KnowledgeLevel[]> => {
     }
 };
 
+
+// To get the profile of the user, particularly the credits and level
 export const getProfile = async (): Promise<User | null> => {
     const auth_token = await getAuthToken();
     if (!auth_token) {
@@ -96,7 +99,8 @@ export const getProfile = async (): Promise<User | null> => {
     }
 };
 
-
+// This is to update the level of the user
+// The level is used to determinate of the bot should be more or less verbose
 export const updateProfile = async (level: string): Promise<Message> => {
     const auth_token = await getAuthToken();
     try {
@@ -118,6 +122,7 @@ export const updateProfile = async (level: string): Promise<Message> => {
     }
 }
 
+// This is to get the usage data of the user, number of messages, number of reports, number of documents, and number of conversations
 export const getProfileUsageData = async (): Promise<UsageData | null> => {
     const auth_token = await getAuthToken();
     try {

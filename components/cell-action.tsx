@@ -43,7 +43,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const onDelete = async () => {
     try {
-      await deleteConversation(data?.id.toString());
+      await deleteConversation(data?.id);
       router.refresh();
       setShowEditDialog(false);
     } catch (error) {

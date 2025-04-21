@@ -6,6 +6,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 
+// This function is used to sign up a new user and log them in
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
@@ -52,6 +53,7 @@ export const signUpAction = async (formData: FormData) => {
   return redirect("/");
 };
 
+// This function is used to sign in an existing user
 export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -84,6 +86,8 @@ export const signInAction = async (formData: FormData) => {
   return encodedRedirect("error", "/sign-in", "Unexpected error occurred.");
 };
 
+// This function is used for forgot password functionality
+// It sends a password reset email to the user
 export const forgotPasswordAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const supabase = await createClient();
@@ -118,6 +122,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   );
 };
 
+// This function is used to reset the password after the user clicks the link in the email
 export const resetPasswordAction = async (formData: FormData) => {
   const supabase = await createClient();
 
@@ -155,6 +160,7 @@ export const resetPasswordAction = async (formData: FormData) => {
   encodedRedirect("success", "/protected/reset-password", "Password updated");
 };
 
+// This function is used to sign out the user, it deletes the auth token from cookies
 export const signOutAction = async () => {
   const supabase = await createClient();
   await supabase.auth.signOut();
@@ -163,6 +169,7 @@ export const signOutAction = async () => {
   return redirect("/sign-in");
 };
 
+// This function is used to get the user information
 export const getUserInfo = async () => {
   const {
     data: { user },
@@ -170,12 +177,13 @@ export const getUserInfo = async () => {
   return user;
 };
 
+// This function is used to get the auth token from cookies
 export const getAuthToken = async (): Promise<string | null> => {
   const cookieStore = await cookies();
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
-
+// This function is used to get the user UID from the auth token
 export const deleteUser = async (user_uid: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -187,6 +195,7 @@ export const deleteUser = async (user_uid: string) => {
   else console.log(data)
 }
 
+// To update the user information, particularly the email
 export const updateUser = async (user_uid: string, email: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase

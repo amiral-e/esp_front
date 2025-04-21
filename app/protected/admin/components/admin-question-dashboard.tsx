@@ -11,7 +11,7 @@ import {
   createPredifinedQuestion,
   modifyPredifinedQuestions,
   deletePredifinedQuestion,
-  getPredifinedQuestions,
+  getAllQuestionsForAdmin,
 } from "@/actions/predifined_questions"
 import {
   Dialog,
@@ -60,7 +60,7 @@ export default function QuestionsDashboard() {
 
   const fetchQuestions = async () => {
     setIsLoading(true)
-      const questionData = await getPredifinedQuestions()
+      const questionData = await getAllQuestionsForAdmin()
       if (questionData.length === 0) {
         setQuestions([])
       }
@@ -101,8 +101,6 @@ export default function QuestionsDashboard() {
     try {
       
     await modifyPredifinedQuestions(newQuestion, newLevel, selectedQuestion.id)
-    console.log(newQuestion, newLevel, selectedQuestion.id)
-
       // Update local state
       setQuestions(
         questions.map((q) => (q.id === selectedQuestion.id ? { ...q, question: newQuestion, level: newLevel } : q)),

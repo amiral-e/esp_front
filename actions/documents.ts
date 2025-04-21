@@ -24,7 +24,7 @@ const getAuthToken = async (): Promise<string | null> => {
     return cookieStore.get("auth_token")?.value ?? null;
 };
 
-
+// Function to get all the documents by collection name
 export const getDocumentsByCollectionName = async (collection_name: string) => {
     const auth_token = await getAuthToken();
     try {
@@ -55,7 +55,7 @@ export const getDocumentsByCollectionName = async (collection_name: string) => {
     }
 }
 
-
+// Function to get all the documents by collection name for admin, all the global documents
 export const getDocumentsByCollectionGlobal = async (collection_name: string) => {
     const auth_token = await getAuthToken();
     try {
@@ -86,6 +86,7 @@ export const getDocumentsByCollectionGlobal = async (collection_name: string) =>
     }
 }
 
+// Function to delete a document by its ID
 export const deleteDocumentByDocId = async (collection_name: string, doc_id: string) => {
     const auth_token = await getAuthToken();
     try {
@@ -115,7 +116,7 @@ export const deleteDocumentByDocId = async (collection_name: string, doc_id: str
     }
 }
 
-
+// Delete global document by its ID for admin.
 export const deleteDocumenGlobaltByDocId = async (collection_name: string, doc_id: string) => {
     const auth_token = await getAuthToken();
     try {

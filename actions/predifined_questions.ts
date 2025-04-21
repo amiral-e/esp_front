@@ -21,7 +21,8 @@ const getAuthToken = async (): Promise<string | null> => {
   return cookieStore.get("auth_token")?.value ?? null;
 };
 
-
+// Function to create a predefined question, admin only
+// Question and level are required
 export const createPredifinedQuestion = async (question: string, level: string) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.post<any>(
@@ -39,7 +40,7 @@ export const createPredifinedQuestion = async (question: string, level: string) 
   return data.message;
 }
 
-
+// Function to delete a predefined question, admin only
 export const deletePredifinedQuestion = async (questionId: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.delete<any>(
@@ -53,6 +54,7 @@ export const deletePredifinedQuestion = async (questionId: number) => {
   return data.message;
 }
 
+// Function to modify a predefined question, admin only
 export const modifyPredifinedQuestions = async (question: string, level: string, questionId: number) => {
   const auth_token = await getAuthToken();
   const { data } = await axios.put<any>(
@@ -70,24 +72,46 @@ export const modifyPredifinedQuestions = async (question: string, level: string,
   return data;
 }
 
-
+// Function to get all the predefined questions
 export const getPredifinedQuestions = async () => {
-    const auth_token = await getAuthToken();
-  
-    try {
-      const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
-        headers: {
-          Authorization: `Bearer ${auth_token}`,
-        },
-      });
-  
-      return data.questions || [];
-    } catch (error: any) {
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        return [];
-      }
-  
-      console.error("Erreur lors de la récupération des questions :", error);
-      throw error;
+  const auth_token = await getAuthToken();
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}questions`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
     }
-  };
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
+
+
+export const getAllQuestionsForAdmin = async () => {
+  const auth_token = await getAuthToken();
+
+  try {
+    const { data } = await axios.get(`${NEXT_PUBLIC_API_URL}admins/questions`, {
+      headers: {
+        Authorization: `Bearer ${auth_token}`,
+      },
+    });
+
+    return data.questions || [];
+  } catch (error: any) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return [];
+    }
+
+    console.error("Erreur lors de la récupération des questions :", error);
+    throw error;
+  }
+};
