@@ -160,9 +160,11 @@ export const createCollection = async (collection_name: string, files: File | Fi
 			: `${API_URL}collections/${collection_name}/documents`;
 		const formData = new FormData();
 		if (Array.isArray(files)) {
-			files.forEach((file) => formData.append("files", file));
+			files.forEach((file) => {
+				formData.append(file.name, file);
+			});
 		} else {
-			formData.append("files", files);
+			formData.append(files.name, files);
 		}
 
 		const data = await axios.request<Response>({
