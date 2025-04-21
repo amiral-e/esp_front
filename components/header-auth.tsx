@@ -1,4 +1,4 @@
-import { signOutAction } from "@/app/actions";
+import { signOutAction } from "@/actions/oauth";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
@@ -6,13 +6,10 @@ import { Button } from "./ui/button";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function AuthButton() {
-  const {
-    data: { user },
-  } = await (await await createClient()).auth.getUser();
-
+  const user = await (await await createClient()).auth.getUser();
   if (!hasEnvVars) {
     return (
-      <>
+      <nav>
         <div className="flex gap-4 items-center">
           <div>
             <Badge
@@ -22,34 +19,36 @@ export default async function AuthButton() {
               Please update .env.local file with anon key and url
             </Badge>
           </div>
-          <div className="flex gap-2">
-            <Button
-              asChild
-              variant={"outline"}
-              disabled
-              className="opacity-75 cursor-none pointer-events-none"
-            >
-              <Link href="/sign-in">Sign in</Link>
-            </Button>
-            <Button
-              asChild
-              variant={"default"}
-              disabled
-              className="opacity-75 cursor-none pointer-events-none"
-            >
-              <Link href="/sign-up">Sign up</Link>
-            </Button>
-          </div>
+          {user && (
+            <div className="flex gap-2">
+              <Button
+                asChild
+                variant={"outline"}
+                disabled
+                className="opacity-75 cursor-none pointer-events-none"
+              >
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+              <Button
+                asChild
+                variant={"default"}
+                disabled
+                className="opacity-75 cursor-none pointer-events-none"
+              >
+                <Link href="/sign-up">Sign up</Link>
+              </Button>
+            </div>
+          )}
         </div>
-      </>
+      </nav>
     );
   }
   return user ? (
     <div className="flex items-center gap-4">
-      Hey, {user.email}!
+      {/* Hey, {user}! */}
       <form action={signOutAction}>
-        <Button type="submit" variant={"outline"}>
-          Sign out
+        <Button type="submit" variant={"outline"} id="sign-out-button">
+          Log Out
         </Button>
       </form>
     </div>
